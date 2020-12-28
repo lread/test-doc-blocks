@@ -1,0 +1,81 @@
+= Design Notes
+:toc:
+
+== 2020-Dec
+
+=== Initial Thoughts
+Heavily based on, and code used from, @seancorfield's https://github.com/seancorfield/readme[readme].
+
+Sean's solution is an all-in-one.
+Tests are generated run, then deleted.
+Since I am supporting cljs in addition to clj, I think I'm going to separate generate from test.
+This is less convenient, but also lets you use your test runner of choice.
+
+Sean's readme project supports REPL and edit style code blocks.
+I'll add support for more editor style code blocks and add some syntax for verifying stdout.
+See examples docs for examples.
+
+Some test blocks might have conflicting `(require ...)` with other test blocks in the same document.
+I'll allow for test blocks to be isolated to their own test namespace.
+
+To support ClojureScript, I'll need to merge the `(require ...)` into the generated test `(ns .. (:require ...))`.
+Reasoning: ClojureScript inline `(require ...)` are REPL only - as far as I understand.
+
+Sean makes use of a macro to convert extracted code blocks to tests at runtime.
+I find this very interesting.
+
+I considered, that instead of using a macro like Sean does, to rewrite code blocks to tests using rewrite-cljc at generation time.
+I decided against this because I like minimizing deps for a test tool.
+One could argue that bringing in extra deps for generation only and not for testing is ok, but I want to leave the door open for those who might want to merge these two steps.
+So I'll stick with Sean's macro technique for now.
+
+I'll make use of `(testing ...)` macro for descriptive tests that show file, maybe last section header and line number.
+Opting to group all `testing` blocks under a single `deftest` has the advantage of cleaner output when running tests in a verbose mode, but also has the disadvantage of finding compilation errors originating from code blocks.
+Clojure will report the error at the `deftest` line rather than the `testing` line.
+
+Writing macros that work for Clojure and ClojureScript is a bit of a challenge, but mostly due to my learning curve, rather than any technical limitations.
+
+Running code blocks can be a potentially dangerous thing.
+For a contrived example, an author might provide a code snippit to illustrate how to delete all files on your system.
+So, although it might be convenient, I'll try to force caution by:
+
+1. only processing files explicitly listed.
+2. by default, only generate tests for code blocks that have been tagged to be processed.
+This can be overriden with an invocation option such as `{:test :all}`, maybe the default will be `:tagged-only`.
+Or maybe this is too much? Yeah, the user has listed the file, that's good enough.
+We'll add a big warning in the README.
+
+Continueing with safety, we'll be generating potentially more than one file.
+To avoid accidental deletion of other files, we'll
+
+1. fail on soft links in deletion set
+2. always create the same root dir under a specified target dir and delete recursively from there.
+
+I'll start with support for asciidoctor, because this what I write my documents in, but will likely quickly move to also supporting CommonMark.
+
+Generated tests will take advantage of `(testing ...)` to provide a rich descriptive string for the code block under test.
+The string might contain:
+
+* filename
+* last section header before code block
+* line number
+
+Options will be optionally conveyed via comments in docs.
+We'll take inspiration for clj-kondo for syntax.
+
+* In Asciidoctor this will look like: `// {:test-doc-blocks/my-option x}`
+* In CommonMark: `\<-- {:test-doc-blocks/my-option x} -\->`
+
+I could bring in full featured parsers for Asciidoctor and CommonMark but this would mean extra unwanted deps.
+I'll instead implement simple parsing that should be good enough in most cases.
+
+=== Ideas for later
+Would it be interesting to run clj-kondo on some form of the doc code blocks?
+
+Support code snippits that include `(requires ...)` under reader conditionals.
+
+Currently generating tests to cljc. Ever any need for .cls or .clj?
+
+Could include gen test delete workflow like Sean does. Maybe?
+
+Hmm... for Sean's flow would supporting :doc and :target-test-file (single file mode), help?

@@ -1,0 +1,161 @@
+= AsciiDoctor test-doc-blocks Example
+:toc:
+
+Test-doc-blocks will find Clojure source code blocks in your document and generate tests for them.
+
+== The Basics
+
+Assertions are automatically generated for:
+
+* REPL session code blocks
++
+[source,clojure]
+----
+;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates to the expected 6
+user=> (+ 1 2 3)
+6
+----
+
+* Editor style code blocks currently offer more features:
++
+[source,clojure]
+----
+;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates to the expected 10
+(+ 1 2 3 4)
+;; => 10
+
+;; it understands that Clojure and ClojureScript can evaluate differently
+\C
+;; =clj=> \C
+;; =cljs=> "C"
+
+;; and verifies, when asked, to check what was written to stdout
+(println "is this right?\nor not?")
+;; =stdout=>
+;; is this right?
+;; or not?
+
+;; finish your stdout block with an empty or non-comment line
+----
+
+Test-doc-blocks will plunk your code blocks into a test even when there are no assertions.
+It is sometimes just nice to know that your code snippit will run without exception.
+
+[source,clojure]
+----
+(->> "here we are only checking that our code will run"
+     reverse
+     reverse
+     (apply str))
+----
+
+== Inline Options
+You can, to some limited extent, communicate your intent to test-doc-blocks.
+
+Test-doc-blocks will look for Asciidoctor comments that begin with `:test-doc-blocks`.
+
+It currently understands two options:
+
+* `:test-block-opts/skip` - skips the next code block
+* `:test-block-opts/test-ns` - specifies the test namespace for subsequent code blocks
+
+=== Skipping Code Blocks
+
+By default test-doc-blocks will create tests for all Clojure code blocks it finds.
+
+Tell test-doc-blocks to skip the next Clojure code block via the following Asciidoctor comment:
+
+[source,asciidoctor]
+....
+//:test-doc-blocks/skip
+[source,clojure]
+----
+;; no tests will be generated for this code Clojure code block
+
+(something we don't want to test)
+----
+....
+
+=== Specifying Test Namespace
+
+If you don't tell test-doc-blocks what namespace you want tests in, it will do its best to come up with one based on the document filename.
+For this file, test-doc-blocks, up to this point has been generating tests to `example-adoc-test`.
+
+If this does not work for you, you can override this default in via an Asciidoctor comment:
+
+[source,asciidoctor]
+....
+//{:test-doc-blocks/test-ns example-adoc-new-ns-test}
+[source,clojure]
+----
+;; this code block will generate tests under example-adoc-new-ns-test
+
+user=> (* 2 4)
+8
+----
+....
+
+TIP: Do what you like, but test runners usually look for tests namespaces ending in `-test`.
+
+The `:test-doc-blocks/test-ns` option applies to all subsequent code blocks in the document.
+
+Changing the test-ns is useful for code blocks that need to be isolated.
+Code blocks that require a unique set of namespaces fall under this category.
+
+[source,asciidoctor]
+....
+//{:test-doc-blocks/test-ns example-adoc-new-ns.ns1-test}
+[source,clojure]
+----
+;; this code block will generate tests under example-adoc-new-ns.ns1-test
+
+(require '[clojure.string :as string])
+
+(string/join ", " [1 2 3])
+=> "1, 2, 3"
+----
+....
+
+Section Titles
+--------------
+Test-doc-blocks will try to give each test block some context by including its filename, section title and starting line number.
+
+It recognizes that Asciidoctor recognizes CommonMark style headers.
+[source,markdown]
+----
+## this type of md header
+
+And this level 1 type
+=====================
+
+And this level 2 type
+---------------------
+----
+
+This code block should be include "Section Titles" as part of the context for its generated test.
+
+[source,mardown]
+....
+```Clojure
+(require '[clojure.string :as string])
+
+(string/join "!" ["well" "how" "about" "that"])
+;; => "well!how!about!that"
+```
+....
+
+## Support for CommonMark Code BlockSyntax
+
+Did you know Asciidoctor supports CommonMark syntax for section headings and code blocks?
+
+Well it does! And test-doc-blocks recognizes this fact.
+
+[source,markdown]
+....
+```Clojure
+(require '[clojure.set :as set])
+
+(set/map-invert {:a 1 :b 2})
+;; => {1 :a 2 :b}
+```
+....

@@ -1,0 +1,210 @@
+= lread.test-doc-blocks
+:toc:
+
+Generate runnable tests from code blocks in Asciidoctor and CommonMark files.
+
+[CAUTION]
+====
+Executing tests executes code.
+
+Example code in docs, while likely not malicious, could be illustrating, for example, how to wipe out a drive.
+
+So, do be deliberate and careful about what docs you run through test-doc-blocks.
+====
+
+== Immediate TODOS
+
+* fail on clash of generated test files
+* print each code block found while generating
+* hmmm rewrite-clj's overide of pr makes things interesting
+  * I might need a =pr=>
+* also not relying on test-doc-blocks after test generation would be simpler for user, so maybe reconsider using macros at runtime.
+  * If I bring in rewrite-cljc for rewriting, does this mean I should bring in proper parsers.
+
+== Status
+
+Initial concept. Currently being used to test doc blocks in rewrite-cljc.
+
+* Can consider alpha.
+* No release to clojars yet.
+* Feedback welcome.
+
+== Usage
+
+Add an alias to your `deps.edn`:
+
+//:test-doc-blocks/skip
+[source,clojure]
+----
+    :test-doc-blocks {:extra-deps {lread/test-doc-blocks {:git "tbd"
+                                                          :sha "tbd"}}
+                      :ns-default lread.test-doc-blocks}
+----
+
+Then the most basic usage is:
+
+[source,shell]
+----
+clojure -X:test-doc-blocks gen-tests
+----
+
+This will generate Clojure tests for code blocks in your `README.md` to `target/test-doc-blocks/test`.
+Any existing tests under `target/test-doc-blocks` will be replaced.
+
+You can then run the generated tests with the test runner of your choosing.
+Our link:deps.edn[deps.edn] has example aliases:
+
+* `:block-test` - base alias to include test-doc-blocks default generatation target dir
+* `:cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
+Invoke for this project via: `clj -M:block-test:cljs-test-runner`
+* `:kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
+Invoke for this project via: `clj -M:block-test:kaoacha generated`. Note also kaocha link:test.edn[test.edn] config.
+* `:clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
+Invoke for this project via: `clj -M:block-test:clj-test-runner`
+
+When tests are run, the test-doc-blocks runtime will look for assertions in editor style and REPL style format.
+For example:
+
+[source,clojure]
+----
+user=> (/ 714 17)
+42
+----
+
+Will be evaluated as the assertion `(is (= 42 (/ 714 17)))`.
+
+For more detailed examples and inline options, see
+
+* link:doc/example.adoc[Asciidoctor example]
+* link:doc/example.md[CommonMark example]
+
+=== Command Line Options
+
+==== :docs
+The default file to generate tests for is README.md.
+
+If you want to specify a different vector of files you can do so via `:docs`:
+
+[source,shell]
+----
+clojure -X:test-doc-blocks gen-tests :docs '["README.adoc" "doc/example.adoc" "doc/example.md"]'
+----
+
+==== :target-root
+The default directory to generate tests is `./target`.
+
+You can override this via `:target-root`:
+
+[source,shell]
+----
+clojure -X:test-doc-blocks gen-tests :target-root '"./someplace/else"'
+----
+
+Note that test-doc-blocks will delete and recreate `test-docs-block/test` dirs under the target root.
+Keep that in mind to when figuring out where to point your test runner.
+
+== Limitations
+
+* Setup and use is more involved than for https://github.com/seancorfield/readme[readme].
+Check out the readme project for a simpler alternative.
+* Test-doc-blocks will automatically handle inline `(requires ...)` appearing in code blocks, but only in their simplest form.
+* Code blocks using `ns` or `in-ns` will not work with test-doc-blocks.
+If there is enough interest, we can look into supporting.
+* Parsing adoc and md files is on the naive side but should handle most cases.
+If we've overlooked a common syntax, let us know.
+Note that we have no plans to do any special parsing for embedded HTML in markdown (if that's where you are hiding your code blocks).
+
+== Development
+
+=== Prerequisites
+
+You will need to install https://github.com/borkdude/babashka[babashka] to run scripts.
+
+=== Tests
+
+==== Integration
+Run integration test via:
+[source,shell]
+----
+clojure -M:test:koacha integration
+----
+This will generate tests for README and example docs and then diff against a previously manually verified test run.
+The previously verified test run is stored under `test-resources/expected`.
+
+On failure careful manual inspection is recommended.
+When you are happy with current behaviour of generation of tests:
+
+[source,shell]
+----
+clojure -X:regen-local-expected
+----
+
+==== Manual
+
+Generate tests for local docs via:
+[source,shell]
+----
+clojure -X:gen-local-tests
+----
+
+Run generated tests under Clojure via:
+[source,shell]
+----
+clojure -M:block-test:kaocha generated
+----
+
+And under ClojureScript via:
+[source,shell]
+----
+clojure -M:block-test:cljs-test-runner
+----
+
+==== Continuous Integration
+
+To run what CI runs:
+[source,shell]
+----
+bb script/ci_tests.clj
+----
+
+=== Linting
+We use clj-kondo to lint project source and fail the build when linting fails.
+
+To run linting as the CI server does:
+
+[source,shll]
+----
+bb script/lint.clj
+----
+
+=== Release
+
+TODO: fill in the blanks.
+
+== Versioning
+
+rewrite-cljc versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
+
+* `major` increments when the API has been broken - something, as a rule, we'd like to avoid.
+* `minor` increments to convey significant new features have been added.
+* `patch` indicates bug fixes - it is the number of commits since `major`.`minor`.
+* `test-qualifier` is absent for stable releases. Can be `alpha`, `beta`, `rc1`, etc.
+
+
+== People
+
+=== Contributors
+
+* @seancorfield - code and idea is based on Sean's https://github.com/seancorfield/readme[readme] project.
+
+=== Current Maintainers
+
+* @lread
+
+== License
+
+Copyright © 2020 Lee Read, all rights reserved.
+
+Distributed under the EPL License, same as Clojure. See LICENSE.
+
+Code and concept heavily based on @seancorfield's https://github.com/seancorfield/readme[readme] which is distributed under EPL v1.0 or later.

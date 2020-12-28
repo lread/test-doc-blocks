@@ -1,0 +1,7 @@
+;; koacha config for clj testing
+#kaocha/v1
+{:tests [{:id :integration
+          :test-paths ["test"]}
+         {:id :generated
+          :test-paths  ["target/test-doc-blocks/test"]}]
+ :reporter kaocha.report/documentation}

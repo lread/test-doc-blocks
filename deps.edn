@@ -1,0 +1,58 @@
+{:paths ["src"]
+
+ :deps {org.clojure/clojure {:mvn/version "1.10.1"}}
+
+ :aliases {;; clojure -X support for local examples
+           :test-doc-blocks {:ns-default lread.test-doc-blocks
+                             :exec-args {}}
+
+           ;; base test aliases
+           :test {:extra-paths ["test"]}
+           :block-test {:extra-paths ["target/test-doc-blocks/test"]}
+
+           ;;
+           ;; Test runners
+           ;;
+           ;; Combine with :block-test for generated doc block tests.
+           ;; Note test-doc-block's unit tests are Clojure only and are to be run with :test.
+           ;;
+
+           ;; for kaocha see also tests.edn
+           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}
+                    :main-opts ["-m" "kaocha.runner"]}
+
+           :cljs-test-runner {:extra-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}}
+                              :main-opts ["-m" "cljs-test-runner.main"
+                                          "--dir" "target/test-doc-blocks/test"]}
+
+           :clj-test-runner
+           {:extra-deps {com.cognitect/test-runner
+                         {:git/url "https://github.com/cognitect-labs/test-runner"
+                          :sha "b6b3193fcc42659d7e46ecd1884a228993441182"}}
+            :main-opts ["-m" "cognitect.test-runner"
+                        "-d" "target/test-doc-blocks/test"]}
+
+           ;;
+           ;; Test support
+           ;;
+
+           ;; TODO: repetitive ... should I have a test-doc-blocks config stored on file system?
+           :gen-local-tests {:exec-fn lread.test-doc-blocks/gen-tests
+                             :exec-args {:docs ["README.adoc"
+                                                "doc/example.adoc"
+                                                "doc/example.md"]}}
+
+           :regen-local-expected {:exec-fn lread.test-doc-blocks/gen-tests
+                                  :exec-args {:docs ["README.adoc"
+                                                     "doc/example.adoc"
+                                                     "doc/example.md"]
+                                              :target-root "test-resources/expected"}}
+
+           :clj-kondo {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2020.12.12"}}
+                       :main-opts ["-m" "clj-kondo.main"]}
+
+           ;;
+           ;; Script deps
+           ;;
+           :script {:extra-paths ["script"]}
+           }}
