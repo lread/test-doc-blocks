@@ -14,7 +14,7 @@ So, do be deliberate and careful about what docs you run through test-doc-blocks
 
 == Immediate TODOS
 
-* review regex \s, I think I really meant literally a space rather than whitespace
+* turf unused script helpers I pasted in from rewrite-cljc
 * fail on clash of generated test files
 * print each code block found while generating
 * also not relying on test-doc-blocks after test generation would be simpler for user, so maybe reconsider using macros at runtime.

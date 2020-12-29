@@ -162,6 +162,6 @@ Well it does! And test-doc-blocks recognizes this fact.
 (require '[clojure.set :as set])
 
 (set/map-invert {:a 1 :b 2})
-;; => {1 :a 2 :b}
+;; => {1 :a, 2 :b}
 ```
 ....

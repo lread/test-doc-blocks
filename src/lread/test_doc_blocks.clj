@@ -293,10 +293,10 @@
   (= expected (pr-str actual)).
   It also stringifies potentially illegal Clojure."
   [block-text]
-  (let [re-stdout-start #"^;; {0,1}=stdout=>\s*$"
-        re-stdout-continue #"^;;(?:\s*$| (.*))"
-        re-repl-style-actual #"^user=>.*"
-        re-editor-style-expected #"^(?:;; *){0,1}(=clj=>|=cljs=>|=>) *(.*$)"]
+  (let [re-stdout-start #"^\s*;;\s{0,1}=stdout=>\s*$"
+        re-stdout-continue #"^\s*;;(?:\s*$| (.*))"
+        re-repl-style-actual #"^\s*user=>.*"
+        re-editor-style-expected #"^\s*(?:;;\s*){0,1}(=clj=>|=cljs=>|=>)\s*(.*$)"]
     (-> (loop [acc {:body ""}
                ;; add extra empty line to trigger close of trailing multiline
                [line line-next & more :as lines] (string/split block-text #"\n")]
@@ -328,7 +328,7 @@
               ;; expected
               (re-matches re-repl-style-actual line)
               (recur (-> acc
-                         (update :body str (str line "\n" (pr-str line-next) "\n")))
+                         (update :body str (str line "\n" (pr-str (string/trim line-next)) "\n")))
                      more)
 
               ;; editor style evaluation expectation:
@@ -345,62 +345,12 @@
                      (rest lines)))))
         :body)))
 
-(comment
-
-  (str ["a" nil "b"] "\n")
-
-  (re-matches #"^;;(?:\s*$| (.*))" ";; hey")
-  (re-matches #"^;;(?:\s*$| (.*))" ";;")
-
-  (re-matches #"^(?:;;)\s{0,1}(=clj=>|=cljs=>|=>)\s*(.*$)" ";; =clj=> expected")
-  (-> (doc-block->test-body (string/join "\n"
-                                         ["one"
-                                          "two"
-                                          ""
-                                          "user=> actual"
-                                          "expected"
-                                          ""
-                                          "actual2"
-                                          "=> expected2"
-                                          "actual3"
-                                          ";; =stdout=> "
-                                          ";; hey"
-                                          ";; "
-                                          ";; billy"
-                                          ""
-                                          ";; other stuff"]))
-      println)
-
-  (-> (doc-block->test-body "(require '[rewrite-cljc.parser :as p]
-         '[rewrite-cljc.node :as n])
-
-;; parse some Clojure source
-(def nodes (p/parse-string \"{  :a 1\n\n   :b 2}\"))
-
-;; print it out to show the whitespace
-(println (n/string nodes))
-;; =stdout=>
-;; {  :a 1
-;;
-;;    :b 2}
-")
-      println)
-
-  )
-;;
+;
 ;; Generating test files
 ;;
 
 (defn- testing-text [{:keys [doc-filename header line-no]}]
   (string/join " - " (keep identity [doc-filename header (str "line " line-no)])))
-
-(defn- indent-text [num-spaces text]
-  (str (string/join "\n"
-                    (map #(if (string/blank? %)
-                            %
-                            (str (apply str (repeat num-spaces " ")) %))
-                         (string/split text #"\n")))
-       "\n"))
 
 (defn- write-tests
   "Write out `tests` to test namespace `test-ns` under dir `target-root`.
