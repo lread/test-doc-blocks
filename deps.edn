@@ -36,18 +36,6 @@
            ;; Test support
            ;;
 
-           ;; TODO: repetitive ... should I have a test-doc-blocks config stored on file system?
-           :gen-local-tests {:exec-fn lread.test-doc-blocks/gen-tests
-                             :exec-args {:docs ["README.adoc"
-                                                "doc/example.adoc"
-                                                "doc/example.md"]}}
-
-           :regen-local-expected {:exec-fn lread.test-doc-blocks/gen-tests
-                                  :exec-args {:docs ["README.adoc"
-                                                     "doc/example.adoc"
-                                                     "doc/example.md"]
-                                              :target-root "test-resources/expected"}}
-
            :clj-kondo {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2020.12.12"}}
                        :main-opts ["-m" "clj-kondo.main"]}
 
