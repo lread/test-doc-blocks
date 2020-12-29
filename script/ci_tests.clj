@@ -21,8 +21,7 @@
   (shell/command ["clojure" "-M:test:kaocha" "integration" ]) )
 
 (defn generate-tests []
-  (status/line :info "Generating tests from local docs")
-  (shell/command ["clojure" "-X:gen-local-tests"]))
+  (shell/command ["bb" "./script/gen_local_tests.clj"]))
 
 (defn run-generated-tests []
   (status/line :info "Running locally generated tests under Clojure via kaocha")

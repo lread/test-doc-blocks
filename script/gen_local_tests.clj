@@ -15,10 +15,10 @@
                "doc/example.adoc"
                "doc/example.md"]]
 
-     (shell/command ["clojure" "-X:test-doc-blocks" "gen-tests"
-
-                     ":target-root" (pr-str target-root)
-                     ":docs" (str docs)]))))
+     (shell/command (concat ["clojure" "-X:test-doc-blocks" "gen-tests"]
+                            (when target-root
+                              [":target-root" (pr-str target-root)])
+                            [":docs" (str docs)])))))
 
 (defn main [args]
   (env/assert-min-versions)
