@@ -103,7 +103,7 @@ clojure -X:test-doc-blocks gen-tests :target-root '"./someplace/else"'
 ----
 
 Note that test-doc-blocks will delete and recreate `test-docs-block/test` dirs under the target root.
-Keep that in mind to when figuring out where to point your test runner.
+Keep that the location mind to when figuring out where to point your test runner.
 
 == Limitations
 
@@ -111,8 +111,7 @@ Keep that in mind to when figuring out where to point your test runner.
 Check out the readme project for a simpler alternative.
 * Test-doc-blocks will automatically handle inline `(requires ...)` appearing in code blocks, but only in their simplest form.
 * Code blocks using `ns` or `in-ns` will not work with test-doc-blocks.
-If there is enough interest, we can look into supporting.
-* Parsing adoc and md files is on the naive side but should handle most cases.
+* Parsing adoc and md files is on the naive side but should handle most common cases.
 If we've overlooked a common syntax, let us know.
 Note that we have no plans to do any special parsing for embedded HTML in markdown (if that's where you are hiding your code blocks).
 
@@ -209,4 +208,4 @@ Copyright © 2020 Lee Read, all rights reserved.
 
 Distributed under the EPL License, same as Clojure. See LICENSE.
 
-Code and concept heavily based on @seancorfield's https://github.com/seancorfield/readme[readme] which is distributed under EPL v1.0 or later.
+Code and concept based on @seancorfield's https://github.com/seancorfield/readme[readme] which is distributed under EPL v1.0 or later.
