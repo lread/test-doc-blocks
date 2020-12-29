@@ -2,6 +2,7 @@
   "Parse code blocks from markdown and generate Clojure test code."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.pprint :as pprint]
             [clojure.string :as string])
   (:import [java.nio.file Files]))
 
@@ -353,8 +354,7 @@
   (string/join " - " (keep identity [doc-filename header (str "line " line-no)])))
 
 (defn- write-tests
-  "Write out `tests` to test namespace `test-ns` under dir `target-root`.
-  Some attention paid to formatting just to make manual verification easier on the eyes."
+  "Write out `tests` to test namespace `test-ns` under dir `target-root`"
   [target-root [test-ns tests]]
   (let [ns-name (str "test-doc-blocks.gen" "." test-ns)
         test-fname (io/file target-root (fname-for-ns ns-name))
@@ -366,7 +366,6 @@
                                  distinct
                                  (into []))]
     (io/make-parents test-fname)
-    (println "writing -" (str test-fname))
     (spit test-fname
           (str "(ns " ns-name  "\n"
                "  (:require " (-> (into [] yanked-require-refs)
@@ -388,6 +387,13 @@
   {:target-root "./target"
    :docs ["README.md"]})
 
+(defn- parse-all-docs [docs]
+  (mapcat (fn [d]
+            (->> (parse-doc-code-blocks d)
+                 (remove :test-doc-blocks/skip)
+                 (map #(merge % (yank-requires (:block-text %))))))
+          docs))
+
 ;;
 ;; Entry points
 ;;
@@ -396,25 +402,30 @@
   "Generate tests for code blocks found in markdown files.
   Invoke from clojure CLI with -X."
   [opts]
-
   (let [{:keys [target-root docs]} (merge default-opts opts )
         target-root (str (io/file target-root "test-doc-blocks"))]
     (when (.exists (io/file target-root))
       (delete-dir target-root))
-    (let [target-root (str (io/file target-root "test"))]
+    (let [target-root (str (io/file target-root "test"))
+          parsed (parse-all-docs docs)]
+      (println "Found Clojure doc blocks:")
+      (clojure.pprint/print-table [:doc-filename :line-no :header :test-doc-blocks/test-ns] parsed)
       (println "\nGenerating tests to:" target-root)
-      (run! (fn [d]
-              (println "Processing:" d)
-              (->> (parse-doc-code-blocks d)
-                   (remove :test-doc-blocks/skip)
-                   (map #(merge % (yank-requires (:block-text %))))
-                   (group-by :test-doc-blocks/test-ns)
-                   (into [])
-                   (sort-by (fn [[_tgroupname [t & _ts]]]  (:line-no t)))
-                   (run! #(write-tests target-root %))))
-            docs))))
+      (->> parsed
+           (group-by :test-doc-blocks/test-ns)
+           (into [])
+           (sort-by (fn [[_tgroupname [t & _ts]]]  (:line-no t)))
+           (run! #(write-tests target-root %)))
+      (println "Done"))))
+
 
 (comment
+  (concat [1 2 3] (when false [7 8 9]) [4 4 5])
+
+  (parse-all-docs ["README.adoc"
+                  "doc/example.md"
+                  "doc/example.adoc"])
+
   (gen-tests {:target-root "./target/"
               :docs ["README.adoc"
                      "doc/example.md"
