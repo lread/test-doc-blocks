@@ -100,8 +100,8 @@
   "```Clojure"
   [{:keys [in-code-block? line]}]
   (when (not in-code-block?)
-    (when-let [[_ lang] (re-matches #"(?i)^\s*```\s*(\w*)\s*$" line)]
-      {:new-block? true :lang (normalize-lang lang) :end-block-re #"\s*```\s*" })))
+    (when-let [[_ indent lang] (re-matches #"(?i)^( *)```\s*(\w*)\s*$" line)]
+      {:new-block? true :lang (normalize-lang lang) :end-block-re #"\s*```\s*" :block-indentation (count indent)})))
 
 (defn- md-opts
   "Test-doc-blocks opts are conveyed in comments:
@@ -182,6 +182,26 @@
 (defn- parse-next [parsers state line]
   (first (keep #(% (assoc state :line line)) parsers)))
 
+(defn- block-line
+  "CommonMark code blocks can be indented.
+   We need to strip the indentation.
+
+   CommonMark seems somewhat forgiving of
+
+      ```Clojure
+      somewhat
+    skewed left
+      here
+      ```
+  So we allow for that."
+  [{:keys [block-indentation]} line]
+  (if block-indentation
+    (if (string/blank? line)
+      ""
+      (subs line (min (->> line (re-find #"^( *)[^ ]") second count)
+                      block-indentation)))
+    line))
+
 (defn- parse-doc-code-blocks
   "Parse out clojure code blocks from markdown in `doc-filename`.
   Formats supported are md and adoc and determined by file extension.
@@ -191,6 +211,7 @@
   - :line-no - line number at start of block
   - :header - last header found before code block
   - :block-text - content of block in string "
+  ;; TODO: close da damn reader
   ([doc-filename] (parse-doc-code-blocks doc-filename (io/reader doc-filename)))
   ;; this arity to support REPL testing via string reader
   ([doc-filename rdr]
@@ -202,44 +223,60 @@
                    :blocks []}]
        (if line
          (recur lines
-                (-> (let [p (parse-next parsers state line)]
-                      (cond
-                        (:end-block? p)
-                        (let [lang (:block-lang state)
-                              state (dissoc state :in-code-block? :end-block-re :block-lang)]
-                          (if-not (= "Clojure" lang)
-                            state
-                            (-> state
-                                (update :blocks conj (-> (:block state)
-                                                         (merge (:opts state))
-                                                         (assoc :header (:header state))
-                                                         (assoc :doc-filename (:doc-filename state))))
-                                (update :opts dissoc :test-doc-blocks/skip)
-                                (assoc :block {}))))
+                (try
+                  (-> (let [p (parse-next parsers state line)]
+                        (cond
+                          (:end-block? p)
+                          (let [lang (:block-lang state)
+                                state (dissoc state :in-code-block? :end-block-re :block-lang :block-indentation)]
+                            (if-not (= "Clojure" lang)
+                              state
+                              (-> state
+                                  (update :blocks conj (-> (:block state)
+                                                           (merge (:opts state))
+                                                           (assoc :header (:header state))
+                                                           (assoc :doc-filename (:doc-filename state))))
+                                  (update :opts dissoc :test-doc-blocks/skip)
+                                  (assoc :block {}))))
 
-                        (and (:new-block? p))
-                        (let [state (-> state (assoc :in-code-block? true
-                                                     :end-block-re (:end-block-re p)
-                                                     :block-lang (:lang p)))]
-                          (if-not (= "Clojure" (:lang p))
-                            state
-                            (-> state (assoc :block {:line-no (:doc-line-no state)
-                                                     :block-text ""}))))
+                          (and (:new-block? p))
+                          (let [state (-> state (assoc :in-code-block? true
+                                                       :end-block-re (:end-block-re p)
+                                                       :block-indentation (:block-indentation p)
+                                                       :block-lang (:lang p)))]
+                            (if-not (= "Clojure" (:lang p))
+                              state
+                              (-> state (assoc :block {:line-no (:doc-line-no state)
+                                                       :block-text ""}))))
 
-                        (and (:in-code-block? state) (= "Clojure" (:block-lang state)))
-                        (update-in state [:block :block-text] #(str % "\n" line))
+                          (and (:in-code-block? state) (= "Clojure" (:block-lang state)))
+                          (update-in state
+                                     [:block :block-text]
+                                     #(str % (block-line state line) "\n"))
 
-                        (:header p)
-                        (merge state p)
+                          (:header p)
+                          (merge state p)
 
-                        (:opts p)
-                        (update state :opts merge (:opts p))
+                          (:opts p)
+                          (update state :opts merge (:opts p))
 
-                        :else
-                        state))
-                    (update :doc-line-no inc)
-                    (assoc :line-prev line)))
+                          :else
+                          state))
+                      (update :doc-line-no inc)
+                      (assoc :line-prev line))
+                  (catch Throwable e
+                    (throw (ex-info (format "Unable to parse %s, issue at line %d" doc-filename (:doc-line-no state)) {} e)))))
          (:blocks state))))))
+
+(comment
+  (parse-doc-code-blocks "test.md" (io/reader (char-array
+                                               (string/join "\n" ["# hey"
+                                                                  ""
+                                                                  "   ```Clojure"
+                                                                  "   clj"
+                                                                  "    clj"
+                                                                  "```"]))))
+)
 
 ;;
 ;; Post parse
@@ -258,7 +295,7 @@
                     (string/index-of s "(require\n" pos))
           end (string/index-of s ")" pos)]
       (if (and start end)
-        (recur (str new-s (subs s pos (dec start)))
+        (recur (str new-s (subs s pos start))
                (conj yanked (subs s start (inc end)))
                (inc end))
         {:block-text (str new-s (subs s pos))
@@ -421,10 +458,6 @@
 
 (comment
   (concat [1 2 3] (when false [7 8 9]) [4 4 5])
-
-  (parse-all-docs ["README.adoc"
-                  "doc/example.md"
-                  "doc/example.adoc"])
 
   (gen-tests {:target-root "./target/"
               :docs ["README.adoc"

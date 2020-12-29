@@ -117,3 +117,32 @@ This code block should be include "Section Titles" as part of the context for it
 ;; => "well!how!about!that"
 ```
 ~~~
+
+# Indented Blocks
+
+CommonMark syntax gives meaning to indented code blocks.
+
+
+- In CommonMark, a block is indented to be attached to a list item:
+
+    ```Clojure
+    ;; we handle simple cases a-OK.
+    user=> (+ 1 2 3)
+    6
+    ``` 
+
+  - It indents more for deeper items:
+  
+      ```Clojure
+      ;; we handle indented wrapped strings just fine
+      (def s "my
+      goodness
+      gracious")
+   
+      (println s)
+      ;; =stdout=>
+      ;; my
+      ;; goodness
+      ;; gracious
+      ``` 
+

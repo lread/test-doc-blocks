@@ -5,14 +5,12 @@
 (deftest-doc-blocks
 
 (testing-block  "doc/example.adoc - The Basics - line 13"
-
 ;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates to the expected 6
 user=> (+ 1 2 3)
 "6"
 )
 
 (testing-block  "doc/example.adoc - The Basics - line 22"
-
 ;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates to the expected 10
 (+ 1 2 3 4)
 =>"10"
@@ -30,7 +28,6 @@ user=> (+ 1 2 3)
 )
 
 (testing-block  "doc/example.adoc - The Basics - line 45"
-
 (->> "here we are only checking that our code will run"
      reverse
      reverse

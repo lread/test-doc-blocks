@@ -5,7 +5,6 @@
 (deftest-doc-blocks
 
 (testing-block  "doc/example.adoc - Specifying Test Namespace - line 90"
-
 ;; this code block will generate tests under example-adoc-new-ns-test
 
 user=> (* 2 4)

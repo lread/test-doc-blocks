@@ -7,8 +7,8 @@
 (deftest-doc-blocks
 
 (testing-block  "doc/example.adoc - Specifying Test Namespace - line 109"
-
 ;; this code block will generate tests under example-adoc-new-ns.ns1-test
+
 
 
 (string/join ", " [1 2 3])
