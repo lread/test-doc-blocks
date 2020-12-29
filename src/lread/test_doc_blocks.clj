@@ -124,10 +124,11 @@
       {:header header})))
 
 (defn- adoc-header
-  "Adoc also recongizes md header syntax."
+  "Adoc also recongizes md header syntax.
+  For now we only support 1line md headers, as I don't yet understand the rules in adoc for the 2 line version."
   [parse-state]
   (or (adoc-header-1line parse-state)
-      (md-header parse-state)))
+      (md-header-1line parse-state)))
 
 (defn- adoc-code-block-start*
   "[source,clojure]
@@ -244,7 +245,7 @@
 ;;
 
 (defn- yank-requires
-  "Returns map where `:block-text` is `s` without `(require ...)` and `:requires` is a vector of strings of each yanked `(require ...)`.
+  "Returns map where `:block-text` is `s` without any `(require ...)` and `:requires` is a vector of strings of each yanked `(require ...)`.
 
   Warning: Super naive for now.
   No handling of parens that maybe nested, in string or comments, etc."
@@ -281,43 +282,111 @@
 
   =stdout=> [\"line1\" \"line2\"]
 
-  editor style:
+  Editor style:
+  actual
   ;; => expected
   becomes:
-  => expected"
+  actual
+  => expected
+
+  And expected gets wrapped in a string so that it can be compared:
+  (= expected (pr-str actual)).
+  It also stringifies potentially illegal Clojure."
   [block-text]
-  (let [re-stdout #"^;;\s{0,1}=stdout=>\s*$"
-        re-stdout-continue #"^;;\s{0,1}(.*)$"
-        re-eval #"^(?:;;)\s{0,1}((?:=clj=>|=cljs=>|=>){0,1}=>.*$)"]
-    (-> (reduce (fn [acc line]
-                  (cond
-                    ;; collecting stdout expectation
-                    (:multiline acc)
-                    (if-let [[_ out-line] (re-matches re-stdout-continue  line)]
-                      (update acc :multiline conj out-line)
-                      (-> acc
-                          (update :body str (str "=stdout=> " (str (:multiline acc) "\n")))
-                          (dissoc :multiline)))
+  (let [re-stdout-start #"^;; {0,1}=stdout=>\s*$"
+        re-stdout-continue #"^;;(?:\s*$| (.*))"
+        re-repl-style-actual #"^user=>.*"
+        re-editor-style-expected #"^(?:;; *){0,1}(=clj=>|=cljs=>|=>) *(.*$)"]
+    (-> (loop [acc {:body ""}
+               ;; add extra empty line to trigger close of trailing multiline
+               [line line-next & more :as lines] (string/split block-text #"\n")]
+          (if-not line
+            acc
+            (cond
+              ;; stdout expectation ends
+              (and (:stdout acc) (re-matches re-stdout-continue line)
+                   (not (re-matches re-stdout-continue (or line-next ""))))
+              (let [[_ out-line] (re-matches re-stdout-continue line)]
+                   (recur (-> acc
+                              (update :body str (str "=stdout=> " (str (conj (:stdout acc) (or out-line "")) "\n")))
+                              (dissoc :stdout))
+                          (rest lines)))
 
-                    ;; stdout expectation starts
-                    (re-matches re-stdout  line)
-                    (assoc acc :multiline [])
+              ;; collecting stdout expectation
+              (and (:stdout acc) (re-matches re-stdout-continue line))
+              (let [[_ out-line] (re-matches re-stdout-continue line)]
+                (recur (update acc :stdout conj (or out-line ""))
+                       (rest lines)))
 
-                    ;; evaluation expectation
-                    (re-matches re-eval line)
-                    (let [[_ tline] (re-matches re-eval line)]
-                      (update acc :body str (str tline "\n")))
+              ;; stdout expectation starts
+              (re-matches re-stdout-start line)
+              (recur (assoc acc :stdout [])
+                     (rest lines))
 
-                    ;; other lines
-                    :else
-                    (update acc :body str (str line "\n"))))
-                {:body ""}
-                ;; add extra empty line to trigger close of trailing multiline
-                (conj (string/split block-text #"\n") ""))
-        :body
-        string/trim-newline
-        (str "\n"))))
+              ;; repl style evaluation expectation:
+              ;; user=> actual
+              ;; expected
+              (re-matches re-repl-style-actual line)
+              (recur (-> acc
+                         (update :body str (str line "\n" (pr-str line-next) "\n")))
+                     more)
 
+              ;; editor style evaluation expectation:
+              ;; actual
+              ;; ;;=> expected
+              (re-matches re-editor-style-expected line)
+              (let [[_ prefix expected] (re-matches re-editor-style-expected line)]
+                (recur (update acc :body str (str prefix (pr-str expected) "\n"))
+                       (rest lines)))
+
+              ;; other lines
+              :else
+              (recur (update acc :body str (str line "\n"))
+                     (rest lines)))))
+        :body)))
+
+(comment
+
+  (str ["a" nil "b"] "\n")
+
+  (re-matches #"^;;(?:\s*$| (.*))" ";; hey")
+  (re-matches #"^;;(?:\s*$| (.*))" ";;")
+
+  (re-matches #"^(?:;;)\s{0,1}(=clj=>|=cljs=>|=>)\s*(.*$)" ";; =clj=> expected")
+  (-> (doc-block->test-body (string/join "\n"
+                                         ["one"
+                                          "two"
+                                          ""
+                                          "user=> actual"
+                                          "expected"
+                                          ""
+                                          "actual2"
+                                          "=> expected2"
+                                          "actual3"
+                                          ";; =stdout=> "
+                                          ";; hey"
+                                          ";; "
+                                          ";; billy"
+                                          ""
+                                          ";; other stuff"]))
+      println)
+
+  (-> (doc-block->test-body "(require '[rewrite-cljc.parser :as p]
+         '[rewrite-cljc.node :as n])
+
+;; parse some Clojure source
+(def nodes (p/parse-string \"{  :a 1\n\n   :b 2}\"))
+
+;; print it out to show the whitespace
+(println (n/string nodes))
+;; =stdout=>
+;; {  :a 1
+;;
+;;    :b 2}
+")
+      println)
+
+  )
 ;;
 ;; Generating test files
 ;;
@@ -356,14 +425,13 @@
                "\n"
                "(deftest-doc-blocks\n"
                "\n"
-               (indent-text 2
-                            (->> (reduce (fn [acc t]
-                                           (conj acc (str
-                                                      "(testing-block " " \"" (testing-text t) "\"\n"
-                                                      (indent-text 2 (doc-block->test-body (:block-text t))) ")")))
-                                         []
-                                         tests)
-                                 (string/join "\n\n")))
+               (->> (reduce (fn [acc t]
+                              (conj acc (str
+                                         "(testing-block " " \"" (testing-text t) "\"\n"
+                                         (doc-block->test-body (:block-text t)) ")")))
+                            []
+                            tests)
+                    (string/join "\n\n"))
                ")\n"))))
 
 (def default-opts

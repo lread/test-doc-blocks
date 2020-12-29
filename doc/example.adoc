@@ -116,15 +116,21 @@ Code blocks that require a unique set of namespaces fall under this category.
 ----
 ....
 
-Section Titles
---------------
+## Section Titles
 Test-doc-blocks will try to give each test block some context by including its filename, section title and starting line number.
 
-It recognizes that Asciidoctor recognizes CommonMark style headers.
+It recognizes that Asciidoctor recognizes CommonMark style single line headers.
+
 [source,markdown]
 ----
 ## this type of md header
+----
 
+I think there is also support for 2 line headers but the rules might be a differ a bit from CommonMark.
+As 2 line CommonMark headers in a Asciidoctor file should be rare, we'll not try to parse these variants in Asciidoctor docs for now:
+
+[source,markdown]
+----
 And this level 1 type
 =====================
 

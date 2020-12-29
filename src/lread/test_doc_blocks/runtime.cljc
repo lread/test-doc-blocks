@@ -86,9 +86,9 @@
                                assertions (->> (for [[etype e] (select-keys(:expected t)
                                                                            ['=> '=clj=> '=cljs=> '=stdout=>])]
                                                  (case etype
-                                                   => `(is (~'= ~e ~a))
-                                                   =clj=> `(is (~'= ~e ~a))
-                                                   =cljs=> `(if-cljs (is (~'= ~e ~a)) nil)
+                                                   => `(is (~'= ~e (~'pr-str ~a)))
+                                                   =clj=> `(if-cljs nil (is (~'= ~e (~'pr-str ~a))))
+                                                   =cljs=> `(if-cljs (is (~'= ~e (~'pr-str ~a))) nil)
                                                    =stdout=> `(is (~'= ~e (str/split-lines (~'with-out-str ~a))))))
                                                (keep identity))]
                            (apply conj acc assertions))))
@@ -99,7 +99,7 @@
   [parsed-forms]
   (if (some #(= :assertion (:type %)) parsed-forms)
     parsed-forms
-    (concat parsed-forms [{:type :assertion :expected '{=> "dummy"} :actual "dummy"}])))
+    (concat parsed-forms [{:type :assertion :expected '{=> "\"dummy\""} :actual "dummy"}])))
 
 (defmacro testing-block
   "testing macro, is a far as I can tell, no designed for wrapping, so here we'll just return body and expand appropriately in deftest-doc-blocks macro. "
