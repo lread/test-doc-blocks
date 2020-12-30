@@ -1,4 +1,11 @@
 = lread.test-doc-blocks
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
 :toc:
 
 Generate runnable tests from code blocks in Asciidoctor and CommonMark files.
@@ -12,15 +19,28 @@ Example code in docs, while likely not malicious, could be illustrating, for exa
 So, do be deliberate and careful about what docs you run through test-doc-blocks.
 ====
 
+== Rationale
+I wanted to make sure the code examples I provided in rewrite-cljc documentation do not mislead and would function as expected for those who dared to try them.
+
+This might (or might not, see link:#limitations[limitations], and link:#other-options[other options]) be of interest for your Clojure project too.
+
 == Immediate TODOS
+
+* I was heavily influenced by the readme project, but now that I am aware of it, will have a look at the testdoc project.
 * do I handle/ignore trailing whitespace?
-* to allow for libs that override pr (rewrite-clj for example), I now compare (= (str expected) (pr-str actual))
+* to allow for libs that override pr (rewrite-clj for example), I now compare `(= (str expected) (pr-str actual))`
 ** but... this may not always work for items where order is not guaranteed, ex sets and maps.
 * turf unused script helpers I pasted in from rewrite-cljc
-* also not relying on test-doc-blocks after test generation would be simpler for user, so maybe reconsider NOT using macros at runtime.
-** If I bring in rewrite-cljc for rewriting, does this mean I should bring in proper parsers.
+* not relying on test-doc-blocks after test generation would be simpler for user, so maybe reconsider NOT using macros at runtime.
+** If I bring in rewrite-cljc for rewriting, does this mean I should bring in proper parsers for docs?
+
+From feedback:
+
+* show example with stdout, stderr ad expected eval result
+* any way to format expected result nicely to multiple lines?
 
 Maybe:
+
 * might be nice to offer to validate edn snippits are readable?
 
 == Status
@@ -105,15 +125,30 @@ clojure -X:test-doc-blocks gen-tests :target-root '"./someplace/else"'
 Note that test-doc-blocks will delete and recreate `test-docs-block/test` dirs under the target root.
 Keep that the location mind to when figuring out where to point your test runner.
 
+[#limitations]
 == Limitations
 
-* Setup and use is more involved than for https://github.com/seancorfield/readme[readme].
-Check out the readme project for a simpler alternative.
+Some current limitations that we might entertain addressing:
+
+* If your code block depends on some external setup, we've no way to express that.
 * Test-doc-blocks will automatically handle inline `(requires ...)` appearing in code blocks, but only in their simplest form.
-* Code blocks using `ns` or `in-ns` will not work with test-doc-blocks.
 * Parsing adoc and md files is on the naive side but should handle most common cases.
 If we've overlooked a common syntax, let us know.
-Note that we have no plans to do any special parsing for embedded HTML in markdown (if that's where you are hiding your code blocks).
+
+And some we have no current plans to address:
+
+* Code blocks using `ns` or `in-ns` will not work with test-doc-blocks.
+* It is possible to embed HTML into your docs.
+If your code or headings are expressed in HTML, we won't find them.
+
+[#other-options]
+== Other Options
+
+Here are other options and related projects that I am currently aware of:
+
+* https://github.com/seancorfield/readme[readme] - Generates tests for code blocks found in .md files and then runs them.
+* https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
+* https://github.com/sogaiu/alc.x-as-tests[alc.x-as-tests] - Runs code in `(comment ...)` blocks as tests.
 
 == Development
 
@@ -191,12 +226,17 @@ rewrite-cljc versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
 * `patch` indicates bug fixes - it is the number of commits since `major`.`minor`.
 * `test-qualifier` is absent for stable releases. Can be `alpha`, `beta`, `rc1`, etc.
 
-
 == People
 
 === Contributors
 
 * @seancorfield - code and idea is based on Sean's https://github.com/seancorfield/readme[readme] project.
+* Helpful feedback and ideas from:
+** @borkdude
+** @sogaiu
+** @dominicin
+** @pez
+** @uochan
 
 === Current Maintainers
 

@@ -69,13 +69,50 @@ We'll take inspiration for clj-kondo for syntax.
 I could bring in full featured parsers for Asciidoctor and CommonMark but this would mean extra unwanted deps.
 I'll instead implement simple parsing that should be good enough in most cases.
 
+=== Feedback from community
+
+I asked some folks about any existing conventions for what I sketched as `=stdout=>` and got back some great responses:
+
+@sogaiu
+
+* one thing to consider might be whether you want to be able to distinguish between return values and output.
+it wasn't clear to me from the snippets above how that might occur.
+* another consideration might be if you want to verify stdout vs stderr (though arranging for this might be tricky depending on how things are done underneath?).
+with your sketch, perhaps you'd use "=stderr=>" as a prefix?
+* i was also interested in verying output but didn't set anything down.
+in my case i've tried to make the notation concise with the idea that this stuff might be entered manually.
+thus i've steered clear of longer things if possible.
+* on a related note, i took a quick peek at test-doc-blocks,
+but didn't find anything about supporting expected return values that might be more nicely formatted across lines.
+in alc.x-as-tests' case, i used #_ to prefix multiline constructs: https://github.com/sogaiu/alc.x-as-tests/blob/master/doc/comment-block-tests.md (search for "discard")
+
+@uochan
+
+* FWIW, I also have a similar library to test codes in docstring mainly.
+But it is also usable for external documents like markdown or asciidoc.
+https://github.com/liquidz/testdoc
+
+@dominicm
+
+* Vim fireplace prefixes lines with `;{sp}` for stdout
+
+@pez
+
+* We have a similar problem in the Calva output window.
+So far only prefixing both stdout and stderr with `;{sp}`.
+But I have been wanting to start using maybe `;o{sp}` and `;e{sp}`.
+
+We then dug into clearly representing eval vs stdout and stderr a bit.
+
+Other
+
+* One person kindly warned me privately this project might be a bit of a rabbit hole.
+I see their point, but my main customer is rewrite-cljc, and it already found issues there, so I'll carry on.
+
 === Ideas for later
-Would it be interesting to run clj-kondo on some form of the doc code blocks?
 
-Support code snippits that include `(requires ...)` under reader conditionals.
+* Support code snippits that include `(requires ...)` under reader conditionals.
 
-Currently generating tests to cljc. Ever any need for .cls or .clj?
+* Currently generating tests to cljc. Ever any need for .cls or .clj?
 
-Could include gen test delete workflow like Sean does. Maybe?
-
-Hmm... for Sean's flow would supporting :doc and :target-test-file (single file mode), help?
+* Could include gen test delete workflow like Sean does. Maybe?
