@@ -6,18 +6,28 @@ ifdef::env-github[]
 :caution-caption: :fire:
 :warning-caption: :warning:
 endif::[]
-:toc:
+:toc: macro
+
+image:https://github.com/lread/test-doc-blocks/workflows/Test/badge.svg[Test]
 
 Generate runnable tests from code blocks in Asciidoctor and CommonMark files.
 
 [CAUTION]
 ====
-Executing tests executes code.
-
-Example code in docs, while likely not malicious, could be illustrating, for example, how to wipe out a drive.
-
+Executing tests executes code. +
+Example code in docs, while likely not malicious, could be illustrating, for example, how to wipe a drive. +
 So, do be deliberate and careful about what docs you run through test-doc-blocks.
 ====
+
+toc::[]
+
+== Status
+
+Initial concept. Currently being used to test doc blocks in rewrite-cljc.
+
+* Alpha, this might not be a good general idea, but might work well for some projects.
+* No release to clojars yet.
+* Feedback welcome.
 
 == Rationale
 I wanted to make sure the code examples I provided in rewrite-cljc documentation do not mislead and would function as expected for those who dared to try them.
@@ -95,14 +105,7 @@ From feedback:
 Maybe:
 
 * might be nice to offer to validate edn snippits are readable?
-
-== Status
-
-Initial concept. Currently being used to test doc blocks in rewrite-cljc.
-
-* Alpha, this might not be a good general idea, but might work well for some projects.
-* No release to clojars yet.
-* Feedback welcome.
+* tests are integration only and super brittle but that's ok for now
 
 == Usage
 
