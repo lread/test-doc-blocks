@@ -22,7 +22,7 @@ So, do be deliberate and careful about what docs you run through test-doc-blocks
 == Rationale
 I wanted to make sure the code examples I provided in rewrite-cljc documentation do not mislead and would function as expected for those who dared to try them.
 
-This might (or might not, see link:#limitations[limitations], and link:#other-options[other options]) be of interest for your Clojure project too.
+Test-doc-blocks might (or might not, see link:#limitations[limitations], and link:#other-options[other options]) be of interest for your Clojure project too.
 
 == Immediate TODOS
 
@@ -200,8 +200,9 @@ If your code or headings are expressed in HTML, we won't find them.
 
 Here are other options and related projects that I am currently aware of:
 
-* https://github.com/lambdaisland/kaocha[kaocha] - Koacha includes cucumber tests in its documentation.
-A feature document describes the feature and includes given, when, then scenarios that are both run and show in documentation.
+* https://github.com/lambdaisland/kaocha[kaocha] - Koacha supports running cucumber tests.
+It uses this cucumber tests for its own documentation.
+A .feature document describes the feature and includes given, when, then scenarios that are both run and shown in documentation.
 Gritty details can be hidden in step definitions.
 * https://github.com/seancorfield/readme[readme] - Generates tests for code blocks found in .md files and then runs them.
 * https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
@@ -211,7 +212,9 @@ Gritty details can be hidden in step definitions.
 
 === Prerequisites
 
-You will need to install https://github.com/borkdude/babashka[babashka] to run scripts.
+In addition to the https://clojure.org/guides/getting_started[Clojure CLI], you will need to install https://github.com/borkdude/babashka[babashka] to run scripts.
+
+The example ClojureScript test runner does make use of https://nodejs.org[Node.js]
 
 === Tests
 
