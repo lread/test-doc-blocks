@@ -4,8 +4,13 @@
             [clojure.string :as string]))
 
 ;;
-;; Parsing markdown
-;;
+;; Parsing markdown, we look at:
+;; - code blocks
+;; - the heading that appears before a code block
+;; - test-doc-block opts conveyed in comments
+
+;; TODO: I am more than just parsing markdown, I am also interpreting test-doc-opts opts.
+;; probably a good idea to separate those two things.
 
 (defn- file-ext[fname]
   (let [pos (.lastIndexOf fname ".")]

@@ -4,8 +4,6 @@
             #?(:clj [clojure.test]
                :cljs [cljs.test :include-macros true])))
 
-
-
 (defn cljs-env?
   "Take the &env from a macro, and tell whether we are expanding into cljs."
   [env]
@@ -16,7 +14,6 @@
    https://groups.google.com/d/msg/clojurescript/iBY5HaQda4A/w1lAQi9_AwsJ"
   [then else]
   (if (cljs-env? &env) then else))
-
 
 (defmacro with-err-str-clj
   "Analog to with-out-str, just for *err*: https://clojuredocs.org/clojure.core/with-out-str"
@@ -143,8 +140,6 @@
   `'(~@body))
 
 (defmacro deftest-doc-blocks
-  ;; TODO: Supporting clojure.test vs cljs.test is gross in here...
-  ;; TODO: there must be a better way.
   "Wrapper for deftest that understands readme examples."
   [& body]
   (let [testing-forms (->> body
