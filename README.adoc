@@ -26,6 +26,56 @@ This might (or might not, see link:#limitations[limitations], and link:#other-op
 
 == Immediate TODOS
 
+* Change stderr stdout to (?):
++
+[source,asciidoctor]
+----
+;; =stdout=> line 1
+;; =stdout=> line 2
+;; =stdout=> line 3
+;; =stderr=> line 1
+;; =stderr=> line 2
+;; =stderr=> line 3
+
+This should also allow intermingly of stdout and stderr, if that's beneficial to doc author:
+;; =stdout=> line 1
+;; =stderr=> line 1
+;; =stderr=> line 2
+;; =stdout=> line 2
+;; =stdout=> line 3
+;; =stderr=> line 3
+
+I argued that the reader might get confused if we used a shorter form but, my eye has an easier time of distinguishing here:
+;; =out=> line 1
+;; =err=> line 1
+;; =err=> line 2
+;; =out=> line 2
+;; =out=> line 3
+;; =err=> line 3
+
+All of this is a bit hard on the eyes, to me anyway, so consider:
+
+;; =stdout=>
+; line 1
+; line 2
+; line 3
+;; =stderr=>
+; line 1
+; line 2
+; line 3
+
+A single semicolon for output allows for expecting our special tokens in output
+
+;; =stdout=>
+; =stdout=>
+
+And might be a good general continuation?
+
+;; => {:a 1
+;      :b 2
+;      :c 3}
+----
+
 * I was heavily influenced by the readme project, but now that I am aware of it, will have a look at the testdoc project.
 * do I handle/ignore trailing whitespace?
 * to allow for libs that override pr (rewrite-clj for example), I now compare `(= (str expected) (pr-str actual))`
