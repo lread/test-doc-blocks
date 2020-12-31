@@ -35,7 +35,21 @@ user=> (+ 1 2 3)
 ;; is this right?
 ;; or not?
 
-;; finish your stdout block with an empty or non-comment line
+;; sometimes we might care about evaluated result, stderr and stdout
+(do
+  (println "To out I go")
+  #?(:clj
+     (binding [*out* *err*]
+       (println "To err is human"))
+     :cljs
+     (binding [*print-fn* *print-err-fn*]
+       (println "To err is human")))
+  (* 9 9))
+;; => 81
+;; =stderr=>
+;; To err is human
+;; =stdout=>
+;; To out I go
 ----
 
 Test-doc-blocks will plunk your code blocks into a test even when there are no assertions.

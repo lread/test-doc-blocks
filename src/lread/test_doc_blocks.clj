@@ -309,9 +309,22 @@
        (mapcat rest)
        (filter vector?)))
 
+(comment
+  (re-matches #"^\s*;;\s{0,1}(=(?:stdout|stderr)=>)\s*$" ";; =stdout=>")
+  (re-matches #"^\s*;;(?:\s*$| (.*))" ";; =clj=>")
+
+  (re-matches #"^\s*(?:;;\s*){0,1}(=stdout=>|stderr=>|=clj=>|=cljs=>|=>)\s*(.*$)"
+              "=sdtout=>")
+  (let [[_ two three] [1 2 ]]
+    [two three])
+
+  )
+
+
 (defn- doc-block->test-body
   "Convert doc block to something suitable for test body.
 
+  stdout and stderr:
   ;; =stdout=>
   ;; line
   ;; line2
@@ -331,40 +344,51 @@
   (= expected (pr-str actual)).
   It also stringifies potentially illegal Clojure."
   [block-text]
-  (let [re-stdout-start #"^\s*;;\s{0,1}=stdout=>\s*$"
-        re-stdout-continue #"^\s*;;(?:\s*$| (.*))"
-        re-repl-style-actual #"^\s*user=>.*"
+  (let [re-out-continue #"^\s*;;(?:\s*$| (.*))"
+        re-repl-style-actual #"^\s*(user=>).*"
+        re-editor-style-out-expected #"^\s*;;\s{0,1}(=stdout=>|=stderr=>)\s*$"
         re-editor-style-expected #"^\s*(?:;;\s*){0,1}(=clj=>|=cljs=>|=>)\s*(.*$)"]
     (-> (loop [acc {:body ""}
                ;; add extra empty line to trigger close of trailing multiline
                [line line-next & more :as lines] (string/split block-text #"\n")]
-          (if-not line
-            acc
+          (let [[_ assert-token payload] (when line
+                                           (or (re-matches re-repl-style-actual line)
+                                               (re-matches re-editor-style-expected line)
+                                               (re-matches re-editor-style-out-expected line)))]
             (cond
-              ;; stdout expectation ends
-              (and (:stdout acc) (re-matches re-stdout-continue line)
-                   (not (re-matches re-stdout-continue (or line-next ""))))
-              (let [[_ out-line] (re-matches re-stdout-continue line)]
-                   (recur (-> acc
-                              (update :body str (str "=stdout=> " (str (conj (:stdout acc) (or out-line "")) "\n")))
-                              (dissoc :stdout))
-                          (rest lines)))
+              ;; out expectation ends
+              (and (:out acc) (or (not line)
+                                  assert-token
+                                  (not (re-matches re-out-continue line))
+                                  (re-matches re-editor-style-expected line)))
+              (recur (-> acc
+                         (update :body str (str (:out-token acc) " "
+                                                (str (conj (:out acc)) "\n")))
+                         (dissoc :out :out-token))
+                     lines)
 
-              ;; collecting stdout expectation
-              (and (:stdout acc) (re-matches re-stdout-continue line))
-              (let [[_ out-line] (re-matches re-stdout-continue line)]
-                (recur (update acc :stdout conj (or out-line ""))
+              ;; done?
+              (not line)
+              acc
+
+              ;; collecting stdout/stderr expectation
+              (and (:out acc)
+                   (not assert-token)
+                   (re-matches re-out-continue line))
+              (let [[_ out-line] (re-matches re-out-continue line)]
+                (recur (update acc :out conj (or out-line ""))
                        (rest lines)))
 
-              ;; stdout expectation starts
-              (re-matches re-stdout-start line)
-              (recur (assoc acc :stdout [])
+              ;; out expectation starts
+              (or (= "=stdout=>" assert-token)
+                  (= "=stderr=>" assert-token))
+              (recur (assoc acc :out [] :out-token assert-token)
                      (rest lines))
 
               ;; repl style evaluation expectation:
               ;; user=> actual
               ;; expected
-              (re-matches re-repl-style-actual line)
+              (= "user=>" assert-token)
               (recur (-> acc
                          (update :body str (str line "\n" (pr-str (string/trim line-next)) "\n")))
                      more)
@@ -372,10 +396,9 @@
               ;; editor style evaluation expectation:
               ;; actual
               ;; ;;=> expected
-              (re-matches re-editor-style-expected line)
-              (let [[_ prefix expected] (re-matches re-editor-style-expected line)]
-                (recur (update acc :body str (str prefix (pr-str expected) "\n"))
-                       (rest lines)))
+              assert-token
+              (recur (update acc :body str (str assert-token (pr-str payload) "\n"))
+                     (rest lines))
 
               ;; other lines
               :else
@@ -383,7 +406,19 @@
                      (rest lines)))))
         :body)))
 
-;
+(comment
+  (some? nil)
+
+  (doc-block->test-body (string/join "\n" [";; =stdout=>"
+                                           ";; b"
+                                           ";; c"
+                                           ";; =stderr=>"
+                                           ";; foo"]))
+
+
+  )
+
+;;
 ;; Generating test files
 ;;
 

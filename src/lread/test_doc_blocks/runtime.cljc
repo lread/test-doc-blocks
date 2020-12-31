@@ -4,6 +4,8 @@
             #?(:clj [clojure.test]
                :cljs [cljs.test :include-macros true])))
 
+
+
 (defn cljs-env?
   "Take the &env from a macro, and tell whether we are expanding into cljs."
   [env]
@@ -15,8 +17,30 @@
   [then else]
   (if (cljs-env? &env) then else))
 
+
+(defmacro with-err-str-clj
+  "Analog to with-out-str, just for *err*: https://clojuredocs.org/clojure.core/with-out-str"
+  [& body]
+  `(let [s# (new java.io.StringWriter)]
+     (binding [*err* s#]
+       ~@body
+       (str s#))))
+
+(defmacro with-err-str-cljs
+  [& body]
+  `(let [sb# (goog.string/StringBuffer.)]
+     (binding [cljs.core/*print-newline* true
+               cljs.core/*print-err-fn* (fn [x#] (.append sb# x#))]
+       ~@body)
+     (cljs.core/str sb#)))
+
+(defmacro with-err-str [& body]
+  `(if-cljs
+     (with-err-str-cljs ~@body)
+     (with-err-str-clj ~@body)))
+
 (defn- assertion-token? [t]
-  (some #{t} '(=> =stdout=> =clj=> =cljs=>)))
+  (some #{t} '(=> =stderr=> =stdout=> =clj=> =cljs=>)))
 
 (defn- parse-testing-block-forms
   "Given a series of Clojure forms returns a vector of maps describing test:
@@ -33,7 +57,8 @@
   - =>
   - =clj=>
   - =cljs=>
-  - =stdout=>"
+  - =stdout=>
+  - =stderr=>"
   [forms]
   (loop [acc []
          [f1 f2 f3 & more :as forms] forms]
@@ -63,6 +88,15 @@
           :else
           (recur (conj acc {:type :passthrough :form f1}) (rest forms)))))
 
+(comment
+  (parse-testing-block-forms '(a => b
+                                 => c
+                                 =clj=> d
+                                 =stdout=> foo
+                                 =stderr=> moof))
+
+  )
+
 (defmacro is [form]
   `(if-cljs
      (cljs.test/is ~form)
@@ -84,12 +118,13 @@
               :passthrough (conj acc (:form t))
               :assertion (let [a (:actual t)
                                assertions (->> (for [[etype e] (select-keys(:expected t)
-                                                                           ['=> '=clj=> '=cljs=> '=stdout=>])]
+                                                                           ['=> '=clj=> '=cljs=> '=stdout=> '=stderr=>])]
                                                  (case etype
                                                    => `(is (~'= ~e (~'pr-str ~a)))
                                                    =clj=> `(if-cljs nil (is (~'= ~e (~'pr-str ~a))))
                                                    =cljs=> `(if-cljs (is (~'= ~e (~'pr-str ~a))) nil)
-                                                   =stdout=> `(is (~'= ~e (str/split-lines (~'with-out-str ~a))))))
+                                                   =stdout=> `(is (~'= ~e (str/split-lines (~'with-out-str ~a))))
+                                                   =stderr=> `(is (~'= ~e (str/split-lines (with-err-str ~a))))))
                                                (keep identity))]
                            (apply conj acc assertions))))
           []

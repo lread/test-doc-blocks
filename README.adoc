@@ -130,6 +130,7 @@ Keep that the location mind to when figuring out where to point your test runner
 
 Some current limitations that we might entertain addressing:
 
+* I'm initially coming at this from a cljc project and that bias will show and might not be appropriate for your project.
 * If your code block depends on some external setup, we've no way to express that.
 * Test-doc-blocks will automatically handle inline `(requires ...)` appearing in code blocks, but only in their simplest form.
 * Parsing adoc and md files is on the naive side but should handle most common cases.
