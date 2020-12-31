@@ -76,6 +76,9 @@ And might be a good general continuation?
 ;      :c 3}
 ----
 
+* currently generating on deftest and multiple testings per test-ns,
+** but might want to allow of attaching of metadata to code block test and that would mean one deftest per test block
+** because.. that is how test runners select and omit tests.
 * I was heavily influenced by the readme project, but now that I am aware of it, will have a look at the testdoc project.
 * do I handle/ignore trailing whitespace?
 * to allow for libs that override pr (rewrite-clj for example), I now compare `(= (str expected) (pr-str actual))`

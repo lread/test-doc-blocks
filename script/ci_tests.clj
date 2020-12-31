@@ -37,9 +37,10 @@
   (env/assert-min-versions)
   (clean)
   (lint)
-  (integration-tests)
   (generate-tests)
   (run-generated-tests)
+  (integration-tests)
+  (println "ci tests all done")
   nil)
 
 (main)
