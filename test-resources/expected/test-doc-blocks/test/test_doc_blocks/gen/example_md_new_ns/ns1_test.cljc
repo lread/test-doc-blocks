@@ -5,7 +5,7 @@
 
 (deftest-doc-blocks
 
-(testing-block  "doc/example.md - Specifying Test Namespace - line 96"
+(testing-block  "doc/example.md - Specifying Test Namespace - line 113"
 ;; this code block will generate tests under example-md-new-ns.ns1-test
 
 
@@ -14,20 +14,20 @@
 =>"\"1, 2, 3\""
 )
 
-(testing-block  "doc/example.md - Section Titles - line 113"
+(testing-block  "doc/example.md - Section Titles - line 130"
 
 
 (string/join "!" ["well" "how" "about" "that"])
 =>"\"well!how!about!that\""
 )
 
-(testing-block  "doc/example.md - Indented Blocks - line 128"
+(testing-block  "doc/example.md - Indented Blocks - line 145"
 ;; we handle simple cases a-OK.
 user=> (+ 1 2 3)
 "6"
 )
 
-(testing-block  "doc/example.md - Indented Blocks - line 136"
+(testing-block  "doc/example.md - Indented Blocks - line 153"
 ;; we handle indented wrapped strings just fine
 (def s "my
 goodness

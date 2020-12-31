@@ -6,7 +6,7 @@
 
 (deftest-doc-blocks
 
-(testing-block  "doc/example.adoc - Specifying Test Namespace - line 109"
+(testing-block  "doc/example.adoc - Specifying Test Namespace - line 124"
 ;; this code block will generate tests under example-adoc-new-ns.ns1-test
 
 
@@ -15,14 +15,14 @@
 =>"\"1, 2, 3\""
 )
 
-(testing-block  "doc/example.adoc - Section Titles - line 145"
+(testing-block  "doc/example.adoc - Section Titles - line 160"
 
 
 (string/join "!" ["well" "how" "about" "that"])
 =>"\"well!how!about!that\""
 )
 
-(testing-block  "doc/example.adoc - Support for CommonMark Code BlockSyntax - line 161"
+(testing-block  "doc/example.adoc - Support for CommonMark Code BlockSyntax - line 176"
 
 
 (set/map-invert {:a 1 :b 2})

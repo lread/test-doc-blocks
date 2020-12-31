@@ -30,7 +30,24 @@ Assertions are automatically generated for:
    ;; =stdout=>
    ;; is this right?
    ;; or not?
-   
+ 
+   ;; sometimes we might care about evaluated result, stderr and stdout
+   ;; TODO: reader conditionals makes this example awkward
+   (do
+     (println "To out I go")
+     #?(:clj
+        (binding [*out* *err*]
+          (println "To err is human"))
+        :cljs
+        (binding [*print-fn* *print-err-fn*]
+          (println "To err is human")))
+     (* 9 9))
+   ;; => 81
+   ;; =stderr=>
+   ;; To err is human
+   ;; =stdout=>
+   ;; To out I go
+ 
    ;; finish your stdout block with an empty or non-comment line
    ```
 

@@ -97,7 +97,7 @@ Maybe:
 
 Initial concept. Currently being used to test doc blocks in rewrite-cljc.
 
-* Can consider alpha.
+* Alpha, this might not be a good general idea, but might work well for some projects.
 * No release to clojars yet.
 * Feedback welcome.
 
@@ -197,6 +197,9 @@ If your code or headings are expressed in HTML, we won't find them.
 
 Here are other options and related projects that I am currently aware of:
 
+* https://github.com/lambdaisland/kaocha[kaocha] - Koacha includes cucumber tests in its documentation.
+A feature document describes the feature and includes given, when, then scenarios that are both run and show in documentation.
+Gritty details can be hidden in step definitions.
 * https://github.com/seancorfield/readme[readme] - Generates tests for code blocks found in .md files and then runs them.
 * https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
 * https://github.com/sogaiu/alc.x-as-tests[alc.x-as-tests] - Runs code in `(comment ...)` blocks as tests.

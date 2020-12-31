@@ -36,6 +36,7 @@ user=> (+ 1 2 3)
 ;; or not?
 
 ;; sometimes we might care about evaluated result, stderr and stdout
+;; TODO: reader conditionals makes this example awkward
 (do
   (println "To out I go")
   #?(:clj

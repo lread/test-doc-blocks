@@ -4,7 +4,7 @@
 
 (deftest-doc-blocks
 
-(testing-block  "doc/example.md - Specifying Test Namespace - line 79"
+(testing-block  "doc/example.md - Specifying Test Namespace - line 96"
 ;; this code block will generate tests under example-md-new-ns-test
 
 user=> (* 2 4)

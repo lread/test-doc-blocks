@@ -4,7 +4,7 @@
 
 (deftest-doc-blocks
 
-(testing-block  "README.adoc - Usage - line 91"
+(testing-block  "README.adoc - Usage - line 141"
 user=> (/ 714 17)
 "42"
 ))
