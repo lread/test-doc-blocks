@@ -27,8 +27,19 @@
       (str ".cljc")))
 
 (defn- testing-text [{:keys [doc-filename header line-no]}]
-  (string/join " - " (keep identity [doc-filename header (str "line " line-no)])))
+  (string/join " - " (keep identity [doc-filename header line-no])))
 
+(defn- expand-refs [refs]
+  {:common (-> refs :common vec sort)
+   :reader-cond (->> (dissoc refs :common)
+                     (map (fn [[k v]] [k v]))
+                     (sort-by first)
+                     (mapcat (fn [[platform elems]] (concat [platform] (sort-by str elems)))))})
+
+
+(defn- str-reader-cond [l]
+  (when l
+    [(str "#?(" (string/join " " (map str l)) ")")]))
 
 (defn- write-tests
   "Write out `tests` to test namespace `test-ns` under dir `target-root`"
@@ -36,13 +47,23 @@
   (let [ns-name (str "test-doc-blocks.gen" "." test-ns)
         test-fname (io/file target-root (fname-for-ns ns-name))
         test-doc-blocks-refs ["#?(:clj [lread.test-doc-blocks.runtime :refer [deftest-doc-blocks testing-block]]"
-                              "   :cljs [lread.test-doc-blocks.runtime :refer-macros [deftest-doc-blocks testing-block]])"]]
+                              "   :cljs [lread.test-doc-blocks.runtime :refer-macros [deftest-doc-blocks testing-block]])"]
+        requires (expand-refs (:requires ns-refs))
+        imports (expand-refs (:imports ns-refs))]
     (io/make-parents test-fname)
     (spit test-fname
           (str "(ns " ns-name  "\n"
-               "  (:require " (-> (into [] ns-refs)
-                                  (into test-doc-blocks-refs)
-                                  (->> (string/join "\n            "))) "))\n"
+               "  (:require " (->> []
+                                   (into (:common requires))
+                                   (into (str-reader-cond (:reader-cond requires)))
+                                   (into test-doc-blocks-refs)
+                                   (string/join "\n            ")) ")"
+               (when (or (seq (:common imports)) (seq (:reader-cond imports)))
+                 (str "\n  (:import " (->> []
+                                         (into (:common imports))
+                                         (into (str-reader-cond (:reader-cond imports)))
+                                         (string/join "\n    ")) ")"))
+               ")\n"
                "\n"
                "(deftest-doc-blocks\n"
                "\n"
@@ -94,9 +115,10 @@
 
 (comment
   (gen-tests {:target-root "./target/"
-              :docs ["README.adoc"
-                     "doc/example.md"
-                     "doc/example.adoc"]})
+              :docs ["doc/erp.adoc"
+                     #_"README.adoc"
+                     #_"doc/example.md"
+                     #_"doc/example.adoc"]})
 
   (gen-tests {:docs ["README.adoc"]})
 

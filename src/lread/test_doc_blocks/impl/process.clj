@@ -1,38 +1,12 @@
 (ns lread.test-doc-blocks.impl.process
-  (:require [clojure.edn :as edn]
-            [clojure.string :as string]))
+  (:require [clojure.string :as string]
+            [lread.test-doc-blocks.impl.amalg-ns :as amalg-ns]
+            [lread.test-doc-blocks.impl.inline-ns :as inline-ns]))
 
 ;;
 ;; Post parse
 ;;
 
-(defn- yank-requires
-  ;; TODO: does 2 things, maybe should only do 1
-  "Returns map where `:block-text` is `s` without any `(require ...)` and `:requires` is a vector of strings of each yanked `(require ...)`.
-
-  Warning: Super naive for now.
-  No handling of parens that maybe nested, in string or comments, etc."
-  [s]
-  (loop [new-s ""
-         yanked []
-         pos 0]
-    (let [start (or (string/index-of s "(require " pos)
-                    (string/index-of s "(require\n" pos))
-          end (string/index-of s ")" pos)]
-      (if (and start end)
-        (recur (str new-s (subs s pos start))
-               (conj yanked (subs s start (inc end)))
-               (inc end))
-        {:block-text (str new-s (subs s pos))
-         :requires yanked}))))
-
-(defn- extract-ns-refs
-  "Returns unique set of namespace refs (the vectors) from a sequence of `(require ..)` strings."
-  [requires]
-  (->> requires
-       (map edn/read-string)
-       (mapcat rest)
-       (filter vector?)))
 
 (defn- block-text->test-body
   "Convert doc block to something suitable for test body.
@@ -51,11 +25,7 @@
   ;; => expected
   becomes:
   actual
-  => expected
-
-  And expected gets wrapped in a string so that it can be compared:
-  (= expected (pr-str actual)).
-  It also stringifies potentially illegal Clojure."
+  => expected "
   [block-text]
   (let [re-out-continue #"^\s*;;(?:\s*$| (.*))"
         re-repl-style-actual #"^\s*(user=>).*"
@@ -103,14 +73,14 @@
               ;; expected
               (= "user=>" assert-token)
               (recur (-> acc
-                         (update :body str (str line "\n" (pr-str (string/trim line-next)) "\n")))
+                         (update :body str (str line "\n" (string/trim line-next) "\n")))
                      more)
 
               ;; editor style evaluation expectation:
               ;; actual
               ;; ;;=> expected
               assert-token
-              (recur (update acc :body str (str assert-token (pr-str payload) "\n"))
+              (recur (update acc :body str (str assert-token " " payload "\n"))
                      (rest lines))
 
               ;; other lines
@@ -119,12 +89,9 @@
                      (rest lines)))))
         :body)))
 
-(defn- amalgamate-ns-refs [tests]
-  (->> tests
-       (mapcat :requires-ns-refs)
-       sort
-       distinct
-       (into [])))
+(defn- amalg-ns-refs [tests]
+  {:imports (amalg-ns/amalg-imports (mapcat #(get-in % [:ns-forms :imports]) tests))
+   :requires (amalg-ns/amalg-requires (mapcat #(get-in % [:ns-forms :requires]) tests))})
 
 (defn convert-to-tests
   "Takes parsed input [{block}...] and preps for output to
@@ -134,8 +101,8 @@
         [parsed]
         (->> parsed
              (remove :test-doc-blocks/skip)
-             (map #(merge % (yank-requires (:block-text %))))
-             (map #(assoc % :requires-ns-refs (extract-ns-refs (:requires %))))
+             (map #(assoc % :ns-forms (inline-ns/find-forms (:block-text %))))
+             (map #(update % :block-text inline-ns/remove-forms))
              (map #(assoc % :test-body (block-text->test-body (:block-text %))))
              ;; TODO: I guess I should read the test-ns as strs in first place
              (map #(update % :test-doc-blocks/test-ns str))
@@ -143,4 +110,4 @@
              (group-by :test-doc-blocks/test-ns)
              (into [])
              (map #(zipmap [:test-ns :tests] %))
-             (map #(assoc % :ns-refs (amalgamate-ns-refs (:tests %))))))
+             (map #(assoc % :ns-refs (amalg-ns-refs (:tests %))))))
