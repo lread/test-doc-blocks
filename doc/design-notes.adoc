@@ -1,6 +1,41 @@
 = Design Notes
 :toc:
 
+== 2021-Jan
+
+After playing with my December experiment, I decided to take an alternate approach.
+I no longer use macros to parse and run tests at test runtime.
+I instead convert REPL assertions to deftest assertions a test generation time.
+
+The disadvantage is that the generated tests look less like the original doc code blocks.
+
+Advantages are:
+
+1. I can freely bring in useful dependencies to help with the test generation.
+So far I am experimenting with clojure.tools.reader and rewrite-cljc.
+2. The generated tests look like normal clojure tests and can be easily reasoned about without studying a custom macros.
+
+Other changes:
+
+* I was prefixing generated test namespaces with `test-doc-blocks.gen`.
+The idea was to provide isolation from other code.
+Since the test-ns is under the control of the author (with the default being based on the doc filename), this perhaps presumptuous.
+* I had some primitive support for bringing up inline ``require``s into the ns declaration (to support ClojureScript).
+It is still primitive, but now I also support bringing up inline ``import``s into the ns declaration.
+And do some recognizing of these elements when they, or parts of their bodies are wrapped in reader conditionals.
+* Although I liked having one `deftest` with multiple ``testing``s, because it made for good looking test reports,
+I decided to only have one `testing` per `deftest`.
+This will allow for tagging of individual code blocks with metadata, which can then in turn be used by test runners.
+
+Still to ponder:
+
+* I'm fine with test generation including whatever deps make sense.
+But I'd like test runtime to be truly free of any imposed deps including test-doc-blocks.
+I have one macro remaining.
+Perhaps I'll just copy of this ns at test generation time.
+* Add metadata feature I mentioned above
+* Allow a code block to target .clj or .cljs, currently only spitting to .cljc.
+
 == 2020-Dec
 
 === Initial Thoughts

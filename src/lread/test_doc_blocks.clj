@@ -26,8 +26,8 @@
       (string/replace "." "/")
       (str ".cljc")))
 
-(defn- testing-text [{:keys [doc-filename header line-no]}]
-  (string/join " - " (keep identity [doc-filename header line-no])))
+(defn- testing-text [{:keys [doc-filename line-no header]}]
+  (string/join " - " (keep identity [doc-filename (str "line " line-no) header])))
 
 (defn- expand-refs [refs]
   {:common (-> refs :common vec sort)
@@ -38,49 +38,52 @@
 
 
 (defn- str-reader-cond [l]
-  (when l
+  (when (seq l)
     [(str "#?(" (string/join " " (map str l)) ")")]))
+
+(defn- ns-declaration [test-ns {:keys [requires imports] :as _ns-ref} ]
+  (let [test-doc-blocks-refs ['clojure.test
+                              'clojure.string
+                              "#?(:cljs [lread.test-doc-blocks.runtime :include-macros])"
+                              "#?(:clj lread.test-doc-blocks.runtime)"]
+        requires (expand-refs requires)
+        imports (expand-refs imports)]
+    (str "(ns " test-ns  "\n"
+         "  (:require " (->> []
+                             (into (:common requires))
+                             (into (str-reader-cond (:reader-cond requires)))
+                             (into test-doc-blocks-refs)
+                             (string/join "\n            ")) ")"
+         (when (or (seq (:common imports)) (seq (:reader-cond imports)))
+           (str "\n  (:import " (->> []
+                                     (into (:common imports))
+                                     (into (str-reader-cond (:reader-cond imports)))
+                                     (string/join "\n    ")) ")"))
+         ")\n")))
+
+(defn- test-defs [tests]
+  (str (->> (reduce (fn [acc t]
+                      (conj acc (str
+                                 "(clojure.test/deftest block-" (inc (count acc)) "\n"
+                                 "  (clojure.test/testing " " \"" (testing-text t) "\"\n"
+                                 (:test-body t) "))")))
+                    []
+                    tests)
+            (string/join "\n\n"))))
 
 (defn- write-tests
   "Write out `tests` to test namespace `test-ns` under dir `target-root`"
   [target-root {:keys [test-ns ns-refs tests]}]
-  (let [ns-name (str "test-doc-blocks.gen" "." test-ns)
-        test-fname (io/file target-root (fname-for-ns ns-name))
-        test-doc-blocks-refs ["#?(:clj [lread.test-doc-blocks.runtime :refer [deftest-doc-blocks testing-block]]"
-                              "   :cljs [lread.test-doc-blocks.runtime :refer-macros [deftest-doc-blocks testing-block]])"]
-        requires (expand-refs (:requires ns-refs))
-        imports (expand-refs (:imports ns-refs))]
+  (let [test-fname (io/file target-root (fname-for-ns test-ns))]
     (io/make-parents test-fname)
-    (spit test-fname
-          (str "(ns " ns-name  "\n"
-               "  (:require " (->> []
-                                   (into (:common requires))
-                                   (into (str-reader-cond (:reader-cond requires)))
-                                   (into test-doc-blocks-refs)
-                                   (string/join "\n            ")) ")"
-               (when (or (seq (:common imports)) (seq (:reader-cond imports)))
-                 (str "\n  (:import " (->> []
-                                         (into (:common imports))
-                                         (into (str-reader-cond (:reader-cond imports)))
-                                         (string/join "\n    ")) ")"))
-               ")\n"
-               "\n"
-               "(deftest-doc-blocks\n"
-               "\n"
-               (->> (reduce (fn [acc t]
-                              (conj acc (str
-                                         "(testing-block " " \"" (testing-text t) "\"\n"
-                                         (:test-body t) ")")))
-                            []
-                            tests)
-                    (string/join "\n\n"))
-               ")\n"))))
+    (spit test-fname (str (ns-declaration test-ns ns-refs) "\n"
+                          (test-defs tests)))))
 
 (defn- print-table [parsed]
   (clojure.pprint/print-table [:doc-filename :line-no :header :test-doc-blocks/test-ns]
                               parsed))
 
-(defn- report-found [parsed]
+(defn- report-on-found [parsed]
   (println "Will generate tests for Clojure doc blocks:")
   (print-table (remove :test-doc-blocks/skip parsed))
   (when (some :test-doc-blocks/skip parsed)
@@ -105,7 +108,7 @@
       (delete-dir target-root))
     (let [target-root (str (io/file target-root "test"))
           parsed (mapcat parse/parse-doc-code-blocks docs)]
-     (report-found parsed)
+     (report-on-found parsed)
      (println "\nGenerating tests to:" target-root)
       (->> parsed
            (process/convert-to-tests)
@@ -116,9 +119,9 @@
 (comment
   (gen-tests {:target-root "./target/"
               :docs ["doc/erp.adoc"
-                     #_"README.adoc"
-                     #_"doc/example.md"
-                     #_"doc/example.adoc"]})
+                     "README.adoc"
+                     "doc/example.md"
+                     "doc/example.adoc"]})
 
   (gen-tests {:docs ["README.adoc"]})
 
