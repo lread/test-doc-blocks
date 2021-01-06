@@ -1,0 +1,88 @@
+(ns lread.test-doc-blocks.impl.body-prep
+  (:require [clojure.string :as string]))
+
+(defn prep-block-for-conversion-to-test
+  "Convert doc block to Clojure that can be more easily parsed.
+
+  We uncomment editor style assertions converting stdout and stderr style.
+
+  Example 1:
+
+    actual
+    ;; => expected
+
+   becomes:
+
+    actual
+    => expected
+
+  Example 2:
+
+    ;; =stdout=>           ;; =stdout=> line1
+    ; line1           OR   ; line2
+    ; line2
+
+   becomes:
+
+    =stdout=> [\"line1\" \"line2\"]
+  "
+  [block-text]
+  (let [re-editor-style-out-expected #"^\s*(?:;;\s*){0,1}(=stdout=>|=stderr=>)(?:\s*$| (.*))"
+        re-out-continue #"^\s*;(?:\s*$| (.*))"
+        re-editor-style-expected #"^\s*(?:;;\s*){0,1}(=clj=>|=cljs=>|=>)\s*(.*$)"]
+    (-> (loop [acc {:body ""}
+               [line :as lines] (string/split block-text #"\n")]
+          (let [[_ assert-token payload] (when line
+                                           (or (re-matches re-editor-style-expected line)
+                                               (re-matches re-editor-style-out-expected line)))]
+            (cond
+              ;; out expectation ends
+              (and (:out acc) (or (not line)
+                                  assert-token
+                                  (not (re-matches re-out-continue line))
+                                  (re-matches re-editor-style-expected line)))
+              (recur (-> acc
+                         (update :body str (str (:out-token acc) " "
+                                                (str (conj (:out acc)) "\n")))
+                         (dissoc :out :out-token))
+                     lines)
+
+              ;; all done?
+              (not line)
+              acc
+
+              ;; collecting stdout/stderr expectation
+              (and (:out acc)
+                   (not assert-token)
+                   (re-matches re-out-continue line))
+              (let [[_ out-line] (re-matches re-out-continue line)]
+                (recur (update acc :out conj (or out-line ""))
+                       (rest lines)))
+
+              ;; out expectation starts
+              (or (= "=stdout=>" assert-token)
+                  (= "=stderr=>" assert-token))
+              (recur (assoc acc
+                            :out (if payload [payload] [])
+                            :out-token assert-token)
+                     (rest lines))
+
+              ;; editor style evaluation expectation:
+              ;; actual
+              ;; ;;=> expected
+              assert-token
+              (recur (update acc :body str (str assert-token " " payload "\n"))
+                     (rest lines))
+
+              ;; other lines
+              :else
+              (recur (update acc :body str (str line "\n"))
+                     (rest lines)))))
+        :body)))
+
+
+(comment
+  (prep-block-for-conversion-to-test ";; =stdout=> line1")
+
+
+  )

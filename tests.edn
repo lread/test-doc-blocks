@@ -1,8 +1,12 @@
 ;; koacha config for clj testing
 #kaocha/v1
 {:plugins [:kaocha.plugin/hooks]
- :tests [{:id :integration
-          :test-paths ["test"]}
+ :tests [{:id :unit
+          :test-paths ["test"]
+          :skip-meta [:integration]}
+         {:id :integration
+          :test-paths ["test"]
+          :focus-meta [:integration]}
          {:id :generated
           :test-paths  ["target/test-doc-blocks/test"]
           :kaocha.hooks/post-load-test [lread.test-doc-blocks.kaocha.hooks/fail-on-no-tests-found]}]

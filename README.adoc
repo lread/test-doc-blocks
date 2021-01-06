@@ -34,78 +34,54 @@ I wanted to make sure the code examples I provided in rewrite-cljc documentation
 
 Test-doc-blocks might (or might not, see link:#limitations[limitations], and link:#other-options[other options]) be of interest for your Clojure project too.
 
-== Immediate TODOS
+If your example code blocks are REPL style:
 
-* Change stderr stdout to (?):
-+
-[source,asciidoctor]
+//:test-doc-blocks/skip
+[source,clojure]
 ----
-;; =stdout=> line 1
-;; =stdout=> line 2
-;; =stdout=> line 3
-;; =stderr=> line 1
-;; =stderr=> line 2
-;; =stderr=> line 3
+user=> (* 6 7)
+42
+----
 
-This should also allow intermingly of stdout and stderr, if that's beneficial to doc author:
-;; =stdout=> line 1
-;; =stderr=> line 1
-;; =stderr=> line 2
-;; =stdout=> line 2
-;; =stdout=> line 3
-;; =stderr=> line 3
+Or editor style:
 
-I argued that the reader might get confused if we used a shorter form but, my eye has an easier time of distinguishing here:
-;; =out=> line 1
-;; =err=> line 1
-;; =err=> line 2
-;; =out=> line 2
-;; =out=> line 3
-;; =err=> line 3
+//:test-doc-blocks/skip
+[source,clojure]
+----
+(* 6 7)
+;; => 42
+----
 
-All of this is a bit hard on the eyes, to me anyway, so consider:
+And don't rely on any special unspecified setup, then test-doc-blocks might work for your project too.
 
-;; =stdout=>
-; line 1
-; line 2
-; line 3
-;; =stderr=>
-; line 1
-; line 2
-; line 3
-
-A single semicolon for output allows for expecting our special tokens in output
-
-;; =stdout=>
-; =stdout=>
+== Immediate TODOS
 
 And might be a good general continuation?
 
+* allow for no imposed deps (including test-doc-blocks) for generated tests
+* allow metadata to be attached to generated tests which can then in turn be used by test runners
+* allow test to target .clj or cljs file.. currently targetting cljc only
+* turf unused script helpers I pasted in from rewrite-cljc
+
+Maybe:
+
+* bring in battle tested parsers for docs? asciidoctorj, flexmark
+* might be nice to offer to validate edn snippits are readable?
+* tests are integration only and super brittle but that's ok for now
+* consider supporting expressing stdout and stderr as they might naturally be output, they would still bec compared as single blocks, but this might better represent a visual output flow.
+** stderr line1
+** stdout line1
+** stderr line2
+** etc..
+* Consider supporting continuations on expectations for readability? Maybe something like?
+//:test-doc-blocks/skip
++
+[source,clojure]
+----
 ;; => {:a 1
 ;      :b 2
 ;      :c 3}
 ----
-
-* currently generating on deftest and multiple testings per test-ns,
-** but might want to allow of attaching of metadata to code block test and that would mean one deftest per test block
-** because.. that is how test runners select and omit tests.
-* I was heavily influenced by the readme project, but now that I am aware of it, will have a look at the testdoc project.
-* do I handle/ignore trailing whitespace?
-* to allow for libs that override pr (rewrite-clj for example), I now compare `(= (str expected) (pr-str actual))`
-** but... this may not always work for items where order is not guaranteed, ex sets and maps.
-* turf unused script helpers I pasted in from rewrite-cljc
-* not relying on test-doc-blocks after test generation would be simpler for user, so maybe reconsider NOT using macros at runtime.
-** If I bring in rewrite-cljc for rewriting, does this mean I should bring in proper parsers for docs?
-
-From feedback:
-
-* show example with stdout, stderr ad expected eval result
-* any way to format expected result nicely to multiple lines?
-
-Maybe:
-
-* might be nice to offer to validate edn snippits are readable?
-* tests are integration only and super brittle but that's ok for now
 
 == Usage
 
@@ -188,11 +164,11 @@ Some current limitations that we might entertain addressing:
 
 * I'm initially coming at this from a cljc project and that bias will show and might not be appropriate for your project.
 * If your code block depends on some external setup, we've no way to express that.
-* Test-doc-blocks will automatically handle inline `(requires ...)` appearing in code blocks, but only in their simplest form.
+* Test-doc-blocks will automatically handle inline `(require ...)` and `(import ...)` appearing in code blocks, but not in any complex expressions of these forms.
 * Parsing adoc and md files is on the naive side but should handle most common cases.
 If we've overlooked a common syntax, let us know.
 
-And some we have no current plans to address:
+Some limitations we have no current plans to address:
 
 * Code blocks using `ns` or `in-ns` will not work with test-doc-blocks.
 * It is possible to embed HTML into your docs.

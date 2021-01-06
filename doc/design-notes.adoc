@@ -3,6 +3,8 @@
 
 == 2021-Jan
 
+=== Thoughts and Ramblings
+
 After playing with my December experiment, I decided to take an alternate approach.
 I no longer use macros to parse and run tests at test runtime.
 I instead convert REPL assertions to deftest assertions a test generation time.
@@ -17,6 +19,8 @@ So far I am experimenting with clojure.tools.reader and rewrite-cljc.
 
 Other changes:
 
+* No longer trying to automatically handle violaters of pr (like rewrite-clj).
+The work-around is to spit output to stdout and use =stdout=> assertion.
 * I was prefixing generated test namespaces with `test-doc-blocks.gen`.
 The idea was to provide isolation from other code.
 Since the test-ns is under the control of the author (with the default being based on the doc filename), this perhaps presumptuous.
@@ -26,6 +30,16 @@ And do some recognizing of these elements when they, or parts of their bodies ar
 * Although I liked having one `deftest` with multiple ``testing``s, because it made for good looking test reports,
 I decided to only have one `testing` per `deftest`.
 This will allow for tagging of individual code blocks with metadata, which can then in turn be used by test runners.
+* =stdout=> and =stderr=> continuation is now single ; rather than ;;.
+This allows us to distinguish output from assertion tokens so we can have things like:
++
+[source,clojure]
+----
+(println "oh my\n;; =>")
+;; =stdout=>
+; oh my
+; ;; =>
+----
 
 Still to ponder:
 
@@ -35,6 +49,15 @@ I have one macro remaining.
 Perhaps I'll just copy of this ns at test generation time.
 * Add metadata feature I mentioned above
 * Allow a code block to target .clj or .cljs, currently only spitting to .cljc.
+
+=== Feedback from community
+
+I think this might have been from last days of December but I'm only recording it now:
+
+@sogaiu Kindly mentioned that my original idea for stdout markers did not allow for the output to contain the marker. Oops!
+He also prefers 80 chars width so was suggesting using up as little horizontal screen real estate as possible.
+
+@pez Mentioned that stdout and stderr will be printed as they occur for a REPL flow. (I'm ignoring this observation for now).
 
 == 2020-Dec
 
@@ -143,11 +166,3 @@ Other
 
 * One person kindly warned me privately this project might be a bit of a rabbit hole.
 I see their point, but my main customer is rewrite-cljc, and it already found issues there, so I'll carry on.
-
-=== Ideas for later
-
-* Support code snippits that include `(requires ...)` under reader conditionals.
-
-* Currently generating tests to cljc. Ever any need for .cls or .clj?
-
-* Could include gen test delete workflow like Sean does. Maybe?

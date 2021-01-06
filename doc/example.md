@@ -26,11 +26,15 @@ Assertions are automatically generated for:
    ;; =cljs=> "C"
 
    ;; and verifies, when asked, to check what was written to stdout
+   (println "hey there!")
+   ;; stdout=> hey there!
+   
+   ;; multiple stdout lines can be verified like so (notice the single ;):
    (println "is this right?\nor not?")
    ;; =stdout=>
-   ;; is this right?
-   ;; or not?
- 
+   ; is this right?
+   ; or not?
+
    ;; sometimes we might care about evaluated result, stderr and stdout
    ;; TODO: reader conditionals makes this example awkward
    (do
@@ -43,12 +47,8 @@ Assertions are automatically generated for:
           (println "To err is human")))
      (* 9 9))
    ;; => 81
-   ;; =stderr=>
-   ;; To err is human
-   ;; =stdout=>
-   ;; To out I go
- 
-   ;; finish your stdout block with an empty or non-comment line
+   ;; =stderr=> To err is human
+   ;; =stdout=> To out I go
    ```
 
 Test-doc-blocks will plunk your code blocks into a test even when there are no assertions.
@@ -158,8 +158,25 @@ CommonMark syntax gives meaning to indented code blocks.
    
       (println s)
       ;; =stdout=>
-      ;; my
-      ;; goodness
-      ;; gracious
+      ; my
+      ; goodness
+      ; gracious
       ``` 
 
+# Nuances
+
+## When Libraries Override pr
+
+The REPL makes use of `pr` to output what it has evaluated.
+The `pr` docstring states:
+
+> By default, pr and prn print in a way that objects can be read by the reader
+
+Some libraries break this contract.
+For example, rewrite-clj overrides `pr` to display output for its nodes that is easily digestable by humans, but not at all digestable by Clojure.
+
+If `pr` has been overriden for your library, you have choices for test-doc-blocks:
+
+1. Skip the block (see inline options)
+2. Avoid REPL assertions that effect the overriden pr
+3. Have your code blocks include call `pr` on affected evaluations and use `=stdout=>` to compare for expected output.

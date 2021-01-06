@@ -12,6 +12,9 @@
        (= :token (z/tag (z/down zloc)))
        (= sym (z/sexpr (z/down zloc)))) )
 
+;; TODO: think about this: here were find top level forms that include lists starting with require or import
+;; the idea was to pick up reader conditonal wrapped requires and imports
+;; but those reader conditional may also contain other things
 (defn- inline-ns-of-interest? [sym]
   (fn pred? [zloc]
     (and (= 1 (zdepth zloc))
@@ -36,14 +39,21 @@
 
 
 
-(defn find-forms [block-text]
+(defn find-forms
+  "Returns map where `:requires` is a vector of inline `(require ...)` found in `block-text`
+  and `:imports` is a vector of inline `(import ...)` found in `block-text`.
+
+  We search a max depth of 1 deep to catch requires that are wrapped by reader conditionals."
+  [block-text]
   (let [zloc (z/of-string block-text)]
     {:requires (->> (find-ns-forms-of-interest zloc 'require)
                     (map z/string))
      :imports (->> (find-ns-forms-of-interest zloc 'import)
                    (map z/string))}))
 
-(defn remove-forms [block-text]
+(defn remove-forms
+  "Returns `block-text` with same inline elements found by [[find-forms]] removed."
+  [block-text]
   (-> block-text
       z/of-string
       (remove-ns-forms-of-interest 'require)

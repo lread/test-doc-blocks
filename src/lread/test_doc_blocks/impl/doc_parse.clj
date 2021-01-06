@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks.impl.parse
+(ns lread.test-doc-blocks.impl.doc-parse
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as string]))

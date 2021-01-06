@@ -16,9 +16,9 @@
 (defn lint[]
   (shell/command ["bb" "./script/lint.clj"]))
 
-(defn integration-tests []
-  (status/line :info "Running test-doc-blocks integration tests")
-  (shell/command ["clojure" "-M:test:kaocha" "integration" ]) )
+(defn unit-tests []
+  (status/line :info "Running test-doc-blocks unit tests")
+  (shell/command ["clojure" "-M:kaocha" "unit"]))
 
 (defn generate-tests []
   (shell/command ["bb" "./script/gen_local_tests.clj"]))
@@ -33,10 +33,15 @@
   (status/line :info "Running locally generated tests under ClojureScript via cljs-test-runner")
   (shell/command ["clojure" "-M:block-test:cljs-test-runner"]))
 
+(defn integration-tests []
+  (status/line :info "Running test-doc-blocks integration tests")
+  (shell/command ["clojure" "-M:test:kaocha" "integration" ]))
+
 (defn main[]
   (env/assert-min-versions)
   (clean)
   (lint)
+  (unit-tests)
   (generate-tests)
   (run-generated-tests)
   (integration-tests)

@@ -3,7 +3,7 @@
   (:require [clojure.java.io :as io]
             [clojure.pprint :as pprint]
             [clojure.string :as string]
-            [lread.test-doc-blocks.impl.parse :as parse]
+            [lread.test-doc-blocks.impl.doc-parse :as doc-parse]
             [lread.test-doc-blocks.impl.process :as process])
   (:import [java.nio.file Files]))
 
@@ -107,7 +107,7 @@
     (when (.exists (io/file target-root))
       (delete-dir target-root))
     (let [target-root (str (io/file target-root "test"))
-          parsed (mapcat parse/parse-doc-code-blocks docs)]
+          parsed (mapcat doc-parse/parse-doc-code-blocks docs)]
      (report-on-found parsed)
      (println "\nGenerating tests to:" target-root)
       (->> parsed

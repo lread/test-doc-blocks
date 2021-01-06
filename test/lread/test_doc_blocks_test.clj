@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks-test
+(ns ^:integration lread.test-doc-blocks-test
   (:require [clojure.java.io :as io]
             [clojure.string :as string]
             [clojure.test :refer [deftest is]]
@@ -14,8 +14,8 @@
                          "doc/example.md"]
                   :target-root "target/actual"})
 
-  (let [expected-dir "test-resources/expected/test-doc-blocks/test/test_doc_blocks/gen/"
-        actual-dir "target/actual/test-doc-blocks/test/test_doc_blocks/gen/"
+  (let [expected-dir "test-resources/expected/test-doc-blocks/test/"
+        actual-dir "target/actual/test-doc-blocks/test/"
         files (->> expected-dir
                    io/file
                    file-seq
