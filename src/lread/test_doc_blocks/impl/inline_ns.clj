@@ -1,11 +1,6 @@
 (ns lread.test-doc-blocks.impl.inline-ns
-  (:require [rewrite-cljc.zip :as z]))
-
-(defn- zdepth [zloc]
-  (->> (z/up zloc)
-       (iterate z/up)
-       (take-while identity)
-       count))
+  (:require [lread.test-doc-blocks.impl.zutil :as zutil]
+            [rewrite-cljc.zip :as z]))
 
 (defn- list-starting-with-sym? [zloc sym]
   (and (z/list? zloc)
@@ -17,7 +12,7 @@
 ;; but those reader conditional may also contain other things
 (defn- inline-ns-of-interest? [sym]
   (fn pred? [zloc]
-    (and (= 1 (zdepth zloc))
+    (and (= 1 (zutil/zdepth zloc))
          (z/find (z/subzip zloc)
                  z/next
                  #(list-starting-with-sym? % sym)))))
@@ -36,8 +31,6 @@
       z/edn*
       (z/prewalk (inline-ns-of-interest? sym)
                  (fn action [zloc] (z/remove zloc)))))
-
-
 
 (defn find-forms
   "Returns map where `:requires` is a vector of inline `(require ...)` found in `block-text`
