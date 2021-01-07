@@ -271,7 +271,7 @@ rewrite-cljc versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
 
 === Contributors
 
-* @seancorfield - code and idea is based on Sean's https://github.com/seancorfield/readme[readme] project.
+* @seancorfield - idea is based on Sean's https://github.com/seancorfield/readme[readme] project.
 * Helpful feedback and ideas from:
 ** @borkdude
 ** @sogaiu
@@ -289,4 +289,4 @@ Copyright © 2020 Lee Read, all rights reserved.
 
 Distributed under the EPL License, same as Clojure. See LICENSE.
 
-Code and concept based on @seancorfield's https://github.com/seancorfield/readme[readme] which is distributed under EPL v1.0 or later.
+Concept based on @seancorfield's https://github.com/seancorfield/readme[readme] which is distributed under EPL v1.0 or later.
