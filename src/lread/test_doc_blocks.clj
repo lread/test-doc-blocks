@@ -1,7 +1,7 @@
 (ns lread.test-doc-blocks
   "Parse code blocks from markdown and generate Clojure test code."
   (:require [clojure.java.io :as io]
-            [clojure.pprint :as pprint]
+            [doric.core :as doric]
             [lread.test-doc-blocks.impl.doc-parse :as doc-parse]
             [lread.test-doc-blocks.impl.process :as process]
             [lread.test-doc-blocks.impl.test-write :as test-write])
@@ -19,8 +19,11 @@
       (run! #(io/delete-file %) flist))))
 
 (defn- print-table [parsed]
-  (clojure.pprint/print-table [:doc-filename :line-no :header :test-doc-blocks/test-ns]
-                              parsed))
+  (println (doric/table [{:name :doc-filename             :align :left}
+                         {:name :line-no                  :align :right}
+                         {:name :header                   :align :left}
+                         {:name :test-doc-blocks/test-ns  :align :left}]
+                         parsed)))
 
 (defn- report-on-found [parsed]
   (println "Will generate tests for Clojure doc blocks:")
@@ -49,10 +52,10 @@
           parsed (mapcat doc-parse/parse-doc-code-blocks docs)]
      (report-on-found parsed)
      (println "\nGenerating tests to:" target-root)
-      (->> parsed
-           (process/convert-to-tests)
-           (run! #(test-write/write-tests target-root %)))
-      (println "Done"))))
+     (->> parsed
+          (process/convert-to-tests)
+          (run! #(test-write/write-tests target-root %)))
+     (println "Done"))))
 
 
 (comment
