@@ -33,7 +33,8 @@
            :isolated/cljs-test-runner {:replace-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}}
                                        :replace-paths ["target/test-doc-blocks/test"]
                                        :main-opts ["-m" "cljs-test-runner.main"
-                                          "--dir" "target/test-doc-blocks/test"]}
+                                                   "--compile-opts" "{:warnings,{:single-segment-namespace,false}}"
+                                                   "--dir" "target/test-doc-blocks/test"]}
 
            :isolated/clj-test-runner
            {:replace-deps {com.cognitect/test-runner
