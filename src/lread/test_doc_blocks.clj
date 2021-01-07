@@ -40,9 +40,6 @@
     (with-open [in (io/input-stream runtime-src)]
       (io/copy in runtime-target))))
 
-(comment
- )
-
 ;;
 ;; Entry points
 ;;
