@@ -32,6 +32,17 @@
     (println "\nAnd, as requested, skipping:")
     (print-table (filter :test-doc-blocks/skip parsed))))
 
+(defn copy-runtime [target-root]
+  (let [runtime-path "lread/test_doc_blocks/runtime.cljc"
+        runtime-src (io/resource runtime-path)
+        runtime-target (io/file target-root runtime-path)]
+    (io/make-parents runtime-target)
+    (with-open [in (io/input-stream runtime-src)]
+      (io/copy in runtime-target))))
+
+(comment
+ )
+
 ;;
 ;; Entry points
 ;;
@@ -55,6 +66,7 @@
      (->> parsed
           (process/convert-to-tests)
           (run! #(test-write/write-tests target-root %)))
+     (copy-runtime target-root)
      (println "Done"))))
 
 

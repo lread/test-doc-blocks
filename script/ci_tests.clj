@@ -25,17 +25,17 @@
 
 (defn run-generated-tests []
   (status/line :info "Running locally generated tests under Clojure via kaocha")
-  (shell/command ["clojure" "-M:block-test:kaocha" "generated"])
+  (shell/command ["clojure" "-M:isolated/kaocha" "generated"])
 
   (status/line :info "Running locally generated tests under Clojure via Clojure test-runner")
-  (shell/command ["clojure" "-M:block-test:clj-test-runner"])
+  (shell/command ["clojure" "-M:isolated/clj-test-runner"])
 
   (status/line :info "Running locally generated tests under ClojureScript via cljs-test-runner")
-  (shell/command ["clojure" "-M:block-test:cljs-test-runner"]))
+  (shell/command ["clojure" "-M:isolated/cljs-test-runner"]))
 
 (defn integration-tests []
   (status/line :info "Running test-doc-blocks integration tests")
-  (shell/command ["clojure" "-M:test:kaocha" "integration" ]))
+  (shell/command ["clojure" "-M:kaocha" "integration" ]))
 
 (defn main[]
   (env/assert-min-versions)

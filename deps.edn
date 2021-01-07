@@ -11,29 +11,35 @@
            :test-doc-blocks {:ns-default lread.test-doc-blocks
                              :exec-args {}}
 
-           ;; base test aliases
-           :test {:extra-paths ["test"]}
-           :block-test {:extra-paths ["target/test-doc-blocks/test"]}
-
            ;;
-           ;; Test runners
-           ;;
-           ;; Combine with :block-test for generated doc block tests.
-           ;; Note test-doc-block's unit tests are Clojure only and are to be run with :test.
+           ;; test runners for test-doc-blocks
            ;;
 
            ;; for kaocha see also tests.edn
            :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}
+                    :extra-paths ["test"]
                     :main-opts ["-m" "kaocha.runner"]}
 
-           :cljs-test-runner {:extra-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}}
-                              :main-opts ["-m" "cljs-test-runner.main"
+           ;;
+           ;; Test runners for generated tests
+           ;;
+           ;; Notice we are replacing deps and paths to verify that tests do not rely on test-doc-blocks or its deps
+
+           ;; for kaocha see also tests.edn
+           :isolated/kaocha {:replace-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}
+                             :replace-paths ["test"] ;; include test to bring in kaocha hook
+                             :main-opts ["-m" "kaocha.runner"]}
+
+           :isolated/cljs-test-runner {:replace-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}}
+                                       :replace-paths ["target/test-doc-blocks/test"]
+                                       :main-opts ["-m" "cljs-test-runner.main"
                                           "--dir" "target/test-doc-blocks/test"]}
 
-           :clj-test-runner
-           {:extra-deps {com.cognitect/test-runner
-                         {:git/url "https://github.com/cognitect-labs/test-runner"
-                          :sha "b6b3193fcc42659d7e46ecd1884a228993441182"}}
+           :isolated/clj-test-runner
+           {:replace-deps {com.cognitect/test-runner
+                           {:git/url "https://github.com/cognitect-labs/test-runner"
+                            :sha "b6b3193fcc42659d7e46ecd1884a228993441182"}}
+            :replace-paths ["target/test-doc-blocks/test"]
             :main-opts ["-m" "cognitect.test-runner"
                         "-d" "target/test-doc-blocks/test"]}
 
@@ -47,5 +53,4 @@
            ;;
            ;; Script deps
            ;;
-           :script {:extra-paths ["script"]}
-           }}
+           :script {:extra-paths ["script"]}}}

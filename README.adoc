@@ -56,9 +56,6 @@ And don't rely on any special unspecified setup, then test-doc-blocks might work
 
 == Immediate TODOS
 
-And might be a good general continuation?
-
-* allow for no imposed deps (including test-doc-blocks) for generated tests
 * allow metadata to be attached to generated tests which can then in turn be used by test runners
 * allow test to target .clj or cljs file.. currently targetting cljc only
 * turf unused script helpers I pasted in from rewrite-cljc
@@ -67,8 +64,8 @@ Maybe:
 
 * bring in battle tested parsers for docs? asciidoctorj, flexmark
 * might be nice to offer to validate edn snippits are readable?
-* tests are integration only and super brittle but that's ok for now
-* consider supporting expressing stdout and stderr as they might naturally be output, they would still bec compared as single blocks, but this might better represent a visual output flow.
+* integration test is super brittle but that's ok for now
+* consider supporting expressing stdout and stderr as they might naturally be output, they would still be compared as single blocks, but this might better represent a visual output flow.
 ** stderr line1
 ** stdout line1
 ** stderr line2
@@ -108,13 +105,12 @@ Any existing tests under `target/test-doc-blocks` will be replaced.
 You can then run the generated tests with the test runner of your choosing.
 Our link:deps.edn[deps.edn] has example aliases:
 
-* `:block-test` - base alias to include test-doc-blocks default generatation target dir
-* `:cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
-Invoke for this project via: `clj -M:block-test:cljs-test-runner`
-* `:kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
-Invoke for this project via: `clj -M:block-test:kaoacha generated`. Note also kaocha link:test.edn[test.edn] config.
-* `:clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
-Invoke for this project via: `clj -M:block-test:clj-test-runner`
+* `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
+Invoke for this project via: `clj -M:isolated/cljs-test-runner`
+* `:isolated/kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
+Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaocha link:test.edn[test.edn] config.
+* `:isolated/clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
+Invoke for this project via: `clj -M:isolated/clj-test-runner`
 
 When tests are run, the test-doc-blocks runtime will look for assertions in editor style and REPL style format.
 For example:
@@ -197,11 +193,17 @@ The example ClojureScript test runner does make use of https://nodejs.org[Node.j
 
 === Tests
 
+==== Unit
+[source,shell]
+----
+clojure -M:kaocha unit
+----
+
 ==== Integration
 Run integration test via:
 [source,shell]
 ----
-clojure -M:test:koacha integration
+clojure -M:koacha integration
 ----
 This will generate tests for README and example docs and then diff against a previously manually verified test run.
 The previously verified test run is stored under `test-resources/expected`.
@@ -214,7 +216,7 @@ When you are happy with current behaviour of generation of tests:
 bb script/gen_local_tests.clj regen-expected
 ----
 
-==== Manual
+==== Generated
 
 Generate tests for local docs via:
 [source,shell]
@@ -225,13 +227,13 @@ bb script/gen_local_tests.clj
 Run generated tests under Clojure via:
 [source,shell]
 ----
-clojure -M:block-test:kaocha generated
+clojure -M:isolated/kaocha generated
 ----
 
 And under ClojureScript via:
 [source,shell]
 ----
-clojure -M:block-test:cljs-test-runner
+clojure -M:isolated/cljs-test-runner
 ----
 
 ==== Continuous Integration
