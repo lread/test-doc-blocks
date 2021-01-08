@@ -22,8 +22,16 @@
              (map #(assoc % :test-body (test-body/to-test-body (:prepped-block-text %))))
              ;; TODO: I guess I should read the test-ns as strs in first place
              (map #(update % :test-doc-blocks/test-ns str))
-             (sort-by (juxt :test-doc-blocks/test-ns :doc-filename :line-no))
-             (group-by :test-doc-blocks/test-ns)
-             (into [])
-             (map #(zipmap [:test-ns :tests] %))
+             (sort-by (juxt :test-doc-blocks/test-ns :test-doc-blocks/platform :doc-filename :line-no))
+             (group-by (juxt :test-doc-blocks/test-ns :test-doc-blocks/platform))
+             (map (fn [[[test-ns platform] tests]] {:test-ns test-ns :platform platform :tests tests}))
              (map #(assoc % :ns-refs (amalg-ns-refs (:tests %))))))
+
+(comment
+  (->> (group-by (juxt :a :b) [{:a 1 :b 2 :c 3}
+                              {:a 1 :b 3 :c 4}
+                              {:a 2 :b 1 :c 5}])
+       (map (fn [[[test-ns platform] tests]] {:test-ns test-ns :platform platform :tests tests}))
+      )
+
+  )

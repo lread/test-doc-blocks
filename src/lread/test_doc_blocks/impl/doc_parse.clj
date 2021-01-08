@@ -30,7 +30,7 @@
       (str "-test")
       (string/lower-case)))
 
-(defn- adoc-parse-inline-opts
+(defn- parse-inline-opts
   "Parse inline test-doc-blocks options to map.
   Can be map or keyword.
   If keyword k returns {:k true} "
@@ -91,8 +91,8 @@
    <!-- :test-doc-blocks/boolean-opt -->"
   [{:keys [in-code-block? line] :as parse-state}]
   (when-not in-code-block?
-    (when-let [[_ sopts] (re-matches #"\s*<!--\s+(\{?\s*:test-doc-blocks/.*)\s+-->\s*$" line)]
-      {:opts (adoc-parse-inline-opts parse-state sopts)})))
+    (when-let [[_ sopts] (re-matches #"\s*<!--\s+(\{?\s*#?:test-doc-blocks.*)\s+-->\s*$" line)]
+      {:opts (parse-inline-opts parse-state sopts)})))
 
 ;; adoc (Asciidoctor parse support)
 
@@ -131,11 +131,12 @@
 (defn- adoc-opts
   "Test-doc-blocks opts are conveyed in comments:
    //{:test-doc-blocks/boolean-opt value}
-   //:test-doc-blocks/boolean-opt"
+   //:test-doc-blocks/boolean-opt
+   //#:test-doc-blocks{:my-opt1 val1 :my-opt2 val2}"
   [{:keys [in-code-block? line] :as parse-state}]
   (when-not in-code-block?
-    (when-let [[_ sopts] (re-matches #"//\s*(\{?\s*:test-doc-blocks.*)" line)]
-      {:opts (adoc-parse-inline-opts parse-state sopts)})))
+    (when-let [[_ sopts] (re-matches #"//\s*(\{?\s*#?:test-doc-blocks.*)" line)]
+      {:opts (parse-inline-opts parse-state sopts)})))
 
 (defn- code-block-end
   "End block regular expression is defined by block start"
@@ -194,12 +195,14 @@
   - :header - last header found before code block
   - :block-text - content of block in string "
   ;; TODO: close da damn reader
-  ([doc-filename] (parse-doc-code-blocks doc-filename (io/reader doc-filename)))
+  ([doc-filename platform]
+   (parse-doc-code-blocks doc-filename platform (io/reader doc-filename)))
   ;; this arity to support REPL testing via string reader
-  ([doc-filename rdr]
+  ([doc-filename platform rdr]
    (let [parsers (parsers-for doc-filename)]
      (loop [[line & lines] (line-seq rdr)
-            state {:opts {:test-doc-blocks/test-ns (test-ns-for-doc-file doc-filename)}
+            state {:default-opts {:test-doc-blocks/test-ns (test-ns-for-doc-file doc-filename)
+                                  :test-doc-blocks/platform platform}
                    :doc-filename doc-filename ;; unchanging but used for error reporting
                    :doc-line-no 1
                    :blocks []}]
@@ -215,10 +218,10 @@
                               state
                               (-> state
                                   (update :blocks conj (-> (:block state)
-                                                           (merge (:opts state))
+                                                           (merge (:default-opts state) (:next-block-opts state))
                                                            (assoc :header (:header state))
                                                            (assoc :doc-filename (:doc-filename state))))
-                                  (update :opts dissoc :test-doc-blocks/skip)
+                                  (dissoc :next-block-opts)
                                   (assoc :block {}))))
 
                           (and (:new-block? p))
@@ -240,7 +243,12 @@
                           (merge state p)
 
                           (:opts p)
-                          (update state :opts merge (:opts p))
+                          (let [opts (:opts p)
+                                apply-to (:test-doc-blocks/apply opts)
+                                opts (dissoc opts :test-doc-blocks/apply)]
+                            (if (= :all-next apply-to)
+                              (update state :default-opts merge opts)
+                              (update state :next-block-opts merge opts)))
 
                           :else
                           state))
@@ -251,11 +259,21 @@
          (:blocks state))))))
 
 (comment
-  (parse-doc-code-blocks "test.md" (io/reader (char-array
+  (parse-doc-code-blocks "test.adoc" :clj (io/reader (char-array
                                                (string/join "\n" ["# hey"
+                                                                  "//#:test-doc-blocks{:a 1 :b 2 :apply :subsequent}"
+                                                                  "   ```Clojure"
+                                                                  "   clj"
+                                                                  "    clj"
+                                                                  "```"
                                                                   ""
                                                                   "   ```Clojure"
                                                                   "   clj"
                                                                   "    clj"
-                                                                  "```"]))))
+                                                                  "```"
+                                                                  ""
+
+
+                                                                  ]))))
+
 )

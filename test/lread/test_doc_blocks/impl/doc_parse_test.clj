@@ -12,14 +12,15 @@
 
 (deftest parses-adoc
   (testing "no code blocks"
-    (is (= [] (sut/parse-doc-code-blocks "my-doc.adoc" (rdr [""])))))
+    (is (= [] (sut/parse-doc-code-blocks "my-doc.adoc" :cljc (rdr [""])))))
   (testing "an clojure adoc code block"
     (is (= [{:block-text "some\nclojure\n"
              :header nil
              :doc-filename "my-doc.adoc"
              :line-no 2
-             :test-doc-blocks/test-ns "my-doc-adoc-test"}]
-           (sut/parse-doc-code-blocks "my-doc.adoc"
+             :test-doc-blocks/test-ns "my-doc-adoc-test"
+             :test-doc-blocks/platform :cljc}]
+           (sut/parse-doc-code-blocks "my-doc.adoc" :cljc
                                       (rdr ["[source,clojure]"
                                             "----"
                                             "some"
@@ -32,8 +33,9 @@
              :header "My heading"
              :doc-filename "my-doc.md"
              :line-no 5
-             :test-doc-blocks/test-ns "my-doc-md-test"}]
-           (sut/parse-doc-code-blocks "my-doc.md"
+             :test-doc-blocks/test-ns "my-doc-md-test"
+             :test-doc-blocks/platform :cljs}]
+           (sut/parse-doc-code-blocks "my-doc.md" :cljs
                                       (rdr ["# My heading"
                                             ""
                                             "Blocks can be indented under lists"

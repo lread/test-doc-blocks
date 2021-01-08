@@ -4,11 +4,11 @@
 
 (defn- fname-for-ns
   "Converts `ns-name` to a cljc file path."
-  [ns-name]
+  [ns-name platform]
   (-> ns-name
       (string/replace "-" "_")
       (string/replace "." "/")
-      (str ".cljc")))
+      (str "." (name platform))))
 
 (defn- testing-text [{:keys [doc-filename line-no header]}]
   (string/join " - " (keep identity [doc-filename (str "line " line-no) header])))
@@ -20,24 +20,28 @@
                      (sort-by first)
                      (mapcat (fn [[platform elems]] (concat [platform] (sort-by str elems)))))})
 
-
 (defn- str-reader-cond [l]
   (when (seq l)
     [(str "#?(" (string/join " " (map str l)) ")")]))
 
+(defn- base-requires [platform]
+  (let [base ['clojure.test 'clojure.string]
+        runtime-cljs "[lread.test-doc-blocks.runtime :include-macros]"
+        runtime-clj "lread.test-doc-blocks.runtime"]
+    (case platform
+      :clj (conj base runtime-clj)
+      :cljs (conj base runtime-cljs)
+      :cljc (conj base (str "#?(:cljs " runtime-cljs ")")
+                       (str "#?(:clj " runtime-clj ")")))))
 
-(defn- ns-declaration [test-ns {:keys [requires imports] :as _ns-ref} ]
-  (let [test-doc-blocks-refs ['clojure.test
-                              'clojure.string
-                              "#?(:cljs [lread.test-doc-blocks.runtime :include-macros])"
-                              "#?(:clj lread.test-doc-blocks.runtime)"]
-        requires (expand-refs requires)
+(defn- ns-declaration [test-ns platform {:keys [requires imports] :as _ns-ref} ]
+  (let [requires (expand-refs requires)
         imports (expand-refs imports)]
     (str "(ns " test-ns  "\n"
          "  (:require " (->> []
                              (into (:common requires))
                              (into (str-reader-cond (:reader-cond requires)))
-                             (into test-doc-blocks-refs)
+                             (into (base-requires platform))
                              (string/join "\n            ")) ")"
          (when (or (seq (:common imports)) (seq (:reader-cond imports)))
            (str "\n  (:import " (->> []
@@ -58,8 +62,8 @@
 
 (defn write-tests
   "Write out `tests` to test namespace `test-ns` under dir `target-root`"
-  [target-root {:keys [test-ns ns-refs tests]}]
-  (let [test-fname (io/file target-root (fname-for-ns test-ns))]
+  [target-root {:keys [test-ns platform ns-refs tests]}]
+  (let [test-fname (io/file target-root (fname-for-ns test-ns platform))]
     (io/make-parents test-fname)
-    (spit test-fname (str (ns-declaration test-ns ns-refs) "\n"
+    (spit test-fname (str (ns-declaration test-ns platform ns-refs) "\n"
                           (test-defs tests)))))

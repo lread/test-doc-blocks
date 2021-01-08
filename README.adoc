@@ -8,6 +8,9 @@ ifdef::env-github[]
 endif::[]
 :toc: macro
 
+// Exercise our :apply option by skipping all code blocks by default for this doc
+//#:test-doc-blocks{:skip true :apply :all-next}
+
 image:https://github.com/lread/test-doc-blocks/workflows/Test/badge.svg[Test]
 
 Generate runnable tests from code blocks in Asciidoctor and CommonMark files.
@@ -36,7 +39,7 @@ Test-doc-blocks might (or might not, see link:#limitations[limitations], and lin
 
 If your example code blocks are REPL style:
 
-//:test-doc-blocks/skip
+//#:test-doc-blocks{:skip false}
 [source,clojure]
 ----
 user=> (* 6 7)
@@ -45,7 +48,7 @@ user=> (* 6 7)
 
 Or editor style:
 
-//:test-doc-blocks/skip
+//#:test-doc-blocks{:skip false}
 [source,clojure]
 ----
 (* 6 7)
@@ -56,8 +59,9 @@ And don't rely on any special unspecified setup, then test-doc-blocks might work
 
 == Immediate TODOS
 
+* when stdout and stderr are not requested, don't capture
+* validation of command and inline options
 * allow metadata to be attached to generated tests which can then in turn be used by test runners
-* allow test to target .clj or cljs file.. currently targetting cljc only
 * turf unused script helpers I pasted in from rewrite-cljc
 
 Maybe:
@@ -71,7 +75,6 @@ Maybe:
 ** stderr line2
 ** etc..
 * Consider supporting continuations on expectations for readability? Maybe something like?
-//:test-doc-blocks/skip
 +
 [source,clojure]
 ----
@@ -84,7 +87,6 @@ Maybe:
 
 Add an alias to your `deps.edn`:
 
-//:test-doc-blocks/skip
 [source,clojure]
 ----
     :test-doc-blocks {:extra-deps {lread/test-doc-blocks {:git "tbd"
@@ -115,6 +117,7 @@ Invoke for this project via: `clj -M:isolated/clj-test-runner`
 When tests are run, the test-doc-blocks runtime will look for assertions in editor style and REPL style format.
 For example:
 
+//#:test-doc-blocks{:skip false}
 [source,clojure]
 ----
 user=> (/ 714 17)
@@ -151,7 +154,20 @@ clojure -X:test-doc-blocks gen-tests :target-root '"./someplace/else"'
 ----
 
 Note that test-doc-blocks will delete and recreate `test-docs-block/test` dirs under the target root.
-Keep that the location mind to when figuring out where to point your test runner.
+Keep that the location mind when figuring out where to point your test runner.
+
+==== :platform
+The platform governs what Clojure file types will be generated for tests.
+
+Specify:
+
+* `:clj` for Clojure, generates `.clj` files
+* `:cljs` for ClojureScript, generates `.cljs` files
+* `:cljc` for mixed, generates `.cljc` files
+
+The default is `:cljc`.
+
+Platform can be overridden for code blocks via inline options.
 
 [#limitations]
 == Limitations

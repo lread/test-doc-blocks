@@ -22,7 +22,8 @@
   (println (doric/table [{:name :doc-filename             :align :left}
                          {:name :line-no                  :align :right}
                          {:name :header                   :align :left}
-                         {:name :test-doc-blocks/test-ns  :align :left}]
+                         {:name :test-doc-blocks/test-ns  :align :left}
+                         {:name :test-doc-blocks/platform :align :left}]
                          parsed)))
 
 (defn- report-on-found [parsed]
@@ -46,18 +47,19 @@
 
 (def default-opts
   {:target-root "./target"
-   :docs ["README.md"]})
+   :docs ["README.md"]
+   :platform :cljc})
 
 (defn gen-tests
   "Generate tests for code blocks found in markdown files.
   Invoke from clojure CLI with -X."
   [opts]
-  (let [{:keys [target-root docs]} (merge default-opts opts )
+  (let [{:keys [target-root docs platform]} (merge default-opts opts )
         target-root (str (io/file target-root "test-doc-blocks"))]
     (when (.exists (io/file target-root))
       (delete-dir target-root))
     (let [target-root (str (io/file target-root "test"))
-          parsed (mapcat doc-parse/parse-doc-code-blocks docs)]
+          parsed (mapcat #(doc-parse/parse-doc-code-blocks % platform) docs)]
      (report-on-found parsed)
      (println "\nGenerating tests to:" target-root)
      (->> parsed
@@ -72,8 +74,10 @@
               :docs ["doc/erp.adoc"
                      "README.adoc"
                      "doc/example.md"
-                     "doc/example.adoc"]})
+                     "doc/example.adoc"]
+              :platform :cljc})
 
   (gen-tests {:docs ["README.adoc"]})
+
 
   )

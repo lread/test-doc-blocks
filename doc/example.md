@@ -1,6 +1,8 @@
 CommonMark test-doc-blocks Example
 ==========
 
+Test-doc-blocks will find Clojure source code blocks in your documents and generate tests for them.
+
 The Basics
 --
 
@@ -66,8 +68,21 @@ You can, to some limited extent, communicate your intent to test-doc-blocks.
 
 Test-doc-blocks will look for CommonMark comments that begin with `:test-doc-blocks`.
 
-- `:test-block-opts/skip` - skips the next code block
-- `:test-block-opts/test-ns` - specifies the test namespace for subsequent code blocks
+It currently understands four options:
+
+- `:test-doc-blocks/apply` - controls to what code blocks options are applied
+- `:test-doc-blocks/skip` - skips the next code block
+- `:test-doc-blocks/test-ns` - specifies the test namespace 
+- `:test-doc-blocks/platform` - specifies Clojure file type to generate for test ns
+
+### Applying Options
+
+By default, new options are applied to the next Clojure code block only.
+
+You can change this by including the `:test-doc-blocks/apply` option:
+
+- `:next` - default - applies new options to next Clojure code block only
+- `:all-next` - applies new options to all subsequent code blocks in the document until specifically overridden with new opts
 
 ### Skipping Code Blocks
 
@@ -86,7 +101,7 @@ Tell test-doc-blocks to skip the next Clojure code block via the following Commo
 
 ### Specifying Test Namespace
 
-If you don't tell test-doc-blocks what namespace you want tests in, it will do its best to come up with one based on the document filename.
+If you don't tell test-doc-blocks what namespace you want tests in, it will come up with one based on the document filename.
 For this file, test-doc-blocks, up to this point has been generating tests to `example-md-test`.
 
 If this does not work for you, you can override this default via a CommonMark comment:
@@ -106,7 +121,6 @@ user=> (* 2 4)
 The `:test-doc-blocks/test-ns` option applies to all subsequent code blocks in the document.
 
 Changing the test-ns is useful for code blocks that need to be isolated.
-Code blocks that require a unique set of namespaces fall under this category.
 
 ~~~markdown
 <!-- {:test-doc-blocks/test-ns example-md-new-ns.ns1-test} -->
@@ -117,6 +131,39 @@ Code blocks that require a unique set of namespaces fall under this category.
 
 (string/join ", " [1 2 3])
 => "1, 2, 3"
+```
+~~~
+
+### Specifying The Platform
+
+By default, test-doc-blocks generates `.cljc` tests.
+
+You can override this default on the command line via `:platform` and via inline option via `test-doc-blocks/platform`.
+Valid values are:
+
+- `:cljc` - the default - generates `.cljc` test files
+- `:clj` - generates `.clj` test files
+- `:cljs` - generates `.cljs` test files
+
+When specifying the platform, remember that:
+
+- For Clojure `my-ns-file.clj` will be picked over `my-ns-file.cljc`
+- For ClojureScript `my-ns-file.cljs` will be picked over `my-ns-file.cljc`
+
+So if you are generating mixed platforms, you might want to specify the test-ns as well.
+
+~~~markdown
+<!-- #:test-doc-blocks{:platform :cljs :test-ns example-md-cljs-test} -->
+```Clojure
+;; this code block will generate tests under example-md-cljs-test ns to a .cljs file
+
+(import '[goog.events EventType])
+EventType.CLICK
+;;=> "click"
+
+(require '[goog.math :as math])
+(math/clamp -1 0 5)
+;;=> 0
 ```
 ~~~
 
