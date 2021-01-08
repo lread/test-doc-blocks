@@ -17,7 +17,6 @@ Generate runnable tests from code blocks in Asciidoctor and CommonMark files.
 
 [CAUTION]
 ====
-Executing tests executes code. +
 Example code in docs, while likely not malicious, could be illustrating, for example, how to wipe a drive. +
 So, do be deliberate and careful about what docs you run through test-doc-blocks.
 ====
