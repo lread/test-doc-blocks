@@ -19,7 +19,7 @@
 ))
 
 (clojure.test/deftest block-3
-  (clojure.test/testing  "README.adoc - line 122 - Usage"
+  (clojure.test/testing  "README.adoc - line 121 - Usage"
 (let [[actual actual-out actual-err] (lread.test-doc-blocks.runtime/eval-capture (/ 714 17))]
   (clojure.test/is (= '42 actual))) 
 
