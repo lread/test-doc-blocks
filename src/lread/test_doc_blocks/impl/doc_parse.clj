@@ -1,8 +1,8 @@
 (ns lread.test-doc-blocks.impl.doc-parse
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.string :as string]))
-
+            [clojure.string :as string]
+            [lread.test-doc-blocks.impl.validate :as validate]))
 ;;
 ;; Parsing markdown, we look at:
 ;; - code blocks
@@ -30,16 +30,28 @@
       (str "-test")
       (string/lower-case)))
 
+(defn- validate-inline-opts
+  ;; fail fast on first error for now
+  [m]
+  (if-let [errs (validate/errors [:map {:closed true}
+                                  [:test-doc-blocks/platform {:optional true} [:enum :clj :cljs :cljc]]
+                                  [:test-doc-blocks/skip {:optional true} boolean?]
+                                  [:test-doc-blocks/test-ns {:optional true} symbol?]
+                                  [:test-doc-blocks/apply {:optional true} [:enum :next :all-next]]]
+                                 m)]
+    (throw (ex-info (str "Invalid inline options: " errs) {}))
+    m))
+
+
 (defn- parse-inline-opts
   "Parse inline test-doc-blocks options to map.
   Can be map or keyword.
   If keyword k returns {:k true} "
   [{:keys [doc-filename doc-line-no]} sopts]
   (try
-    (let [o (edn/read-string sopts)]
-      (if (keyword? o)
-        {o true}
-        o))
+    (let [o (edn/read-string sopts)
+          m (if (keyword? o) {o true} o)]
+      (validate-inline-opts m))
     (catch Throwable e
       (throw (ex-info (format "Unable to parse test-doc-blocks opts. file: %s @ line: %d"
                               doc-filename doc-line-no) {} e)))))

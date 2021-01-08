@@ -4,7 +4,8 @@
             [doric.core :as doric]
             [lread.test-doc-blocks.impl.doc-parse :as doc-parse]
             [lread.test-doc-blocks.impl.process :as process]
-            [lread.test-doc-blocks.impl.test-write :as test-write])
+            [lread.test-doc-blocks.impl.test-write :as test-write]
+            [lread.test-doc-blocks.impl.validate :as validate])
   (:import [java.nio.file Files]))
 
 (defn- delete-dir
@@ -50,24 +51,33 @@
    :docs ["README.md"]
    :platform :cljc})
 
+
+
 (defn gen-tests
   "Generate tests for code blocks found in markdown files.
   Invoke from clojure CLI with -X."
   [opts]
-  (let [{:keys [target-root docs platform]} (merge default-opts opts )
-        target-root (str (io/file target-root "test-doc-blocks"))]
-    (when (.exists (io/file target-root))
-      (delete-dir target-root))
-    (let [target-root (str (io/file target-root "test"))
-          parsed (mapcat #(doc-parse/parse-doc-code-blocks % platform) docs)]
-     (report-on-found parsed)
-     (println "\nGenerating tests to:" target-root)
-     (->> parsed
-          (process/convert-to-tests)
-          (run! #(test-write/write-tests target-root %)))
-     (copy-runtime target-root)
-     (println "Done"))))
-
+  (if-let [errs (validate/errors [:map {:closed true}
+                                  [:target-root {:optional true} string?]
+                                  [:docs {:optional true} [:vector string?]]
+                                  [:platform {:optional true} [:enum :clj :cljs :cljc]]]
+                                 opts)]
+    (do (println "Invalid args")
+        (println (pr-str errs))
+        (System/exit 1))
+    (let [{:keys [target-root docs platform]} (merge default-opts opts )
+          target-root (str (io/file target-root "test-doc-blocks"))]
+      (when (.exists (io/file target-root))
+        (delete-dir target-root))
+      (let [target-root (str (io/file target-root "test"))
+            parsed (mapcat #(doc-parse/parse-doc-code-blocks % platform) docs)]
+        (report-on-found parsed)
+        (println "\nGenerating tests to:" target-root)
+        (->> parsed
+             (process/convert-to-tests)
+             (run! #(test-write/write-tests target-root %)))
+        (copy-runtime target-root)
+        (println "Done")))))
 
 (comment
   (gen-tests {:target-root "./target/"
@@ -75,9 +85,10 @@
                      "README.adoc"
                      "doc/example.md"
                      "doc/example.adoc"]
-              :platform :cljc})
+              :platform :cljs})
 
-  (gen-tests {:docs ["README.adoc"]})
+  (gen-tests {:docs ["doc/erp.adoc"]})
 
+  (gen-tests {:docs ""})
 
   )
