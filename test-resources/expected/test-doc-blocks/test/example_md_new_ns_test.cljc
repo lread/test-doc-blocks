@@ -8,7 +8,4 @@
   (clojure.test/testing  "doc/example.md - line 111 - Specifying Test Namespace"
 ;; this code block will generate tests under example-md-new-ns-test
 
-(let [[actual actual-out actual-err] (lread.test-doc-blocks.runtime/eval-capture (* 2 4))]
-  (clojure.test/is (= '8 actual))) 
-
-))
+(clojure.test/is (= '8 (* 2 4)))))

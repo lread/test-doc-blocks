@@ -30,9 +30,10 @@
                  last)
             zloc-ret))
         (recur (-> zloc-del
-                   z/remove-preserve-newline
+                   z/remove
                    z/next)
                (dec del-cnt))))))
+
 
 (comment
   (->"one [two [fa fee]] [three four] five six seven"

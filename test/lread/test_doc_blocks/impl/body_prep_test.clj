@@ -44,13 +44,12 @@
                           "; line3"]))))))
 
 (deftest converts-simple-editor-style-assertions
-  (testing ""
-    (is (= "=> (+ 1 2 3)\n"
-           (sut/prep-block-for-conversion-to-test ";; => (+ 1 2 3)")))
-    (is (= "=clj=> (+ 4 5 6)\n"
-           (sut/prep-block-for-conversion-to-test ";; =clj=> (+ 4 5 6)")))
-    (is (= "=cljs=> (+ 7 8 9)\n"
-           (sut/prep-block-for-conversion-to-test ";; =cljs=> (+ 7 8 9)"))) ))
+  (is (= "=> (+ 1 2 3)\n"
+         (sut/prep-block-for-conversion-to-test ";; => (+ 1 2 3)")))
+  (is (= "=clj=> (+ 4 5 6)\n"
+         (sut/prep-block-for-conversion-to-test ";; =clj=> (+ 4 5 6)")))
+  (is (= "=cljs=> (+ 7 8 9)\n"
+         (sut/prep-block-for-conversion-to-test ";; =cljs=> (+ 7 8 9)"))))
 
 
 (deftest ignores-repl-style-assertions
@@ -60,10 +59,40 @@
                        ["user=> (* 6 7)"
                         "42"])))))
 
+(deftest whitespace-handling
+  (testing "editor style"
+    (is (= "=> {:a 1 :b 2}\n"
+           (sut/prep-block-for-conversion-to-test ";;=>{:a 1 :b 2}")
+           (sut/prep-block-for-conversion-to-test "    ;;     =>       {:a 1 :b 2}   "))))
+  (testing "editor out style"
+    (is (= "=stdout=> [\"hello there\"]\n"
+           (sut/prep-block-for-conversion-to-test ";;=stdout=>hello there")))
+    (is (= "=stdout=> [\"line1\" \"line2\"]\n"
+           (sut/prep-block-for-conversion-to-test (string/join "\n" [";;=stdout=>"
+                                                                     ";line1"
+                                                                     ";line2"]))))
+    (testing "considers leading space past the first space significant"
+      (is (= "=stdout=> [\"    hello there\"]\n"
+             (sut/prep-block-for-conversion-to-test ";;=stdout=>     hello there    ")))
+      (is (= "=stdout=> [\"    line1\" \"     line2\"]\n"
+             (sut/prep-block-for-conversion-to-test (string/join "\n" [";;=stdout=>   "
+                                                                       ";     line1     "
+                                                                       ";      line2    "]))))    )) )
+
+(deftest comment-handling
+  (testing "missing ;; is ok for assertion"
+    (is (= "=stdout=> [\"hello there\"]\n"
+           (sut/prep-block-for-conversion-to-test "=stdout=> hello there"))))
+  (testing "no conversion when not ;;"
+    (is (= ";=stdout=> hello there\n"
+           (sut/prep-block-for-conversion-to-test ";=stdout=> hello there")))
+    (is (= ";;;=stdout=> hello there\n"
+           (sut/prep-block-for-conversion-to-test ";;;=stdout=> hello there"))) ))
+
 (deftest larger-test
   (is (= ["Testing 123"
           ""
-          "REPL style asserts "
+          "REPL style asserts"
           ""
           "user=> (+ 1 2 3)"
           "6"

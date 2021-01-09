@@ -3,52 +3,50 @@
             [rewrite-cljc.node :as n]
             [rewrite-cljc.zip :as z] ))
 
-(defn- eval-assertion [expected]
+(defn- eval-assertion [expected-node actual-node]
   (n/list-node [(n/token-node 'clojure.test/is)
                 (n/spaces 1)
                 (n/list-node [(n/token-node '=)
                               (n/spaces 1)
-                              (n/quote-node (z/node expected))
+                              (n/quote-node expected-node)
                               (n/spaces 1)
-                              (n/token-node 'actual)])]))
+                              actual-node])]))
 
-(defn- platform-eval-assertion [platform expected]
+(defn- platform-eval-assertion [platform expected-node actual-node]
   (n/reader-macro-node [(n/token-node '?)
                         (n/list-node [(n/keyword-node platform)
                                       (n/spaces 1)
-                                      (eval-assertion expected)])]))
+                                      (eval-assertion expected-node actual-node)])]))
 
-(defn- output-assertion [out-sym expected]
+(defn- output-assertion [expected-node actual-node]
   (n/list-node [(n/token-node 'clojure.test/is)
                 (n/spaces 1)
                 (n/list-node [(n/token-node (symbol "="))
                               (n/spaces 1)
-                              (z/node expected)
+                              expected-node
                               (n/spaces 1)
-                              (n/list-node [(n/token-node 'clojure.string/split)
+                              (n/list-node [(n/token-node 'clojure.string/split-lines)
                                             (n/spaces 1)
-                                            (n/token-node out-sym)
-                                            (n/spaces 1)
-                                            (n/regex-node "\\n")])])]))
+                                            actual-node])])]))
 
 (defn- interpose-nodes [items coll]
   (into [(first coll)]
         (mapcat #(concat items [%]) (rest coll))))
 
-(defn- editor-assertions [expected-pairs]
+(defn- capturing-assertions [expected-pairs]
   (->> (for [[atoken expected] expected-pairs]
          (case (z/sexpr atoken)
-           => (eval-assertion expected)
-           =clj=> (platform-eval-assertion :clj expected)
-           =cljs=> (platform-eval-assertion :cljs expected)
-           =stdout=> (output-assertion 'actual-out expected)
-           =stderr=> (output-assertion 'actual-err expected)))
+           => (eval-assertion (z/node expected) (n/token-node 'actual))
+           =clj=> (platform-eval-assertion :clj (z/node expected) (n/token-node 'actual))
+           =cljs=> (platform-eval-assertion :cljs (z/node expected) (n/token-node 'actual))
+           =stdout=> (output-assertion  (z/node expected) (n/token-node 'actual-out))
+           =stderr=> (output-assertion (z/node expected) (n/token-node 'actual-err))))
        (interpose-nodes [(n/newlines 1) (n/spaces 2)])))
 
 (defn- assertion-token? [t]
   (some #{t} '(=> =stderr=> =stdout=> =clj=> =cljs=>)))
 
-(defn token? [zloc token]
+(defn- token? [zloc token]
   (and (= :token (z/tag zloc))
        (= token (z/sexpr zloc))))
 
@@ -56,34 +54,55 @@
   (and (= :token (z/tag zloc))
        (assertion-token? (z/sexpr zloc))))
 
-(defn replace-editor-assert [zloc expected-pairs actual]
-    (-> zloc
-        ;; replace might be confusing, but we are replacing actual here
-        (z/replace (n/list-node (concat [(n/token-node 'let)
-                                         (n/spaces 1)
-                                         (n/vector-node [(n/vector-node [(n/token-node 'actual)
-                                                                         (n/spaces 1)
-                                                                         (n/token-node 'actual-out)
-                                                                         (n/spaces 1)
-                                                                         (n/token-node 'actual-err)])
-                                                         (n/spaces 1)
-                                                         (n/list-node [(n/token-node 'lread.test-doc-blocks.runtime/eval-capture)
-                                                                       (n/spaces 1)
-                                                                       (z/node actual)])])
-                                         (n/newlines 1)
-                                         (n/spaces 2)]
-                                        (editor-assertions expected-pairs))))
-        ;; now we need to remove expected pairs
-        (zutil/remove-n-siblings-right (* 2 (count expected-pairs)))))
+(defn- requires-capture? [expected-pairs]
+  (some (fn [[atoken _]]
+          (some #{(z/sexpr atoken)} ['=stdout=> '=stderr=>]))
+        expected-pairs))
 
-(defn get-expected-pairs [zloc]
+(defn- capturing-test-assert-node [expected-pairs actual]
+  (n/list-node (concat [(n/token-node 'let)
+                                       (n/spaces 1)
+                                       (n/vector-node [(n/vector-node [(n/token-node 'actual)
+                                                                       (n/spaces 1)
+                                                                       (n/token-node 'actual-out)
+                                                                       (n/spaces 1)
+                                                                       (n/token-node 'actual-err)])
+                                                       (n/spaces 1)
+                                                       (n/list-node [(n/token-node 'lread.test-doc-blocks.runtime/eval-capture)
+                                                                     (n/spaces 1)
+                                                                     (z/node actual)])])
+                                       (n/newlines 1)
+                                       (n/spaces 2)]
+                                      (capturing-assertions expected-pairs))))
+
+(defn- simple-assertion-nodes [expected-pairs actual]
+  (concat
+   (->> (for [[atoken expected] expected-pairs]
+          (case (z/sexpr atoken)
+            => (eval-assertion (z/node expected) (z/node actual))
+            =clj=> (platform-eval-assertion :clj (z/node expected) (z/node actual))
+            =cljs=> (platform-eval-assertion :cljs (z/node expected) (z/node actual))))
+        (interpose-nodes [(n/newlines 1)]))
+   [(n/newlines 1)]))
+
+(defn- replace-body-assert [zloc expected-pairs actual]
+  (let [new-nodes (if (requires-capture? expected-pairs)
+                    [(capturing-test-assert-node expected-pairs actual)]
+                    (simple-assertion-nodes expected-pairs actual))]
+    (-> (reduce z/insert-left* zloc new-nodes)
+        z/left
+        ;; remove REPL => token and expected pairs
+        (zutil/remove-n-siblings-right (inc (* 2 (count expected-pairs)))))))
+
+(defn- get-expected-pairs [zloc]
   (->> zloc
        (iterate z/right)
        (take-while identity)
        (partition 2)
-       (take-while #(zassertion-token? (first %)))))
+       (take-while #(zassertion-token? (first %)))
+       (sort-by (fn [[ztoken _zexpected]] (z/sexpr ztoken)))))
 
-(defn convert-repl-assertions [prepared-doc-body]
+(defn- convert-repl-assertions [prepared-doc-body]
  (-> (loop [zloc (z/of-string prepared-doc-body)]
                         (let [zloc (cond
                            (not zloc)
@@ -92,22 +111,20 @@
                            (z/end? zloc)
                            (throw (ex-info "unexpected error: zloc end" {}))
 
-                           ;; TODO: what if eof before complete?
                            ;; REPL style has 1 expectation
-                           (token? zloc 'user=>)
+                           (and (token? zloc 'user=>) (-> zloc z/right z/right))
                            (let [actual (z/right zloc)
                                  expected-pairs [[(z/of-string "=>") (z/right actual)]]]
                              (-> zloc
-                                 (replace-editor-assert expected-pairs actual)))
+                                 (replace-body-assert expected-pairs actual)))
 
-                           ;; TODO: what if eof before complete?
                            ;; Editor style can have multiple expectations
-                           (zassertion-token? zloc)
+                           (and (zassertion-token? zloc) (z/left zloc) (z/right zloc))
                            (let [actual (z/left zloc)
                                  expecteded-pairs (get-expected-pairs zloc) ]
                              (-> zloc
                                  z/left
-                                 (replace-editor-assert expecteded-pairs actual)))
+                                 (replace-body-assert expecteded-pairs actual)))
 
                            :else
                            zloc)]
@@ -116,20 +133,14 @@
                   zloc)))
             z/root-string) )
 
-(defn add-dummy-assertion [test-body]
+(defn- add-dummy-assertion [test-body]
   (-> test-body
       z/of-string
       z/up
-      (z/append-child (n/newlines 2))
-      (z/append-child (n/comment-node " dummy assertion to appease tools fail on no assertions"))
-      (z/append-child (n/newlines 1))
-      (z/append-child (n/list-node [(n/token-node 'clojure.test/is)
-                                    (n/spaces 1)
-                                    (n/list-node [(n/token-node '=)
-                                                  (n/spaces 1)
-                                                  (n/string-node "dummy")
-                                                  (n/spaces 1)
-                                                  (n/string-node "dummy")])]))
+      (z/append-child* (n/newlines 1))
+      (z/append-child* (n/comment-node " test-doc-blocks dummy assertion to appease tools that fail on no assertions"))
+      (z/append-child* (n/newlines 1))
+      (z/append-child* (eval-assertion (n/string-node "dummy") (n/string-node "dummy")))
       (z/root-string)))
 
 (defn to-test-body [prepared-doc-body]
@@ -139,7 +150,7 @@
       test-body)))
 
 (comment
-
+(z/right nil)
 
   (def s "hey
 
