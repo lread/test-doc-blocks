@@ -60,7 +60,7 @@
                     tests)
             (string/join "\n\n"))))
 
-(defn write-tests
+(defn write-tests!
   "Write out `tests` to test namespace `test-ns` under dir `target-root`"
   [target-root {:keys [test-ns platform ns-refs tests]}]
   (let [test-fname (io/file target-root (fname-for-ns test-ns platform))]
