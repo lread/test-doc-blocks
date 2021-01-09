@@ -34,7 +34,7 @@ Initial concept. Currently being used to test doc blocks in rewrite-cljc.
 == Rationale
 I wanted to make sure the code examples I provided in rewrite-cljc documentation do not mislead and would function as expected for those who dared to try them.
 
-Test-doc-blocks might (or might not, see link:#limitations[limitations], and link:#other-options[other options]) be of interest for your Clojure project too.
+Test-doc-blocks might (or might not, see link:#limitations[limitations], and link:#interesting-alternatives[interesting alternatives]) be of interest for your Clojure project too.
 
 If your example code blocks are REPL style:
 
@@ -98,21 +98,13 @@ Then the most basic usage is:
 clojure -X:test-doc-blocks gen-tests
 ----
 
-This will generate Clojure tests for code blocks in your `README.md` to `target/test-doc-blocks/test`.
+This generates Clojure tests for code blocks in your `README.md` to the `target/test-doc-blocks/test` directory.
 Any existing tests under `target/test-doc-blocks` will be replaced.
 
-You can then run the generated tests with the test runner of your choosing.
-Our link:deps.edn[deps.edn] has example aliases:
+The generated tests have no dependency on test-doc-blocks and can be run with your preferred test runner.
 
-* `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
-Invoke for this project via: `clj -M:isolated/cljs-test-runner`
-* `:isolated/kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
-Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaocha link:test.edn[test.edn] config.
-* `:isolated/clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
-Invoke for this project via: `clj -M:isolated/clj-test-runner`
-
-When tests are run, the test-doc-blocks runtime will look for assertions in editor style and REPL style format.
-For example:
+Test-doc-blocks looks for assertions in your doc code blocks that are in editor style and REPL style format.
+For example...
 
 //#:test-doc-blocks{:skip false}
 [source,clojure]
@@ -121,49 +113,58 @@ user=> (/ 714 17)
 42
 ----
 
-Will be evaluated as the assertion `(is (= 42 (/ 714 17)))`.
-
-For more detailed examples and inline options, see
+...generates the test assertion `(is (= 42 (/ 714 17)))`.
+For more detailed examples and inline options, see:
 
 * link:doc/example.adoc[Asciidoctor example]
 * link:doc/example.md[CommonMark example]
 
+
+The test-doc-blocks link:deps.edn[deps.edn] has some aliases that might be useful examples:
+
+* `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
+Invoke for this project via: `clj -M:isolated/cljs-test-runner`
+* `:isolated/kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
+Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaocha link:tests.edn[tests.edn] config.
+* `:isolated/clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
+Invoke for this project via: `clj -M:isolated/clj-test-runner`
+
 === Command Line Options
 
-==== :docs
+:docs::
 The default file to generate tests for is README.md.
-
++
 If you want to specify a different vector of files you can do so via `:docs`:
-
++
 [source,shell]
 ----
 clojure -X:test-doc-blocks gen-tests :docs '["README.adoc" "doc/example.adoc" "doc/example.md"]'
 ----
 
-==== :target-root
+:target-root::
 The default directory to generate tests is `./target`.
-
++
 You can override this via `:target-root`:
-
++
 [source,shell]
 ----
 clojure -X:test-doc-blocks gen-tests :target-root '"./someplace/else"'
 ----
-
++
 Note that test-doc-blocks will delete and recreate `test-docs-block/test` dirs under the target root.
 Keep that the location mind when figuring out where to point your test runner.
 
-==== :platform
+:platform::
 The platform governs what Clojure file types will be generated for tests.
-
++
 Specify:
 
 * `:clj` for Clojure, generates `.clj` files
 * `:cljs` for ClojureScript, generates `.cljs` files
 * `:cljc` for mixed, generates `.cljc` files
 
++
 The default is `:cljc`.
-
 Platform can be overridden for code blocks via inline options.
 
 [#limitations]
@@ -171,7 +172,6 @@ Platform can be overridden for code blocks via inline options.
 
 Some current limitations that we might entertain addressing:
 
-* I'm initially coming at this from a cljc project and that bias will show and might not be appropriate for your project.
 * If your code block depends on some external setup, we've no way to express that.
 * Test-doc-blocks will automatically handle inline `(require ...)` and `(import ...)` appearing in code blocks, but not in any complex expressions of these forms.
 * Parsing adoc and md files is on the naive side but should handle most common cases.
@@ -181,16 +181,16 @@ Some limitations we have no current plans to address:
 
 * Code blocks using `ns` or `in-ns` will not work with test-doc-blocks.
 * It is possible to embed HTML into your docs.
-If your code or headings are expressed in HTML, we won't find them.
+If your code or headings are expressed in embedded HTML within your doc, test-doc-blocks won't find them.
 
-[#other-options]
-== Other Options
+[#interesting-alternatives]
+== Interesting Alternatives
 
 Here are other options and related projects that I am currently aware of:
 
 * https://github.com/lambdaisland/kaocha[kaocha] - Koacha supports running cucumber tests.
-It uses this cucumber tests for its own documentation.
-A .feature document describes the feature and includes given, when, then scenarios that are both run and shown in documentation.
+It uses this support in tests for its own documentation.
+A `.feature` document describes the feature and includes given, when, then scenarios that are both run and shown in documentation.
 Gritty details can be hidden in step definitions.
 * https://github.com/seancorfield/readme[readme] - Generates tests for code blocks found in .md files and then runs them.
 * https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
@@ -298,7 +298,7 @@ rewrite-cljc versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
 
 == License
 
-Copyright © 2020 Lee Read, all rights reserved.
+Copyright © 2021 Lee Read, all rights reserved.
 
 Distributed under the EPL License, same as Clojure. See LICENSE.
 
