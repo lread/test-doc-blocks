@@ -58,7 +58,6 @@ And don't rely on any special unspecified setup, then test-doc-blocks might work
 
 == Immediate TODOS
 
-* allow metadata to be attached to generated tests which can then in turn be used by test runners
 * turf unused script helpers I pasted in from rewrite-cljc
 
 Maybe:

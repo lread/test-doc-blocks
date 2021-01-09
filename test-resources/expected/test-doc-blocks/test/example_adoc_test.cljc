@@ -50,9 +50,26 @@
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-4
-  (clojure.test/testing  "doc/example.adoc - line 207 - Section Titles"
-(clojure.test/is (= '"well!how!about!that" (string/join "!" ["well" "how" "about" "that"])))))
+  (clojure.test/testing  "doc/example.adoc - line 198 - Specifying Metadata"
+;; this code block will generate a test with metadata {:testing-meta123 true}
+
+(clojure.test/is (= '[[:a 1]] (into [] {:a 1})))))
 
 (clojure.test/deftest block-5
-  (clojure.test/testing  "doc/example.adoc - line 223 - Support for CommonMark Code Block Syntax"
+  (clojure.test/testing  "doc/example.adoc - line 211 - Specifying Metadata"
+;; this code block will generate a test with metadata:
+;;  {:testing-meta123 "a-specific-value" :testing-meta789 :yip}
+
+(clojure.test/is (= '"!oh!my!goodness" (reduce
+   (fn [acc n]
+     (str acc "!" n))
+   ""
+   ["oh" "my" "goodness"])))))
+
+(clojure.test/deftest block-6
+  (clojure.test/testing  "doc/example.adoc - line 251 - Section Titles"
+(clojure.test/is (= '"well!how!about!that" (string/join "!" ["well" "how" "about" "that"])))))
+
+(clojure.test/deftest block-7
+  (clojure.test/testing  "doc/example.adoc - line 267 - Support for CommonMark Code Block Syntax"
 (clojure.test/is (= '{1 :a, 2 :b} (set/map-invert {:a 1 :b 2})))))

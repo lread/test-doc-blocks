@@ -50,10 +50,21 @@
                                      (string/join "\n    ")) ")"))
          ")\n")))
 
+(string/join "!" ["bah" nil "boo"])
+
+
+(defn- test-var [block-ndx]
+  (let [meta-data (when-let [md (:test-doc-blocks/meta test)]
+                    (str "^" (pr-str md)))
+        name (str "block-" block-ndx)]
+    (if meta-data
+      (str meta-data " " name)
+      name)))
+
 (defn- test-defs [tests]
   (str (->> (reduce (fn [acc t]
                       (conj acc (str
-                                 "(clojure.test/deftest block-" (inc (count acc)) "\n"
+                                 "(clojure.test/deftest " (test-var (inc (count acc))) "\n"
                                  "  (clojure.test/testing " " \"" (testing-text t) "\"\n"
                                  (:test-body t) "))")))
                     []

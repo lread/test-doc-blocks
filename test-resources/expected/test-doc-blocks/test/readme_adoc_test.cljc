@@ -13,5 +13,5 @@
 (clojure.test/is (= '42 (* 6 7)))))
 
 (clojure.test/deftest block-3
-  (clojure.test/testing  "README.adoc - line 111 - Usage"
+  (clojure.test/testing  "README.adoc - line 110 - Usage"
 (clojure.test/is (= '42 (/ 714 17)))))

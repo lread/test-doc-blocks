@@ -167,6 +167,47 @@ EventType.CLICK
 ```
 ~~~
 
+### Specifying Metadata
+Test runners support including and excluding tests based on truthy metadata.
+
+You can attach metadata to generated tests via the `:test-doc-blocks/meta` option.
+
+A new `:test-doc-blocks/meta` will override any and all previous meta values.
+
+We offer two syntaxes:
+
+- `:test-doc-blocks-meta :my-kw` generates `{:my-kw true}` metadata.
+- `:test-doc-blocks-meta {:my-kw1 my-value1 :my-kw2 my-value2}` the explicit option for those that need it
+
+Example code blocks:
+
+~~~markdown
+[source,asciidoctor]
+<!-- #:test-doc-blocks{:meta :testing-meta123} -->
+```clojure
+;; this code block will generate a test with metadata {:testing-meta123 true}
+
+user=> (into [] {:a 1})
+[[:a 1]]
+```
+~~~
+
+
+~~~markdown
+<!-- #:test-doc-blocks{:meta {:testing-meta123 "a-specific-value" :testing-meta789 :yip}} -->
+```clojure
+;; this code block will generate a test with metadata:
+;;  {:testing-meta123 "a-specific-value" :testing-meta789 :yip}
+
+(reduce
+   (fn [acc n]
+     (str acc "!" n))
+   ""
+   ["oh" "my" "goodness"])
+;; => "!oh!my!goodness"
+```
+~~~
+
 # Section Titles
 
 Test-doc-blocks will try to give each test block some context by including its filename, section title and starting line number.

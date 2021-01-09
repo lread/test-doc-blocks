@@ -49,16 +49,33 @@
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-4
-  (clojure.test/testing  "doc/example.md - line 177 - Section Titles"
-(clojure.test/is (= '"well!how!about!that" (string/join "!" ["well" "how" "about" "that"])))))
+  (clojure.test/testing  "doc/example.md - line 187 - Specifying Metadata"
+;; this code block will generate a test with metadata {:testing-meta123 true}
+
+(clojure.test/is (= '[[:a 1]] (into [] {:a 1})))))
 
 (clojure.test/deftest block-5
-  (clojure.test/testing  "doc/example.md - line 192 - Indented Blocks"
+  (clojure.test/testing  "doc/example.md - line 198 - Specifying Metadata"
+;; this code block will generate a test with metadata:
+;;  {:testing-meta123 "a-specific-value" :testing-meta789 :yip}
+
+(clojure.test/is (= '"!oh!my!goodness" (reduce
+   (fn [acc n]
+     (str acc "!" n))
+   ""
+   ["oh" "my" "goodness"])))))
+
+(clojure.test/deftest block-6
+  (clojure.test/testing  "doc/example.md - line 218 - Section Titles"
+(clojure.test/is (= '"well!how!about!that" (string/join "!" ["well" "how" "about" "that"])))))
+
+(clojure.test/deftest block-7
+  (clojure.test/testing  "doc/example.md - line 233 - Indented Blocks"
 ;; we handle simple cases a-OK.
 (clojure.test/is (= '6 (+ 1 2 3)))))
 
-(clojure.test/deftest block-6
-  (clojure.test/testing  "doc/example.md - line 200 - Indented Blocks"
+(clojure.test/deftest block-8
+  (clojure.test/testing  "doc/example.md - line 241 - Indented Blocks"
 ;; we handle indented wrapped strings just fine
 (def s "my
 goodness

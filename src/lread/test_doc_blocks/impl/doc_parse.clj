@@ -30,16 +30,19 @@
       (str "-test")
       (string/lower-case)))
 
+
 (defn- validate-inline-opts
   ;; fail fast on first error for now
-  [m]
+  [doc-filename doc-line-no m]
   (if-let [errs (validate/errors [:map {:closed true}
                                   [:test-doc-blocks/platform {:optional true} [:enum :clj :cljs :cljc]]
                                   [:test-doc-blocks/skip {:optional true} boolean?]
                                   [:test-doc-blocks/test-ns {:optional true} symbol?]
+                                  [:test-doc-blocks/meta {:optional true} [:or map? keyword?]]
                                   [:test-doc-blocks/apply {:optional true} [:enum :next :all-next]]]
                                  m)]
-    (throw (ex-info (str "Invalid inline options: " errs) {}))
+    (throw (ex-info (format "Invalid inline options: %s\n file: %s line: %d"
+                            errs, doc-filename doc-line-no) {}))
     m))
 
 
@@ -48,13 +51,13 @@
   Can be map or keyword.
   If keyword k returns {:k true} "
   [{:keys [doc-filename doc-line-no]} sopts]
-  (try
-    (let [o (edn/read-string sopts)
-          m (if (keyword? o) {o true} o)]
-      (validate-inline-opts m))
-    (catch Throwable e
-      (throw (ex-info (format "Unable to parse test-doc-blocks opts. file: %s @ line: %d"
-                              doc-filename doc-line-no) {} e)))))
+  (let [m (try
+            (let [o (edn/read-string sopts)]
+              (if (keyword? o) {o true} o))
+            (catch Throwable e
+              (throw (ex-info (format "Unable to parse test-doc-blocks opts.\n file: %s line: %d"
+                                      doc-filename doc-line-no) {} e))))]
+    (validate-inline-opts doc-filename doc-line-no m)))
 
 (defn- normalize-lang
   "Normalized lang specified in code block to something consistent for Clojure blocks."
