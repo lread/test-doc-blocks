@@ -13,7 +13,7 @@ endif::[]
 
 image:https://github.com/lread/test-doc-blocks/workflows/Test/badge.svg[Test]
 
-Generate runnable tests from code blocks in Asciidoctor and CommonMark files.
+Generate Clojure tests from AsciiDoc and CommonMark doc code blocks.
 
 [CAUTION]
 ====
@@ -115,7 +115,7 @@ user=> (/ 714 17)
 ...generates the test assertion `(is (= 42 (/ 714 17)))`.
 For more detailed examples and inline options, see:
 
-* link:doc/example.adoc[Asciidoctor example]
+* link:doc/example.adoc[AsciiDoc example]
 * link:doc/example.md[CommonMark example]
 
 

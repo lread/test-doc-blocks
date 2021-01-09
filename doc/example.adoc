@@ -1,4 +1,4 @@
-= AsciiDoctor test-doc-blocks Example
+= AsciiDoc test-doc-blocks Example
 :toc:
 
 Test-doc-blocks will find Clojure source code blocks in your documents and generate tests for them.
@@ -70,7 +70,7 @@ It is sometimes just nice to know that your code snippit will run without except
 == Inline Options
 You can, to some limited extent, communicate your intent to test-doc-blocks.
 
-Test-doc-blocks will look for Asciidoctor comments that begin with `:test-doc-blocks`.
+Test-doc-blocks will look for AsciiDoc comments that begin with `:test-doc-blocks`.
 
 It currently understands four options:
 
@@ -92,7 +92,7 @@ You can change this by including the `:test-doc-blocks/apply` option:
 
 By default test-doc-blocks will create tests for all Clojure code blocks it finds.
 
-Tell test-doc-blocks to skip the next Clojure code block via the following Asciidoctor comment:
+Tell test-doc-blocks to skip the next Clojure code block via the following AsciiDoc comment:
 
 [source,asciidoctor]
 ....
@@ -110,7 +110,7 @@ Tell test-doc-blocks to skip the next Clojure code block via the following Ascii
 If you don't tell test-doc-blocks what namespace you want tests in, it will come up with one based on the document filename.
 For this file, test-doc-blocks, up to this point, has been generating tests to `example-adoc-test`.
 
-If this does not work for you, you can override this default in via an Asciidoctor comment:
+If this does not work for you, you can override this default in via an AsciiDoc comment:
 
 [source,asciidoctor]
 ....
@@ -225,7 +225,7 @@ user=> (into [] {:a 1})
 ## Section Titles
 Test-doc-blocks will try to give each test block some context by including its filename, section title and starting line number.
 
-It recognizes that Asciidoctor recognizes CommonMark style single line headers.
+It recognizes that AsciiDoc recognizes CommonMark style single line headers.
 
 [source,markdown]
 ----
@@ -233,7 +233,7 @@ It recognizes that Asciidoctor recognizes CommonMark style single line headers.
 ----
 
 I think there is also support for 2 line headers but the rules might be a differ a bit from CommonMark.
-As 2 line CommonMark headers in a Asciidoctor file should be rare, we'll not try to parse these variants in Asciidoctor docs for now:
+As 2 line CommonMark headers in a AsciiDoc file should be rare, we'll not try to parse these variants in AsciiDoc docs for now:
 
 [source,markdown]
 ----
@@ -258,7 +258,7 @@ This code block should be include "Section Titles" as part of the context for it
 
 ## Support for CommonMark Code Block Syntax
 
-Did you know Asciidoctor supports CommonMark syntax for section headings and code blocks?
+Did you know AsciiDoc supports CommonMark syntax for section headings and code blocks?
 
 Well it does! And test-doc-blocks recognizes this fact.
 
