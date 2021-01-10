@@ -148,7 +148,7 @@ Changing the test-ns is useful for code blocks that need to be isolated.
 
 By default, test-doc-blocks generates `.cljc` tests.
 
-You can override this default on the command line via `:platform` and via inline option via `test-doc-blocks/platform`.
+You can override this default on the command line via `:platform` and via inline option via `:test-doc-blocks/platform`.
 Valid values are:
 
 - `:cljc` - the default - generates `.cljc` test files

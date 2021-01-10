@@ -119,7 +119,7 @@ For more detailed examples and inline options, see:
 * link:doc/example.md[CommonMark example]
 
 
-The test-doc-blocks link:deps.edn[deps.edn] has some aliases that might be useful examples:
+The test-doc-blocks link:deps.edn[deps.edn] has some aliases that might server as useful examples:
 
 * `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
 Invoke for this project via: `clj -M:isolated/cljs-test-runner`
