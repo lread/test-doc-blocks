@@ -20,7 +20,6 @@
              (map #(update % :block-text inline-ns/remove-forms))
              (map #(assoc % :prepped-block-text (body-prep/prep-block-for-conversion-to-test (:block-text %))))
              (map #(assoc % :test-body (test-body/to-test-body (:prepped-block-text %))))
-             ;; TODO: I guess I should read the test-ns as strs in first place
              (map #(update % :test-doc-blocks/test-ns str))
              (sort-by (juxt :test-doc-blocks/test-ns :test-doc-blocks/platform :doc-filename :line-no))
              (group-by (juxt :test-doc-blocks/test-ns :test-doc-blocks/platform))
