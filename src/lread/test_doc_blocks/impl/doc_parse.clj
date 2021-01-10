@@ -209,9 +209,9 @@
   - :line-no - line number at start of block
   - :header - last header found before code block
   - :block-text - content of block in string "
-  ;; TODO: close da damn reader
   ([doc-filename platform]
-   (parse-doc-code-blocks doc-filename platform (io/reader doc-filename)))
+   (with-open [rdr (io/reader doc-filename)]
+     (parse-doc-code-blocks doc-filename platform rdr)))
   ;; this arity to support REPL testing via string reader
   ([doc-filename platform rdr]
    (let [parsers (parsers-for doc-filename)]
