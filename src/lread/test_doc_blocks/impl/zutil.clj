@@ -1,4 +1,5 @@
 (ns lread.test-doc-blocks.impl.zutil
+  "Misc rewrite-cljc zipper utils."
   (:require [rewrite-cljc.zip :as z]))
 
 (defn zdepth [zloc]

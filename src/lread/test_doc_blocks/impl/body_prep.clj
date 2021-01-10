@@ -1,4 +1,5 @@
 (ns lread.test-doc-blocks.impl.body-prep
+  "Prep a doc block to be converted into a test."
   (:require [clojure.string :as string]))
 
 (defn prep-block-for-conversion-to-test

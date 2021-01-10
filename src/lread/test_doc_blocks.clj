@@ -44,7 +44,7 @@
     (println "\nAnd, as requested, skipping:")
     (print-table! (filter :test-doc-blocks/skip parsed) 1)))
 
-(defn copy-runtime! [target-root]
+(defn- copy-runtime! [target-root]
   (let [runtime-path "lread/test_doc_blocks/runtime.cljc"
         runtime-src (io/resource runtime-path)
         runtime-target (io/file target-root runtime-path)]

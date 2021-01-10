@@ -1,4 +1,5 @@
 (ns lread.test-doc-blocks.impl.amalg-ns
+  "Support for amalgamating refs from found (require ...) and (import ...) forms."
   (:require [clojure.set :as cset]
             [clojure.tools.reader :as reader]))
 

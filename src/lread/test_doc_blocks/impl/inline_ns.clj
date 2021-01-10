@@ -1,4 +1,5 @@
 (ns lread.test-doc-blocks.impl.inline-ns
+  "Support for finding a removing (require ...) and (import ...) forms."
   (:require [lread.test-doc-blocks.impl.zutil :as zutil]
             [rewrite-cljc.zip :as z]))
 
