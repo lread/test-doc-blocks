@@ -22,7 +22,7 @@
                    (filter #(.isFile %))
                    (map #(string/replace (str %) expected-dir "")))]
     ;; sanity check files count
-    (is (= 10 (count files)))
+    (is (= 14 (count files)))
     (run!
      (fn [filename]
        ;; kaocha displays diffs beautifully for seqs of strings

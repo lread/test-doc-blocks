@@ -5,17 +5,17 @@ Test-doc-blocks will find Clojure source code blocks in your documents and gener
 
 The Basics
 --
-
+A test is generated for each Clojure code block.
 Assertions are automatically generated for:
 
-- REPL session code blocks
+- REPL session style prompts:
 
     ```Clojure
     ;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates to the expected 6
     user=> (+ 1 2 3)
     6
     ``` 
-- Editor style code blocks currently offer more features:
+- Editor style eval to comment, with some extras:
 
    ```Clojure
    ;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates to the expected 10
@@ -31,22 +31,32 @@ Assertions are automatically generated for:
    (println "hey there!")
    ;; stdout=> hey there!
    
-   ;; multiple stdout lines can be verified like so (notice the single ;):
+   ;; multiple stdout lines can be verified like so (notice the use of single ;):
    (println "is this right?\nor not?")
    ;; =stdout=>
    ; is this right?
    ; or not?
+   ```
 
-   ;; sometimes we might care about evaluated result, stderr and stdout
-   ;; TODO: reader conditionals makes this example awkward
+   Sometimes we might care about evaluated result, stderr and stdout.
+   <!-- #:test-doc-blocks {:platform :clj :test-ns example-md-out-test} -->
+   ```Clojure
+   ;; A snippit of Clojure where we check result, stderr and stdout
    (do
      (println "To out I go")
-     #?(:clj
-        (binding [*out* *err*]
-          (println "To err is human"))
-        :cljs
-        (binding [*print-fn* *print-err-fn*]
-          (println "To err is human")))
+     (binding [*out* *err*] (println "To err is human"))
+     (* 9 9))
+   ;; => 81
+   ;; =stderr=> To err is human
+   ;; =stdout=> To out I go
+   ```
+
+   <!-- #:test-doc-blocks {:platform :cljs :test-ns example-md-out-test} -->
+   ```Clojure
+   ;; And the same idea for ClojureScript
+   (do
+     (println "To out I go")
+     (binding [*print-fn* *print-err-fn*] (println "To err is human"))
      (* 9 9))
    ;; => 81
    ;; =stderr=> To err is human

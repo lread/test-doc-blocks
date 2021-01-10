@@ -6,6 +6,6 @@
             [clojure.string :as string]))
 
 (clojure.test/deftest block-1
-  (clojure.test/testing  "doc/example.adoc - line 135 - Specifying Test Namespace"
+  (clojure.test/testing  "doc/example.adoc - line 148 - Specifying Test Namespace"
 ;; this code block will generate tests under example-adoc-new-ns.ns1-test
 (clojure.test/is (= '"1, 2, 3" (string/join ", " [1 2 3])))))

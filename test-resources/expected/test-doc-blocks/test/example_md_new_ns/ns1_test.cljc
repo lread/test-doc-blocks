@@ -6,6 +6,6 @@
             [clojure.string :as string]))
 
 (clojure.test/deftest block-1
-  (clojure.test/testing  "doc/example.md - line 127 - Specifying Test Namespace"
+  (clojure.test/testing  "doc/example.md - line 137 - Specifying Test Namespace"
 ;; this code block will generate tests under example-md-new-ns.ns1-test
 (clojure.test/is (= '"1, 2, 3" (string/join ", " [1 2 3])))))
