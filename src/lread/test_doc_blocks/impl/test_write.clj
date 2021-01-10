@@ -15,7 +15,7 @@
   (string/join " - " (keep identity [doc-filename (str "line " line-no) header])))
 
 (defn- expand-refs [refs]
-  {:common (-> refs :common vec sort)
+  {:common (->> refs :common vec (sort-by str))
    :reader-cond (->> (dissoc refs :common)
                      (map (fn [[k v]] [k v]))
                      (sort-by first)

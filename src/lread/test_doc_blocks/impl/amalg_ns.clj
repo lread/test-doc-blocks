@@ -1,5 +1,31 @@
 (ns lread.test-doc-blocks.impl.amalg-ns
-  "Support for amalgamating refs from found (require ...) and (import ...) forms."
+  "Support for amalgamating refs from found (require ...) and (import ...) forms.
+
+  Here we try to amalgate the forms of interest we found via lread.test-doc-blocks.impl.inline-ns.
+  The end goal is to plunk these into the generated test ns declaration.
+
+  Some attempt is made to cover popular syntaxes.
+  But none yet to support, for example libspec for require.
+  For example we understand:
+
+  (require 'clojure.string)
+  (require '[clojure.string :as str])
+
+  But do not handle:
+  (require ['clojure.string :as 'str])
+  (require '(clojure string))
+
+  Amalgation is not too ambitious, it will remove duplicates, but the following, for example, will remain distinct:
+
+  '[clojure.string :as string]
+  '[clojure.string]
+
+  As long as aliases do not clash, the code should compile.
+
+  Clashes will occur for things like the following contrived example:
+
+  '[clojure.string :as string]
+  '[clojure.set :as string]"
   (:require [clojure.set :as cset]
             [clojure.tools.reader :as reader]))
 
@@ -9,7 +35,7 @@
          (str (format "(do %s)" ns-ref)))))
 
 (defn- parse-requires [requires feature]
-  ;; will not normalize clj shorthand
+  ;; will not normalize clj shorthand at this time
   (->> requires
        (mapcat #(read-ns-ref % feature))
        (remove empty?)
@@ -26,7 +52,7 @@
        (mapcat #(if (and (list? %) (list? (first %))) % [%])) ;; flatten
        (map #(if (= 'quote (first %)) (rest %) %)) ;; turf quote if present
        (map #(if (vector? (first %)) (first %) %)) ;; flatten
-       (mapcat #(if (seq (rest %))
+       (mapcat #(if (seq (rest %)) ;; normalize shorthand to fully qualified
                (map
                 (fn [suffix] (symbol (str (first %) "." suffix)))
                 (rest %))

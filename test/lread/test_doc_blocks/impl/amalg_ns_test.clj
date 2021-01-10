@@ -12,14 +12,13 @@
                                 "(require 'moo.cow.woof2)"]))))
   (testing "duplicate requires"
     (is (= {:common #{'moo.cow.woof1 'moo.cow.woof2 'hello.milk.dud}}
-           (sut/amalg-requires [;; TODO: are 2 requires supported by accident?
-                                "(require 'moo.cow.woof1) (require 'hello.milk.dud)"
+           (sut/amalg-requires ["(require 'moo.cow.woof1) (require 'hello.milk.dud)"
                                 "(require 'moo.cow.woof2)"
                                 "(require 'hello.milk.dud)"]))))
   (testing "platform requires"
     (is (= {:common #{'three 'five 'six 'seven '[x :as y]}
-            :cljs #{'four '[w :as w]}
-            :clj #{'one 'two '[w1 :as w1]}
+            :cljs #{'four '[w :as w] 'ten}
+            :clj #{'one 'two '[w1 :as w1] 'nine}
             :cljr #{'eight}}
            (sut/amalg-requires ["#?(:clj (require 'one) :cljs (require 'three))"
                                 "#?(:clj (require 'two) :cljs (require 'three))"
@@ -27,6 +26,7 @@
                                 "#?(:clj (require 'three))"
                                 "#?(:cljr (require 'three))"
                                 "#?(:cljr (require 'eight))"
+                                "#?@(:clj [(require 'nine)] :cljs [(require 'ten)])"
                                 "(require '[x :as y] #?(:cljs '[w :as w] :clj '[w1 :as w1]))"
                                 "(require 'five 'six 'seven)"]))))
   (testing "various syntaxes"
@@ -44,6 +44,7 @@
   (testing "various syntaxes"
     (is (= {:common #{'my.import 'my.import.one 'my.import.two 'binky.banky}}
            (sut/amalg-imports ["(import 'my.import) (import 'binky.banky)"
+                               ;; TODO: this might be invalid? According to clj-kondo?
                                "(import '[my.import])"
                                "(import '[my.import one two])"
                                "(import 'my.import.one)"])))))

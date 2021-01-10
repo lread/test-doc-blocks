@@ -1,5 +1,25 @@
 (ns lread.test-doc-blocks.impl.inline-ns
-  "Support for finding a removing (require ...) and (import ...) forms."
+  "Support for finding a removing (require ...) and (import ...) forms.
+  We'll call these forms of interest.
+
+  Inline requires must be toplevel in Clojure and aren't supported outside the REPL for ClojureScript.
+  Our end goal is to move inline forms of interest up into our generated test ns declaration to support Clojure and ClojureScript.
+
+  Current strategy is to search for top-level forms that contain a form of interest.
+  It should mostly work.
+
+  We'll find:
+
+  (require ...)
+  (require #?(...) ?(...)...)
+  #?(:... (require ...))
+
+  But we'll also remove these.
+  And that won't always be the right thing to do when they are not top level forms.
+  The containing form may contain other forms that are not of interest to us.
+
+  We'll start with this strategy and see how it works out."
+
   (:require [lread.test-doc-blocks.impl.zutil :as zutil]
             [rewrite-cljc.zip :as z]))
 

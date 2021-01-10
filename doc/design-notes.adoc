@@ -43,12 +43,11 @@ This allows us to distinguish output from assertion tokens so we can have things
 
 Still to ponder:
 
-* I'm fine with test generation including whatever deps make sense.
-But I'd like test runtime to be truly free of any imposed deps including test-doc-blocks.
-I have one macro remaining.
-Perhaps I'll just copy of this ns at test generation time.
-* Add metadata feature I mentioned above
-* Allow a code block to target .clj or .cljs, currently only spitting to .cljc.
+* Sean's readme project doesn't wrap code blocks without assertions into tests.
+Test-doc-blocks currently does.
+My thinking was that it would be nice to get some context from the test runner on assert-less errant code blocks.
+But... I might have been wrong.
+Sean's solution allows for setup subsequent tests and mine does not.
 
 === Feedback from community
 

@@ -97,7 +97,7 @@
                      "doc/example.adoc"]
               :platform :cljs})
 
-  (gen-tests {:docs ["doc/erp.adoc"]})
+  (gen-tests {:docs ["doc/example.adoc"]})
 
   (gen-tests {:docs ""})
 

@@ -263,6 +263,34 @@ CommonMark syntax gives meaning to indented code blocks.
 
 # Nuances
 
+## Inline requires and imports
+
+It is common for REPL style code block examples to include inline requires and imports.
+
+Test-doc-blocks will make an honest attempt to lift these inline requires up into the ns declaration of the generated test.
+This allows the generated tests to be run by ClojureScript which only supports inline requires in the REPL.
+
+Test-doc-blocks should be able to handle common import and require formats.
+If we've missed some, let us know.
+
+<!-- #:test-doc-blocks{:test-ns example-md-inline-ns-test} -->
+```Clojure
+;; Stick the basics for requires, shorthand notation isn't supported
+
+;; Some examples:
+(require '[clojure.string :as string])
+(require '[clojure.string])
+(require 'clojure.string)
+(require '[clojure.string :as string] '[clojure.set :as cset])
+
+;; For cljc code examples it is fine for your requires and imports to contain, or be wrapped by, reader conditionals
+
+;; Some examples of supported imports
+#?@(:clj [(import 'java.util.List)
+          (import '[java.util List Queue Set])]
+    :cljs [(import 'goog.math.Long '[goog.math Vec2 Vec3])])
+```
+
 ## When Libraries Override pr
 
 The REPL makes use of `pr` to output what it has evaluated.

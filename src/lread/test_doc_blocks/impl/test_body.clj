@@ -137,7 +137,7 @@
 (defn- add-dummy-assertion [test-body]
   (-> test-body
       z/of-string
-      z/up
+      (#(or (z/up %) %))
       (z/append-child* (n/newlines 1))
       (z/append-child* (n/comment-node " test-doc-blocks dummy assertion to appease tools that fail on no assertions"))
       (z/append-child* (n/newlines 1))
@@ -170,13 +170,16 @@ user=> (* 5 6)
 
 ")
 
-  (-> s
+
+
+  (-> ";; booya"
       z/of-string
-      z/right
+      z/up
       z/right
       z/node
       meta)
 
+  (add-dummy-assertion ";; booya")
 
   (println (to-test-body s))
 
