@@ -316,6 +316,44 @@ If we've missed one, let us know.
     :cljs [(import 'goog.math.Long '[goog.math Vec2 Vec3])])
 ----
 
+=== Test Run Order
+
+In the general case, running tests in no specific or random order is a good thing.
+In the case of test-doc-blocks, this might not be what you want.
+
+If your code blocks are self-contained examples, then test run order won't be an issue for you.
+If your separate code blocks represent a larger flow, then order is important.
+
+If we start in one code block...
+[source,clojure]
+----
+(def var-block1 (+ 1 2 3))
+----
+
+...and continue in another:
+[source,clojure]
+----
+(def var-block2 (+ 4 5 6))
+
+(+ var-block1 var-block2)
+;; => 21
+----
+
+...and then maybe another:
+[source,clojure]
+----
+(+ var-block1 var-block2 79)
+;; => 100
+----
+
+\... then run order is important to your generated tests.
+
+Test-doc-blocks makes use of `test-ns-hook` in generated tests to specify the run order be the same as the doc blocks order in your documents.
+
+Kaocha does not support `test-ns-hook`.
+It will by default randomize the order of tests for each test run.
+For Kaocha, randomization can be disabled from the command line via `--no-randomize` or in its `tests.edn` via `:randomize? false`.
+
 === When Libraries Override pr
 
 The REPL makes use of `pr` to output what it has evaluated.

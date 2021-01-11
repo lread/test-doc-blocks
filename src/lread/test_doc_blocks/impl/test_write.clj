@@ -54,10 +54,10 @@
 (string/join "!" ["bah" nil "boo"])
 
 
-(defn- test-var [block-ndx]
+(defn- test-var [test]
   (let [meta-data (when-let [md (:test-doc-blocks/meta test)]
                     (str "^" (pr-str md)))
-        name (str "block-" block-ndx)]
+        name (:test-name test)]
     (if meta-data
       (str meta-data " " name)
       name)))
@@ -65,17 +65,31 @@
 (defn- test-defs [tests]
   (str (->> (reduce (fn [acc t]
                       (conj acc (str
-                                 "(clojure.test/deftest " (test-var (inc (count acc))) "\n"
+                                 "(clojure.test/deftest " (test-var t) "\n"
                                  "  (clojure.test/testing " " \"" (testing-text t) "\"\n"
                                  (:test-body t) "))")))
                     []
                     tests)
             (string/join "\n\n"))))
 
+(defn- test-ns-hook
+  "To enforce tests running in order, we provide a test-ns-hooks.
+
+  Koacha does not support this feature, but can be asked not to randomize tests.
+  In this case it seems to run them in alphabetical sort order."
+  [tests]
+  (str
+   "\n\n(defn test-ns-hook [] "
+   (string/join " " (mapv #(format "(%s)" (:test-name %)) tests))
+   ")")
+  )
+
 (defn write-tests!
   "Write out `tests` to test namespace `test-ns` under dir `target-root`"
   [target-root {:keys [test-ns platform ns-refs tests]}]
-  (let [test-fname (io/file target-root (fname-for-ns test-ns platform))]
+  (let [test-fname (io/file target-root (fname-for-ns test-ns platform))
+        tests (map-indexed (fn [ndx t] (assoc t :test-name (format "block-%04d" (inc ndx)))) tests)]
     (io/make-parents test-fname)
     (spit test-fname (str (ns-declaration test-ns platform ns-refs) "\n"
-                          (test-defs tests)))))
+                          (test-defs tests)
+                          (test-ns-hook tests)))))

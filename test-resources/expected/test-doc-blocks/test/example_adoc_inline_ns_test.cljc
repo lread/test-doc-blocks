@@ -9,7 +9,7 @@
             [clojure.set :as cset])
   (:import #?(:clj java.util.List java.util.Queue java.util.Set :cljs goog.math.Long goog.math.Vec2 goog.math.Vec3)))
 
-(clojure.test/deftest block-1
+(clojure.test/deftest block-0001
   (clojure.test/testing  "doc/example.adoc - line 302 - Inline requires and imports"
 ;; Stick the basics for requires, shorthand notation isn't supported
 
@@ -20,3 +20,5 @@
 
 ; test-doc-blocks dummy assertion to appease tools that fail on no assertions
 (clojure.test/is (= '"dummy" "dummy"))))
+
+(defn test-ns-hook [] (block-0001))
