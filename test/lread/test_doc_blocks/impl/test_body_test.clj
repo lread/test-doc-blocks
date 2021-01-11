@@ -9,15 +9,15 @@
 (defn tlines [t]
   (string/split-lines t))
 
-(defmacro lsug [fn & lines]
-  `(tlines (~fn (tbody ~@lines))))
+(defmacro lsug [f & lines]
+  `(tlines (~f (tbody ~@lines))))
 
 (def dummy-assertion [""
                       "; test-doc-blocks dummy assertion to appease tools that fail on no assertions"
                       "(clojure.test/is (= '\"dummy\" \"dummy\"))"])
 
-(defn- out-assertion [type expected]
-  (str "  (clojure.test/is (= " expected " (clojure.string/split-lines actual-" type ")))") )
+(defn- out-assertion [atype expected]
+  (str "  (clojure.test/is (= " expected " (clojure.string/split-lines actual-" atype ")))") )
 
 (defn- out-assertion-block [actual assertions]
   (concat

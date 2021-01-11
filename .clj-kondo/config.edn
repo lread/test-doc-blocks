@@ -1,3 +1,4 @@
 {:config-paths ^:replace []
  :linters
- {:unsorted-required-namespaces {:level :warning}}}
+ {:shadowed-var {:level :warning}
+  :unsorted-required-namespaces {:level :warning}}}

@@ -5,8 +5,8 @@
 
 (defn- fname-for-ns
   "Converts `ns-name` to a cljc file path."
-  [ns-name platform]
-  (-> ns-name
+  [ns-nom platform]
+  (-> ns-nom
       (string/replace "-" "_")
       (string/replace "." "/")
       (str "." (name platform))))
@@ -54,13 +54,13 @@
 (string/join "!" ["bah" nil "boo"])
 
 
-(defn- test-var [test]
-  (let [meta-data (when-let [md (:test-doc-blocks/meta test)]
+(defn- test-var [tst]
+  (let [meta-data (when-let [md (:test-doc-blocks/meta tst)]
                     (str "^" (pr-str md)))
-        name (:test-name test)]
+        test-name (:test-name tst)]
     (if meta-data
-      (str meta-data " " name)
-      name)))
+      (str meta-data " " test-name)
+      test-name)))
 
 (defn- test-defs [tests]
   (str (->> (reduce (fn [acc t]

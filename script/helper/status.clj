@@ -1,4 +1,5 @@
 (ns helper.status
+  (:refer-clojure :exclude [type])
   (:require [clojure.string :as string]))
 
 (def format-to-column 80)
