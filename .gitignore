@@ -3,4 +3,5 @@
 /cljs-test-runner-out
 /.clj-kondo/.cache
 /.cpcache
+/.lsp
 .DS_Store
