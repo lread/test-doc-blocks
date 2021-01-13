@@ -84,6 +84,7 @@ It currently understands four options:
 - `:test-doc-blocks/skip` - skips the next code block
 - `:test-doc-blocks/test-ns` - specifies the test namespace 
 - `:test-doc-blocks/platform` - specifies Clojure file type to generate for test ns
+- `:test-doc-blocks/meta` - attach metadata to generated tests
 
 ### Applying Options
 
