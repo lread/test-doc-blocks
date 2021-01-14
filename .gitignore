@@ -1,6 +1,7 @@
 /.nrepl-port
 /target
 /cljs-test-runner-out
+/.calva
 /.clj-kondo/.cache
 /.cpcache
 /.lsp
