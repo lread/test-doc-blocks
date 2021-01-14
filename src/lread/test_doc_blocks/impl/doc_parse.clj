@@ -63,7 +63,7 @@
 (defn- normalize-lang
   "Normalized lang specified in code block to something consistent for Clojure blocks."
   [lang]
-  (if (and lang (re-matches #"(?i)Clojure.*" lang))
+  (if (and lang (re-matches #"(?i)(Clojure.*|clj|cljs|cljc)" lang))
     "Clojure"
     lang))
 

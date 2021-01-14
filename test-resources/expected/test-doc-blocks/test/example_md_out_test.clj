@@ -4,7 +4,7 @@
             lread.test-doc-blocks.runtime))
 
 (clojure.test/deftest block-0001
-  (clojure.test/testing  "doc/example.md - line 43 - The Basics"
+  (clojure.test/testing  "doc/example.md - line 45 - The Basics"
 ;; A snippit of Clojure where we check result, stderr and stdout
 (let [[actual actual-out actual-err] (lread.test-doc-blocks.runtime/eval-capture (do
   (println "To out I go")

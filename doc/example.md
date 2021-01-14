@@ -6,6 +6,8 @@ Test-doc-blocks will find Clojure source code blocks in your documents and gener
 The Basics
 --
 A test is generated for each Clojure code block.
+Any code block with with a (case insenstive) language of `clj` `cljs` `cljc` or starting with `Clojure` is recognized as a Clojure code block.
+
 Assertions are automatically generated for:
 
 - REPL session style prompts:
@@ -17,7 +19,7 @@ Assertions are automatically generated for:
     ``` 
 - Editor style eval to comment, with some extras:
 
-   ```Clojure
+   ```cljc
    ;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates to the expected 10
    (+ 1 2 3 4)
    ;; => 10
@@ -40,7 +42,7 @@ Assertions are automatically generated for:
 
    Sometimes we might care about evaluated result, stderr and stdout.
    <!-- #:test-doc-blocks {:platform :clj :test-ns example-md-out-test} -->
-   ```Clojure
+   ```clj
    ;; A snippit of Clojure where we check result, stderr and stdout
    (do
      (println "To out I go")
@@ -52,7 +54,7 @@ Assertions are automatically generated for:
    ```
 
    <!-- #:test-doc-blocks {:platform :cljs :test-ns example-md-out-test} -->
-   ```Clojure
+   ```cljs
    ;; And the same idea for ClojureScript
    (do
      (println "To out I go")
