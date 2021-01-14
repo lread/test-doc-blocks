@@ -65,29 +65,30 @@
   "Generate tests for code blocks found in markdown files.
   Invoke from clojure CLI with -X."
   [opts]
-  (if-let [errs (validate/errors [:map {:closed true}
-                                  [:target-root {:optional true} string?]
-                                  [:docs {:optional true} [:vector string?]]
-                                  [:platform {:optional true} [:enum :clj :cljs :cljc]]]
-                                 opts)]
-    (do (println "Error, invalid args.")
-        (println (pr-str errs))
-        (System/exit 1))
-    (let [{:keys [target-root docs platform]} (merge default-opts opts )
-          target-root (str (io/file target-root "test-doc-blocks"))]
-      (when (.exists (io/file target-root))
-        (delete-dir! target-root))
-      (let [target-root (str (io/file target-root "test"))
-            parsed (mapcat #(doc-parse/parse-doc-code-blocks % platform) docs)]
-        (report-on-found! parsed)
-        (let [tests (process/convert-to-tests parsed)]
-          (if (seq tests)
-            (do (println "\nGenerating tests to:" target-root)
-                (run! #(test-write/write-tests! target-root %) tests)
-                (copy-runtime! target-root) )
-            (do (println "\nError, no tests to generate.")
-                (System/exit 2))))
-        (println "Done")))))
+  (let [opts (merge default-opts opts)]
+    (if-let [errs (validate/errors [:map {:closed true}
+                                    [:target-root {:optional true} string?]
+                                    [:docs {:optional true} [:vector string?]]
+                                    [:platform {:optional true} [:enum :clj :cljs :cljc]]]
+                                   opts)]
+      (do (println "Error, invalid args.")
+          (println (pr-str errs))
+          (System/exit 1))
+      (let [{:keys [target-root docs platform]} (merge default-opts opts)
+            target-root (str (io/file target-root "test-doc-blocks"))]
+        (when (.exists (io/file target-root))
+          (delete-dir! target-root))
+        (let [target-root (str (io/file target-root "test"))
+              parsed (mapcat #(doc-parse/parse-doc-code-blocks % platform) docs)]
+          (report-on-found! parsed)
+          (let [tests (process/convert-to-tests parsed)]
+            (if (seq tests)
+              (do (println "\nGenerating tests to:" target-root)
+                  (run! #(test-write/write-tests! target-root %) tests)
+                  (copy-runtime! target-root))
+              (do (println "\nError, no tests to generate.")
+                  (System/exit 2))))
+          (println "Done"))))))
 
 (comment
   (gen-tests {:target-root "./target/"
