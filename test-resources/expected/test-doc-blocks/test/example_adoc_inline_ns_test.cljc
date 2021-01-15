@@ -7,7 +7,7 @@
             [clojure.string]
             [clojure.string :as string]
             [clojure.set :as cset])
-  (:import #?(:clj java.util.List java.util.Queue java.util.Set :cljs goog.math.Long goog.math.Vec2 goog.math.Vec3)))
+  (:import #?@(:clj [java.util.List java.util.Queue java.util.Set] :cljs [goog.math.Long goog.math.Vec2 goog.math.Vec3])))
 
 (clojure.test/deftest block-0001
   (clojure.test/testing  "doc/example.adoc - line 305 - Inline requires and imports"

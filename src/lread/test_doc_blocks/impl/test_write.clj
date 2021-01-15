@@ -15,15 +15,15 @@
   (string/join " - " (keep identity [doc-filename (str "line " line-no) header])))
 
 (defn- expand-refs [refs]
-  {:common (->> refs :common vec (sort-by str))
+  {:common (->> refs :common vec (sort-by str) vec)
    :reader-cond (->> (dissoc refs :common)
                      (map (fn [[k v]] [k v]))
                      (sort-by first)
-                     (mapcat (fn [[platform elems]] (concat [platform] (sort-by str elems)))))})
+                     (mapcat (fn [[platform elems]] (concat [platform] [(vec (sort-by str elems))]))))})
 
 (defn- str-reader-cond [l]
   (when (seq l)
-    [(str "#?(" (string/join " " (map str l)) ")")]))
+    [(str "#?@(" (string/join " " (map str l)) ")")]))
 
 (defn- base-requires [platform]
   (let [base ['clojure.test 'clojure.string]
