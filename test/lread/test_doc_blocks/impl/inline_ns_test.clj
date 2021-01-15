@@ -1,5 +1,6 @@
 (ns lread.test-doc-blocks.impl.inline-ns-test
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.string :as string]
+            [clojure.test :refer [deftest testing is]]
             [lread.test-doc-blocks.impl.inline-ns :as sut]))
 
 (deftest find-inline-forms
@@ -17,16 +18,39 @@
     (is (= {:requires []
             :imports ["#?(:clj (import the.thing here))"]}
            (sut/find-forms "#?(:clj (import the.thing here))"))))
-  (testing "1 deep with sibs"
-    ;; TODO: bringing in sibs is not great... should either ignore this form or fail
-    ;; TODO: wait this is not valid, :clj is followed by 1 form
-    (is (= {:requires ["#?(:clj (require 'my.good.ns) (some other stuff))"]
+  (testing "deeper with sibs"
+    ;; TODO: brings in other code too.. not horrible.. not great
+    (is (= {:requires ["#?(:clj\n(do\n(some other code)(require '[cljs.reader :refer [read-string]])(more code)))"]
             :imports []}
-           (sut/find-forms "#?(:clj (require 'my.good.ns) (some other stuff))"))))
-  (testing "multiple requires as sibs 1 level deep"
-    ;; TODO: multiple requires/imports should be fine? double check with amalg alg
-    ;; WAIT: this is is not valid :clj is follow by 1 form
-    (is (= {:requires ["#?(:clj (require 'my.good.ns) (require 'another.good.ns))"]
-            :imports []}
-           (sut/find-forms "#?(:clj (require 'my.good.ns) (require 'another.good.ns))"))))
-  )
+           (sut/find-forms "#?(:clj\n(do\n(some other code)(require '[cljs.reader :refer [read-string]])(more code)))")))))
+
+(deftest remove-inline-forms
+  (testing "top levels"
+    (is (= "(some code) nil (some other code) nil"
+           (sut/remove-forms "(some code) (require '[hey there]) (some other code) (import '[good stuff])"))))
+  (testing "producing empty reader cond"
+    (is (= "#?(:clj nil)"
+           (sut/remove-forms "#?(:clj (require '[my.ns.here]))"))))
+  (testing "deeper"
+    (is (= (string/join "\n"
+                        ["(some code here)"
+                         "#?(:clj"
+                         "(do"
+                         " (other code)"
+                         " nil"
+                         " (more code)"
+                         " nil"
+                         " (still more code)"
+                         ")"
+                         ")"])
+           (sut/remove-forms (string/join "\n"
+                                          ["(some code here)"
+                                           "#?(:clj"
+                                           "(do"
+                                           " (other code)"
+                                           " (require '[all is good])"
+                                           " (more code)"
+                                           " (import '[my.stuff rocks])"
+                                           " (still more code)"
+                                           ")"
+                                           ")"]))))))

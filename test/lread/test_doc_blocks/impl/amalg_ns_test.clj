@@ -29,6 +29,12 @@
                                 "#?@(:clj [(require 'nine)] :cljs [(require 'ten)])"
                                 "(require '[x :as y] #?(:cljs '[w :as w] :clj '[w1 :as w1]))"
                                 "(require 'five 'six 'seven)"]))))
+
+  (testing "try deeper"
+    (is (= {:common #{}
+            :cljs #{'[cljs.reader :refer [read-string]]}}
+           (sut/amalg-requires ["#?(:cljs\n(do\n(require '[cljs.reader :refer [read-string]])))"]))))
+
   (testing "various syntaxes"
     ;; TODO: amalg my.ns1 and [my.ns1]?
     (is (= {:common #{'my.ns1 '[my.ns1] '[my.ns2] '[my.ns3 :as ns3]}}

@@ -28,9 +28,6 @@
        (= :token (z/tag (z/down zloc)))
        (= sym (z/sexpr (z/down zloc)))) )
 
-;; TODO: think about this: here were find top level forms that include lists starting with require or import
-;; the idea was to pick up reader conditonal wrapped requires and imports
-;; but those reader conditional may also contain other things
 (defn- inline-ns-of-interest? [sym]
   (fn pred? [zloc]
     (and (= 1 (zutil/zdepth zloc))
@@ -39,25 +36,29 @@
                  #(list-starting-with-sym? % sym)))))
 
 (defn- find-ns-forms-of-interest
+  "Returns forms of interest and direct parents.
+  Currently also returns any other of unintest forms in tree."
   [zloc sym]
   (let [zloc-top (z/edn* (z/root zloc))]
     (->> (z/find zloc-top z/next (inline-ns-of-interest? sym))
          (iterate #(z/find-next % z/next (inline-ns-of-interest? sym)))
-         (take-while identity))) )
+         (take-while identity))))
 
 (defn- remove-ns-forms-of-interest
+  "Replace forms of interest with nil.
+  We replace instead of remove to avoid having to deal with potentially empty reader conditionals."
   [zloc sym]
   (-> zloc
       z/root
       z/edn*
-      (z/prewalk (inline-ns-of-interest? sym)
-                 (fn action [zloc] (z/remove zloc)))))
+      (z/prewalk #(list-starting-with-sym? % sym)
+                 (fn action [zloc] (z/replace zloc 'nil)))))
 
 (defn find-forms
   "Returns map where `:requires` is a vector of inline `(require ...)` found in `block-text`
   and `:imports` is a vector of inline `(import ...)` found in `block-text`.
 
-  We search a max depth of 1 deep to catch requires that are wrapped by reader conditionals."
+  We search at depth of 1 to bring in parent forms which we assume to be do and/or reader conditionals."
   [block-text]
   (let [zloc (z/of-string block-text)]
     {:requires (->> (find-ns-forms-of-interest zloc 'require)

@@ -38,6 +38,9 @@
   ;; will not normalize clj shorthand at this time
   (->> requires
        (mapcat #(read-ns-ref % feature))
+       (tree-seq seq? identity)
+       (filter list?)
+       (filter #(= 'require (first %)))
        (remove empty?)
        (mapcat rest) ;; don't need 'require
        (mapcat rest) ;; don't need the quote
@@ -47,6 +50,9 @@
   ;; will normalize shorthand because it is common to clj and cljs
   (->> imports
        (mapcat #(read-ns-ref % feature))
+       (tree-seq seq? identity)
+       (filter list?)
+       (filter #(= 'import (first %)))
        (remove empty?)
        (map rest) ;; don't need 'import
        (mapcat #(if (and (list? %) (list? (first %))) % [%])) ;; flatten
@@ -100,6 +106,8 @@ Level)))"
                  "(require '[x :as y] #?(:cljs '[w :as w] :clj '[w1 :as :w1]))"
                  "(require '[doo :as da])"
                  "(require '[coo :as ca])"])
+
+
 
   (amalg-requires requires)
 

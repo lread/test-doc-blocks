@@ -8,6 +8,11 @@
   {:imports (amalg-ns/amalg-imports (mapcat #(get-in % [:ns-forms :imports]) tests))
    :requires (amalg-ns/amalg-requires (mapcat #(get-in % [:ns-forms :requires]) tests))})
 
+(defn- reader-wrap-block-text [{:keys [block-text test-doc-blocks/reader-cond]}]
+  (if reader-cond
+    (format "#?(%s\n(do\n%s\n))" reader-cond block-text)
+    block-text))
+
 (defn convert-to-tests
   "Takes parsed input [{block}...] and preps for output to
   [{:test-doc-blocks/test-ns ns1
@@ -16,6 +21,7 @@
         [parsed]
         (->> parsed
              (remove :test-doc-blocks/skip)
+             (map #(assoc % :block-text (reader-wrap-block-text %)))
              (map #(assoc % :ns-forms (inline-ns/find-forms (:block-text %))))
              (map #(update % :block-text inline-ns/remove-forms))
              (map #(assoc % :prepped-block-text (body-prep/prep-block-for-conversion-to-test (:block-text %))))

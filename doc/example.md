@@ -84,11 +84,12 @@ It currently understands four options:
 
 - `:test-doc-blocks/apply` - controls to what code blocks options are applied
 - `:test-doc-blocks/skip` - skips the next code block
+- `:test-doc-blocks/reader-cond` - wraps your code block in a reader conditional
 - `:test-doc-blocks/test-ns` - specifies the test namespace 
 - `:test-doc-blocks/platform` - specifies Clojure file type to generate for test ns
 - `:test-doc-blocks/meta` - attach metadata to generated tests
 
-### Applying Options
+### Applying Options - :apply
 
 By default, new options are applied to the next Clojure code block only.
 
@@ -97,7 +98,7 @@ You can change this by including the `:test-doc-blocks/apply` option:
 - `:next` - default - applies new options to next Clojure code block only
 - `:all-next` - applies new options to all subsequent code blocks in the document until specifically overridden with new opts
 
-### Skipping Code Blocks
+### Skipping Code Blocks - :skip
 
 By default test-doc-blocks will create tests for all Clojure code blocks it finds.
 
@@ -112,7 +113,45 @@ Tell test-doc-blocks to skip the next Clojure code block via the following Commo
 ```
 ~~~
 
-### Specifying Test Namespace
+### Wrap Test in a Reader Conditional - :reader-cond
+
+A cljc library might want to explain ClojureScript vs Clojure usage without using reader conditionals in the code block.
+
+To wrap the generated test for your code block in a reader conditional use the `:test-doc-blocks/reader-conditional` inline option.
+
+This can be especially handy to show differences in `(requires ...)` for clj and cljs in separate code blocks.
+Here's a somewhat contrived example.
+
+Clojure specific code:
+~~~markdown
+<!-- #:test-doc-blocks {:reader-cond :clj} -->
+```Clojure
+;; This code block will be wrapped in a #?(:clj (do ...))
+(require '[clojure.edn :refer [read-string]])
+```
+~~~
+
+ClojureScript specific code:
+~~~markdown
+<!-- #:test-doc-blocks {:reader-cond :cljs} -->
+```Clojure
+;; This code block will be wrapped in a #?(:cljs (do ...))
+(require '[cljs.reader :refer [read-string]])
+```
+~~~
+
+Later in doc, cross-platform cljc code that relies on the above:
+~~~markdown
+```Clojure
+;; And our generic cljc code:
+(read-string "[1 2 3]")
+=> [1 2 3]
+```
+~~~
+
+No special checking is done; but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
+
+### Specifying Test Namespace - :test-ns
 
 If you don't tell test-doc-blocks what namespace you want tests in, it will come up with one based on the document filename.
 For this file, test-doc-blocks, up to this point has been generating tests to `example-md-test`.
@@ -147,7 +186,7 @@ Changing the test-ns is useful for code blocks that need to be isolated.
 ```
 ~~~
 
-### Specifying The Platform
+### Specifying The Platform - :platform
 
 By default, test-doc-blocks generates `.cljc` tests.
 
@@ -180,7 +219,7 @@ EventType.CLICK
 ```
 ~~~
 
-### Specifying Metadata
+### Specifying Metadata - :meta
 Test runners support including and excluding tests based on truthy metadata.
 
 You can attach metadata to generated tests via the `:test-doc-blocks/meta` option.

@@ -38,6 +38,7 @@
   (if-let [errs (validate/errors [:map {:closed true}
                                   [:test-doc-blocks/platform {:optional true} [:enum :clj :cljs :cljc]]
                                   [:test-doc-blocks/skip {:optional true} boolean?]
+                                  [:test-doc-blocks/reader-cond {:optional true} [:enum :clj :cljs :cljr]]
                                   [:test-doc-blocks/test-ns {:optional true} symbol?]
                                   [:test-doc-blocks/meta {:optional true} [:or map? keyword?]]
                                   [:test-doc-blocks/apply {:optional true} [:enum :next :all-next]]]

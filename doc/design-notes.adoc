@@ -47,16 +47,30 @@ Still to ponder:
 Test-doc-blocks currently does.
 My thinking was that it would be nice to get some context from the test runner on assert-less errant code blocks.
 But... I might have been wrong.
-Sean's solution allows for setup subsequent tests and mine does not.
+Sean's solution allows for setup subsequent tests and mine does not. +
+UPDATE: Actually I think we are probably good here as long as tests are run in order.
 
 === Feedback from community
 
+I mentioned to @seancorfield that I was working on test-doc-blocks and he kindly enlisted as a the second alpha tester (after me).
+He gave it a whirl on honeysql and when he found a few problems I offered to give the honeysql develop branch a whirl and report back. I/we found:
+
+* Default cmd line args were borked. Fixed.
+* Bad `:doc` cmd line arg error message was too vague. Fixed.
+* Require/import refs were not being correctly migrated to ns when more than single. Fixed.
+* A difference in test-doc-blocks and the readme project is that test-doc-blocks always quotes expectations.
+We thought that maybe evaling the expectation might useful if only rarely. 
+It turns out we don't need this for honeysql after all so I'm going to hold off for now. 
+* I decided to try to run honeysql readme through cljs test runner too (readme project only did clj).
+The README `(require ...)` had to be updated for cljs. 
+And this made me think that an inline `reader-conditional` option might be nice. 
+Sometimes you want to show something for Clojure or ClojureScript users but don't want to show the reader conditional in your code block.
+
 I think this might have been from last days of December but I'm only recording it now:
 
-@sogaiu Kindly mentioned that my original idea for stdout markers did not allow for the output to contain the marker. Oops!
+* @sogaiu Kindly mentioned that my original idea for stdout markers did not allow for the output to contain the marker. Oops!
 He also prefers 80 chars width so was suggesting using up as little horizontal screen real estate as possible.
-
-@pez Mentioned that stdout and stderr will be printed as they occur for a REPL flow. (I'm ignoring this observation for now).
+* @pez Mentioned that stdout and stderr will be printed as they occur for a REPL flow. (I'm ignoring this observation for now).
 
 == 2020-Dec
 
