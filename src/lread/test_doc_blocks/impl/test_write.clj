@@ -51,9 +51,6 @@
                                      (string/join "\n    ")) ")"))
          ")\n")))
 
-(string/join "!" ["bah" nil "boo"])
-
-
 (defn- test-var [tst]
   (let [meta-data (when-let [md (:test-doc-blocks/meta tst)]
                     (str "^" (pr-str md)))
