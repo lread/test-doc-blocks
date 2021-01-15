@@ -105,34 +105,34 @@
 
 (defn- convert-repl-assertions [prepared-doc-body]
  (-> (loop [zloc (z/of-string prepared-doc-body)]
-                        (let [zloc (cond
-                           (not zloc)
-                           (throw (ex-info "unexpected error: zloc nil" {}))
+       (let [zloc (cond
+                    (not zloc)
+                    (throw (ex-info "unexpected error: zloc nil" {}))
 
-                           (z/end? zloc)
-                           (throw (ex-info "unexpected error: zloc end" {}))
+                    (z/end? zloc)
+                    (throw (ex-info "unexpected error: zloc end" {}))
 
-                           ;; REPL style has 1 expectation
-                           (and (token? zloc 'user=>) (-> zloc z/right z/right))
-                           (let [actual (z/right zloc)
-                                 expected-pairs [[(z/of-string "=>") (z/right actual)]]]
-                             (-> zloc
-                                 (replace-body-assert expected-pairs actual)))
+                    ;; REPL style has 1 expectation
+                    (and (token? zloc 'user=>) (-> zloc z/right z/right))
+                    (let [actual (z/right zloc)
+                          expected-pairs [[(z/of-string "=>") (z/right actual)]]]
+                      (-> zloc
+                          (replace-body-assert expected-pairs actual)))
 
-                           ;; Editor style can have multiple expectations
-                           (and (zassertion-token? zloc) (z/left zloc) (z/right zloc))
-                           (let [actual (z/left zloc)
-                                 expecteded-pairs (get-expected-pairs zloc) ]
-                             (-> zloc
-                                 z/left
-                                 (replace-body-assert expecteded-pairs actual)))
+                    ;; Editor style can have multiple expectations
+                    (and (zassertion-token? zloc) (z/left zloc) (z/right zloc))
+                    (let [actual (z/left zloc)
+                          expecteded-pairs (get-expected-pairs zloc) ]
+                      (-> zloc
+                          z/left
+                          (replace-body-assert expecteded-pairs actual)))
 
-                           :else
-                           zloc)]
-                (if (z/right zloc)
-                  (recur (z/right zloc))
-                  zloc)))
-            z/root-string) )
+                    :else
+                    zloc)]
+         (if (z/right zloc)
+           (recur (z/right zloc))
+           zloc)))
+     z/root-string) )
 
 (defn- add-dummy-assertion [test-body]
   (-> test-body
