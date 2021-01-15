@@ -110,7 +110,7 @@
                     (throw (ex-info "unexpected error: zloc nil" {}))
 
                     (z/end? zloc)
-                    (throw (ex-info "unexpected error: zloc end" {}))
+                    zloc
 
                     ;; REPL style has 1 expectation
                     (and (token? zloc 'user=>) (-> zloc z/right z/right))
@@ -127,11 +127,11 @@
                           z/left
                           (replace-body-assert expecteded-pairs actual)))
 
-                    :else
+                    :else ;; no change to node
                     zloc)]
-         (if (z/right zloc)
-           (recur (z/right zloc))
-           zloc)))
+         (if (z/end? zloc)
+           zloc
+           (recur (z/next zloc)))))
      z/root-string) )
 
 (defn- add-dummy-assertion [test-body]
@@ -172,12 +172,12 @@ user=> (* 5 6)
 
 
 
-  (-> ";; booya"
+  (-> "(hey joe)"
       z/of-string
-      z/up
-      z/right
-      z/node
-      meta)
+      z/next
+      z/next
+      z/next
+      z/end?)
 
   (add-dummy-assertion ";; booya")
 

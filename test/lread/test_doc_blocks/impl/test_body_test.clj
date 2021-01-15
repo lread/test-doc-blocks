@@ -155,3 +155,8 @@
                  "=> 789"
                  "=clj=> 99"
                  "=cljs=>")))) )
+
+(deftest converts-nested-repl-assert
+  (is (= ["(do (do (do (clojure.test/is (= '6 (+ 1 2 3))))))"]
+         (lsug sut/to-test-body
+               "(do (do (do (+ 1 2 3) => 6)))"))))
