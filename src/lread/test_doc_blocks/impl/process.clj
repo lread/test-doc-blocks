@@ -21,22 +21,6 @@
     (assoc block :block-text (format "#?(%s\n(do\n%s\n))" reader-cond block-text))
     block))
 
-(defn- find-inline-ns-forms
-  "Return block with a string vector of `:ns-forms` found in `:block-text`"
-  [block]
-  (try
-    (assoc block :ns-forms (inline-ns/find-forms (:block-text block)))
-    (catch Throwable e
-      (throw-with-block-context "find inline namespace forms" e block))))
-
-(defn- remove-inline-ns-forms
-  "Return block with `:block-text` absent of inline ns forms"
-  [block]
-  (try
-    (update block :block-text inline-ns/remove-forms)
-    (catch Throwable e
-      (throw-with-block-context "remove inline namespace forms" e block))))
-
 (defn- prep-block-for-conversion-to-test
   "Return block with new `:prepped-block-text`"
   [block]
@@ -44,6 +28,22 @@
     (assoc block :prepped-block-text (body-prep/prep-block-for-conversion-to-test (:block-text block)))
     (catch Throwable e
       (throw-with-block-context "prep block for conversion to test" e block)) ) )
+
+(defn- find-inline-ns-forms
+  "Return block with a string vector of `:ns-forms` found in `:prepped-block-text`"
+  [block]
+  (try
+    (assoc block :ns-forms (inline-ns/find-forms (:prepped-block-text block)))
+    (catch Throwable e
+      (throw-with-block-context "find inline namespace forms" e block))))
+
+(defn- remove-inline-ns-forms
+  "Return block with `:prepped-block-text` absent of inline ns forms"
+  [block]
+  (try
+    (update block :prepped-block-text inline-ns/remove-forms)
+    (catch Throwable e
+      (throw-with-block-context "remove inline namespace forms" e block))))
 
 (defn- create-test-body
   "Return block with new `:test-body`"
@@ -84,9 +84,9 @@
         (->> parsed
              (remove :test-doc-blocks/skip)
              (map reader-wrap-block-text)
+             (map prep-block-for-conversion-to-test)
              (map find-inline-ns-forms)
              (map remove-inline-ns-forms)
-             (map prep-block-for-conversion-to-test)
              (map create-test-body)
              restructure-to-tests
              (map amalgamate-ns-refs)))
