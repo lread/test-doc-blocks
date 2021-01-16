@@ -49,10 +49,12 @@
 
 (defn- token? [zloc token]
   (and (= :token (z/tag zloc))
+       (not (n/printable-only? (z/node zloc)))
        (= token (z/sexpr zloc))))
 
 (defn- zassertion-token? [zloc]
   (and (= :token (z/tag zloc))
+       (not (n/printable-only? (z/node zloc)))
        (assertion-token? (z/sexpr zloc))))
 
 (defn- requires-capture? [expected-pairs]
@@ -152,6 +154,7 @@
 
 (comment
 (z/right nil)
+
 
   (def s "hey
 
