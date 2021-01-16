@@ -8,10 +8,47 @@
   {:imports (amalg-ns/amalg-imports (mapcat #(get-in % [:ns-forms :imports]) tests))
    :requires (amalg-ns/amalg-requires (mapcat #(get-in % [:ns-forms :requires]) tests))})
 
-(defn- reader-wrap-block-text [{:keys [block-text test-doc-blocks/reader-cond]}]
+(defn- reader-wrap-block-text
+  "Return block with `:block-text` wrapped in reader conditional, if requested."
+  [{:keys [block-text test-doc-blocks/reader-cond] :as block}]
   (if reader-cond
-    (format "#?(%s\n(do\n%s\n))" reader-cond block-text)
-    block-text))
+    (assoc block :block-text (format "#?(%s\n(do\n%s\n))" reader-cond block-text))
+    block))
+
+(defn- find-inline-ns-forms
+  "Return block with a string vector of `:ns-forms` found in `:block-text`"
+  [block]
+  (assoc block :ns-forms (inline-ns/find-forms (:block-text block))))
+
+(defn- remove-inline-ns-forms
+  "Return block with `:block-text` absent of inline ns forms"
+  [block]
+  (update block :block-text inline-ns/remove-forms))
+
+(defn- prep-block-for-conversion-to-test
+  "Return block with new `:prepped-block-text`"
+  [block]
+  (assoc block :prepped-block-text (body-prep/prep-block-for-conversion-to-test (:block-text block))) )
+
+(defn- create-test-body
+  "Return block with new `:test-body`"
+  [block]
+  (assoc block :test-body (test-body/to-test-body (:prepped-block-text block))))
+
+(defn- restructure-to-tests
+  "Return blocks restructured to tests"
+  [blocks]
+  (->> blocks
+       (map #(update % :test-doc-blocks/test-ns str))
+       (sort-by (juxt :test-doc-blocks/test-ns :test-doc-blocks/platform :doc-filename :line-no))
+       (group-by (juxt :test-doc-blocks/test-ns :test-doc-blocks/platform))
+       (map (fn [[[test-ns platform] tests]] {:test-ns test-ns :platform platform :tests tests}))))
+
+(defn- amalgamate-ns-refs
+  "Returns test def `t` with new `:ns-refs`"
+  [t]
+  (assoc t :ns-refs (amalg-ns-refs (:tests t))))
+
 
 (defn convert-to-tests
   "Takes parsed input [{block}...] and preps for output to
@@ -21,16 +58,13 @@
         [parsed]
         (->> parsed
              (remove :test-doc-blocks/skip)
-             (map #(assoc % :block-text (reader-wrap-block-text %)))
-             (map #(assoc % :ns-forms (inline-ns/find-forms (:block-text %))))
-             (map #(update % :block-text inline-ns/remove-forms))
-             (map #(assoc % :prepped-block-text (body-prep/prep-block-for-conversion-to-test (:block-text %))))
-             (map #(assoc % :test-body (test-body/to-test-body (:prepped-block-text %))))
-             (map #(update % :test-doc-blocks/test-ns str))
-             (sort-by (juxt :test-doc-blocks/test-ns :test-doc-blocks/platform :doc-filename :line-no))
-             (group-by (juxt :test-doc-blocks/test-ns :test-doc-blocks/platform))
-             (map (fn [[[test-ns platform] tests]] {:test-ns test-ns :platform platform :tests tests}))
-             (map #(assoc % :ns-refs (amalg-ns-refs (:tests %))))))
+             (map reader-wrap-block-text)
+             (map find-inline-ns-forms)
+             (map remove-inline-ns-forms)
+             (map prep-block-for-conversion-to-test)
+             (map create-test-body)
+             restructure-to-tests
+             (map amalgamate-ns-refs)))
 
 (comment
   (->> (group-by (juxt :a :b) [{:a 1 :b 2 :c 3}
