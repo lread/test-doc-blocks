@@ -4,9 +4,8 @@
         org.clojure/tools.reader {:mvn/version "1.3.4"}
         doric/doric {:mvn/version "0.9.0"}
         metosin/malli {:mvn/version "0.2.1"}
-        lread/rewrite-clc-playground {;; grab the namespace branch to help me test latest
-                                      :git/url "https://github.com/lread/rewrite-cljc-playground.git"
-                                      :sha "e37103ae1b568bce9bc16e6095d3074d1cf9f719"}
+        lread/rewrite-cljc-playground {:git/url "https://github.com/lread/rewrite-cljc-playground.git"
+                                       :sha "c09689e955d650fe7564a955ae22a2f02b7352fe"}
         borkdude/sci {:mvn/version "0.2.1-alpha.1"}}
 
  :aliases {;; clojure -X support for local examples
