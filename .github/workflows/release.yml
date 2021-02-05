@@ -5,6 +5,10 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # I do not know of a way to restrict to the main branch so try to skip the whole job if
+    # user selected some other branch from GitHub Actions GUI
+    if: github.ref == 'refs/heads/main'
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -47,7 +51,7 @@ jobs:
       run: clojure -Spath
 
     - name: Run CI Tests
-      run: bb ./script/ci_tests.cl
+      run: bb ./script/ci_tests.clj
 
     - name: Release
       env:
