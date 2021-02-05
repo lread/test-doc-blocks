@@ -1,3 +1,12 @@
+// NOTE: release process automatically updates titles with "Unreleased" to title with actual release version
 = Change Log
 
-No official releases yet.
+For a list of breaking changes see link:breaking[breaking changes]
+
+== Unreleased
+
+* First release
+
+== Breaking Changes
+
+Nothing to track yet!

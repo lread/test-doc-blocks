@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <packaging>jar</packaging>
-  <groupId>test-doc-blocks</groupId>
+  <groupId>lread</groupId>
   <artifactId>test-doc-blocks</artifactId>
-  <version>0.1.0</version>
+  <version>0.0.0</version>
   <name>test-doc-blocks</name>
+  <description>Generate Clojure tests from AsciiDoc and CommonMark doc code blocks</description>
+  <url>https://github.com/lread/test-doc-blocks</url>
+  <licenses>
+    <license>
+      <name>Eclipse Public License</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/lread/test-doc-blocks</url>
+    <connection>scm:git:git@github.com:lread/test-doc-blocks.git</connection>
+    <developerConnection>scm:git:git@github.com:lread/test-doc-blocks.git</developerConnection>
+    <tag>v0.0.0</tag>
+  </scm>
   <dependencies>
     <dependency>
       <groupId>org.clojure</groupId>
@@ -22,4 +35,11 @@
       <url>https://repo.clojars.org/</url>
     </repository>
   </repositories>
+  <distributionManagement>
+    <repository>
+      <id>clojars</id>
+      <name>Clojars repository</name>
+      <url>https://clojars.org/repo</url>
+    </repository>
+  </distributionManagement>
 </project>

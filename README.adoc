@@ -1,4 +1,5 @@
 = lread.test-doc-blocks
+:project-coords: lread/test-doc-blocks
 ifdef::env-github[]
 :tip-caption: :bulb:
 :note-caption: :information_source:
@@ -11,7 +12,9 @@ endif::[]
 // Exercise our :apply option by skipping all code blocks by default for this doc
 //#:test-doc-blocks{:skip true :apply :all-next}
 
-image:https://github.com/lread/test-doc-blocks/workflows/Test/badge.svg[Test]
+https://github.com/{project-coords}/actions?query=workflow%3ATest[image:https://github.com/{project-coords}/workflows/Test/badge.svg[Test]]
+https://clojars.org/{project-coords}[image:https://img.shields.io/clojars/v/{project-coords}.svg[Clojars]]
+https://cljdoc.org/d/{project-coords}/CURRENT[image:https://cljdoc.org/badge/{project-coords}[cljdoc]]
 
 Generate Clojure tests from AsciiDoc and CommonMark doc code blocks.
 
@@ -28,7 +31,6 @@ toc::[]
 Initial concept. Currently being used to test doc blocks in rewrite-cljc.
 
 * Alpha, this might not be a good general idea, but might work well for some projects.
-* No release to clojars yet.
 * Feedback welcome.
 
 == Rationale
@@ -83,18 +85,18 @@ Maybe:
 
 Add an alias to your `deps.edn`:
 
+// NOTE: mvn/version version is automatically updated by release process
 [source,clojure]
 ----
-    :test-doc-blocks {:extra-deps {lread/test-doc-blocks {:git "tbd"
-                                                          :sha "tbd"}}
-                      :ns-default lread.test-doc-blocks}
+    :gen-doc-tests {:extra-deps {lread/test-doc-blocks {:mvn/version "TBD"}}
+                    :exec-fn lread.test-doc-blocks/gen-tests}
 ----
 
 Then the most basic usage is:
 
 [source,shell]
 ----
-clojure -X:test-doc-blocks gen-tests
+clojure -X:gen-doc-tests
 ----
 
 This generates Clojure tests for code blocks in your `README.md` to the `target/test-doc-blocks/test` directory.
@@ -118,7 +120,6 @@ For more detailed examples and inline options, see:
 * link:doc/example.adoc[AsciiDoc example]
 * link:doc/example.md[CommonMark example]
 
-
 The test-doc-blocks link:deps.edn[deps.edn] has some aliases that might server as useful examples:
 
 * `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
@@ -137,7 +138,7 @@ If you want to specify a different vector of files you can do so via `:docs`:
 +
 [source,shell]
 ----
-clojure -X:test-doc-blocks gen-tests :docs '["README.adoc" "doc/example.adoc" "doc/example.md"]'
+clojure -X:gen-doc-tests :docs '["README.adoc" "doc/example.adoc" "doc/example.md"]'
 ----
 
 :target-root::
@@ -147,7 +148,7 @@ You can override this via `:target-root`:
 +
 [source,shell]
 ----
-clojure -X:test-doc-blocks gen-tests :target-root '"./someplace/else"'
+clojure -X:gen-doc-tests :target-root '"./someplace/else"'
 ----
 +
 Note that test-doc-blocks will delete and recreate `test-docs-block/test` dirs under the target root.
@@ -266,10 +267,6 @@ To run linting as the CI server does:
 bb script/lint.clj
 ----
 
-=== Release
-
-TODO: fill in the blanks.
-
 == Versioning
 
 rewrite-cljc versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
@@ -278,6 +275,25 @@ rewrite-cljc versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
 * `minor` increments to convey significant new features have been added.
 * `patch` indicates bug fixes - it is the number of commits since `major`.`minor`.
 * `test-qualifier` is absent for stable releases. Can be `alpha`, `beta`, `rc1`, etc.
+
+The project maintainer manually manages `major` `minor` and `test-qualifier` in `version.edn`.
+
+=== Release
+
+A release is triggered via manually triggered GitHub Action "Release" workflow.
+A release can currently only be cut at main branch HEAD.
+
+The GitHub Actions "Release" workflow:
+
+. Runs all tests.
+. Calculates version (commit count will compensate for upcoming release commit) and apply to:
+.. the `deps.edn` usage example in this doc
+.. the "unreleased" headings in change log (new "unreleased heading also prepended")
+.. `pom.xml` version and scm->tag
+.. a newly built thin jar
+. Deploys jar to clojars
+. Commits updated docs and release tag back to repo
+. Creates a release tag at HEAD
 
 == People
 
