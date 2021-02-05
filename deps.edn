@@ -60,7 +60,7 @@
                  :exec-args {:jar "target/test-doc-blocks.jar"
                              :jar-type :thin}}
 
-           :deploy {:replace-deps {slipset/deps-deploy "0.1.5"}
+           :deploy {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
                     :exec-fn deps-deploy.deps-deploy/deploy
                     :exec-args {:installer :remote
                                 :artifact "target/test-doc-blocks.jar"}}
