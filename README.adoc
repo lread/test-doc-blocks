@@ -58,29 +58,6 @@ Or editor style:
 
 And don't rely on any special unspecified setup, then test-doc-blocks might work for your project too.
 
-== Immediate TODOS
-
-* turf unused script helpers I pasted in from rewrite-cljc
-
-Maybe:
-
-* bring in battle tested parsers for docs? asciidoctorj, flexmark
-* might be nice to offer to validate edn snippits are readable?
-* integration test is super brittle but that's ok for now
-* consider supporting expressing stdout and stderr as they might naturally be output, they would still be compared as single blocks, but this might better represent a visual output flow.
-** stderr line1
-** stdout line1
-** stderr line2
-** etc..
-* Consider supporting continuations on expectations for readability? Maybe something like?
-+
-[source,clojure]
-----
-;; => {:a 1
-;      :b 2
-;      :c 3}
-----
-
 == Usage
 
 Add an alias to your `deps.edn`:
