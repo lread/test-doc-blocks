@@ -4,8 +4,7 @@
         org.clojure/tools.reader {:mvn/version "1.3.4"}
         doric/doric {:mvn/version "0.9.0"}
         metosin/malli {:mvn/version "0.2.1"}
-        lread/rewrite-cljc-playground {:git/url "https://github.com/lread/rewrite-cljc-playground.git"
-                                       :sha "c09689e955d650fe7564a955ae22a2f02b7352fe"}
+        rewrite-clj/rewrite-clj {:mvn/version "0.6.1"}
         borkdude/sci {:mvn/version "0.2.1-alpha.1"}}
 
  :aliases {;; clojure -X support for local examples

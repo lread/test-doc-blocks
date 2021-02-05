@@ -1,8 +1,9 @@
 (ns ^:no-doc lread.test-doc-blocks.impl.test-body
   "Convert a prepared doc block into a test body."
   (:require [lread.test-doc-blocks.impl.zutil :as zutil]
-            [rewrite-cljc.node :as n]
-            [rewrite-cljc.zip :as z] ))
+            [rewrite-clj.custom-zipper.core :as rawz]
+            [rewrite-clj.node :as n]
+            [rewrite-clj.zip :as z]))
 
 (defn- eval-assertion [expected-node actual-node]
   (n/list-node [(n/token-node 'clojure.test/is)
@@ -140,10 +141,11 @@
   (-> test-body
       z/of-string
       (#(or (z/up %) %))
-      (z/append-child* (n/newlines 1))
-      (z/append-child* (n/comment-node " test-doc-blocks dummy assertion to appease tools that fail on no assertions"))
-      (z/append-child* (n/newlines 1))
-      (z/append-child* (eval-assertion (n/string-node "dummy") (n/string-node "dummy")))
+      ;; TODO: append-child* is exposed in rewrite-clj v1 in zip API
+      (rawz/append-child (n/newlines 1))
+      (rawz/append-child (n/comment-node " test-doc-blocks dummy assertion to appease tools that fail on no assertions"))
+      (rawz/append-child (n/newlines 1))
+      (rawz/append-child (eval-assertion (n/string-node "dummy") (n/string-node "dummy")))
       (z/root-string)))
 
 (defn to-test-body [prepared-doc-body]

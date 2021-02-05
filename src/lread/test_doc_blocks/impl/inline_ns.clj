@@ -21,7 +21,9 @@
   We'll start with this strategy and see how it works out."
 
   (:require [lread.test-doc-blocks.impl.zutil :as zutil]
-            [rewrite-cljc.zip :as z]))
+            [rewrite-clj.zip :as z]
+            ;; TODO: subzip is exposed under zip API rewrite-clj v1
+            [rewrite-clj.zip.subedit :as subedit]))
 
 (defn- list-starting-with-sym? [zloc sym]
   (and (z/list? zloc)
@@ -31,7 +33,7 @@
 (defn- inline-ns-of-interest? [sym]
   (fn pred? [zloc]
     (and (= 1 (zutil/zdepth zloc))
-         (z/find (z/subzip zloc)
+         (z/find (subedit/subzip zloc)
                  z/next
                  #(list-starting-with-sym? % sym)))))
 
