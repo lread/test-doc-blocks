@@ -127,9 +127,9 @@
     (status/line :detail "Adding changes")
     (shell/command ["git" "add" "README.adoc" "CHANGELOG.adoc" "pom.xml"])
     (status/line :detail "Committing")
-    (shell/command ["git" "commit" "-m" (str  "Release job: updates for version " version)])
+    (shell/command ["git" "commit" "-m" (str  "Release job: updates for version " tag-version)])
     (status/line :detail "Version tagging")
-    (shell/command ["git" "tag" tag-version])
+    (shell/command ["git" "tag" "-a" tag-version "-m" (str  "Release " tag-version)])
     (status/line :detail "Pushing commit")
     (shell/command ["git" "push"])
     (status/line :detail "Pushing version tag")
@@ -158,4 +158,6 @@
     (inform-cljdoc! target-version)
     (status/line :detail "Release work done.")))
 
-(main)
+#_(main)
+
+(calculate-version)

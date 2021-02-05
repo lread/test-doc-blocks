@@ -293,6 +293,7 @@ The GitHub Actions "Release" workflow:
 .. a newly built thin jar
 . Deploys jar to clojars
 . Commits updated docs and release tag back to repo
+. Informs cljdoc of the new release
 . Creates a release tag at HEAD
 
 == People
