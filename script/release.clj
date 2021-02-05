@@ -48,7 +48,7 @@
   (->>  (shell/command ["git" 
                         "--no-replace-objects" 
                         "describe" 
-                        "--match" (str  "v" version)] {:out :string})
+                        "--match" (str  "v" version ".*")] {:out :string})
         :out
         string/trim
         (re-matches #".*-(\d+)-.*$")
@@ -158,6 +158,4 @@
     (inform-cljdoc! target-version)
     (status/line :detail "Release work done.")))
 
-#_(main)
-
-(calculate-version)
+(main)
