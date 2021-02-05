@@ -55,9 +55,14 @@ jobs:
     - name: Run CI Tests
       run: bb ./script/ci_tests.clj
 
-    - name: Release
+    - name: Release Prep (step 1 of 3)
+      run: bb ./script/release.clj prep
+
+    - name: Release Deploy (step 2 of 3)
       env:
         CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
         CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
-      run: bb ./script/release.clj
+      run: bb ./script/release.clj deploy-remote
 
+    - name: Release Commit (step 3 of 3)
+      run: bb ./script/release.clj commit

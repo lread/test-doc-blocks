@@ -11,6 +11,8 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Developer facing only: updates to release workflow
+
 == v1.0.76-alpha
 
 * First release

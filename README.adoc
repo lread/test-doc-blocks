@@ -255,15 +255,18 @@ rewrite-cljc versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
 
 The project maintainer manually manages `major` `minor` and `test-qualifier` in `version.edn`.
 
-=== Release
+== Release
 
-A release is triggered via manually triggered GitHub Action "Release" workflow.
+A release is triggered manually via a GitHub Action "Release" workflow.
 A release can currently only be cut at main branch HEAD.
 
-The GitHub Actions "Release" workflow:
+GitHub Actions prompts for the branch when running the Release workflow.
+I've not found a way to disable this, just leave it set to `main`.
+
+Our GitHub Actions "Release" workflow:
 
 . Runs all tests.
-. Calculates version (commit count will compensate for upcoming release commit) and apply to:
+. Calculates version (commit count will compensate for upcoming release commit) and applies to:
 .. the `deps.edn` usage example in this doc
 .. the "unreleased" headings in change log (new "unreleased heading also prepended")
 .. `pom.xml` version and scm->tag
@@ -272,6 +275,11 @@ The GitHub Actions "Release" workflow:
 . Commits updated docs and release tag back to repo
 . Informs cljdoc of the new release
 . Creates a release tag at HEAD
+
+As a developer you can run the following locally:
+
+* `bb script/release.clj validate` - to validate your change log is setup appropriately for release
+* `bb script/release.clj prep` - to complete all steps up to, but not including, deploy, note that this will affect changes to `README.adoc`, `CHANGELOG.adoc` and `pom.xml`, you'll NOT want to commit these changes.
 
 == People
 

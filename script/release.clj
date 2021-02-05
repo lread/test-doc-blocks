@@ -16,7 +16,7 @@
          '[helper.shell :as shell]
          '[helper.status :as status])
 
-(defn clean []
+(defn clean! []
   (doseq [dir ["target" ".cpcache"]]
     (fs/delete-file-recursively dir true)))
 
@@ -118,7 +118,10 @@
                   (str "$1 v" version))))
 
 (defn- create-jar! [version]
-  (status/line :info (str "Updating pom.xml and creating jar for version " version))
+  (status/line :info (str "Creating jar for version " version))
+  (status/line :detail "Reflecting deps in deps.edn to pom.xml")
+  (shell/command ["clojure" "-Spom"])
+  (status/line :detail "Updating pom.xml version and creating thin jar")
   (shell/command ["clojure" "-X:jar" ":version" (pr-str version)])
   nil)
 
@@ -163,20 +166,60 @@
     (when (not (zero? exit-code))
       (status/line :warn (str  "Informing cljdoc did not seem to work, exited with " exit-code)))))
 
-(defn- main []
-  (status/line :info "Attempting release")
-  (clean)
-  (let [changelog-status (validate-changelog)
-        target-version (calculate-version)
-        last-version (last-release-tag)]
-    (status/line :detail (str "Last version released: " (or last-version "<none>")))
-    (status/line :detail (str "Target version:        " target-version))
-    (update-readme! target-version)
-    (update-changelog! target-version last-version changelog-status)
-    (create-jar! target-version)
-    (deploy-jar!)
-    (commit-changes! target-version)
-    (inform-cljdoc! target-version)
-    (status/line :detail "Release work done.")))
 
-(main)
+(defn- validate-args [args]
+  (let [cmd (first args)]
+    (when (or (not= 1 (count args))
+              (not (some #{cmd} '("prep" "deploy-remote" "commit" "validate"))))
+      (status/fatal (string/join "\n"
+                                 ["Usage: release cmd"
+                                  ""
+                                  "Where cmd can be:"
+                                  " prep           - update readme, changelog and create jar"
+                                  " deploy-remote  - deploy jar to clojars"
+                                  " commit         - commit changes made back to repo, inform cljdoc of release"
+                                  ""
+                                  "These commands are expected to be run in order from CI."
+                                  "Why the awkward separation?" 
+                                  "To restrict the exposure of our CLOJARS secrets during deploy workflow"
+                                  ""
+                                  "Additional commands for local use:"
+                                  " validate      - verify that change log is good for release"])))
+    cmd))
+
+(defn- main [args]
+  (let [cmd (validate-args args)
+        target-version-filename "target/target-version.txt"]
+    (status/line :info (str  "Attempting release step: " cmd))
+    (case cmd
+      "prep"
+      (do (clean!)
+          (let [changelog-status (validate-changelog)
+                target-version (calculate-version)
+                last-version (last-release-tag)]
+            (status/line :detail (str "Last version released: " (or last-version "<none>")))
+            (status/line :detail (str "Target version:        " target-version))
+            (io/make-parents target-version-filename)
+            (spit target-version-filename target-version)
+            (update-readme! target-version)
+            (update-changelog! target-version last-version changelog-status)
+            (create-jar! target-version)))
+
+      "deploy-remote"
+      (deploy-jar!)
+
+      "commit"
+      (if (not (.exists (io/file target-version-filename)))
+        (status/fatal (str "Target version file not found: " target-version-filename
+                           "\nWas prep step run?"))
+        (let [target-version (slurp target-version-filename)]
+          (commit-changes! target-version)
+          (inform-cljdoc! target-version)))
+
+      "validate"
+      (do (validate-changelog)
+          nil))
+
+    (status/line :detail (str "Release step done:" cmd))))
+
+(main *command-line-args*)
