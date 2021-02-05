@@ -2,7 +2,7 @@
   "Prep a doc block to be converted into a test."
   (:require [clojure.string :as string]))
 
-(defn prep-block-for-conversion-to-test
+(defn ^:no-doc prep-block-for-conversion-to-test
   "Convert doc block to Clojure that can be more easily parsed.
 
   We uncomment editor style assertions converting stdout and stderr style.

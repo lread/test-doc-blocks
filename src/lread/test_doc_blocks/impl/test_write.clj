@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks.impl.test-write
+(ns ^:no-doc lread.test-doc-blocks.impl.test-write
   "Write test to file system."
   (:require [clojure.java.io :as io]
             [clojure.string :as string]))

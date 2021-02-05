@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks.impl.doc-parse
+(ns ^:no-doc lread.test-doc-blocks.impl.doc-parse
   "Parse doc blocks from AsciiDoc and CommonMark files."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]

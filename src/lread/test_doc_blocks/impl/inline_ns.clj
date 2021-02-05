@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks.impl.inline-ns
+(ns ^:no-doc lread.test-doc-blocks.impl.inline-ns
   "Support for finding a removing (require ...) and (import ...) forms.
   We'll call these forms of interest.
 

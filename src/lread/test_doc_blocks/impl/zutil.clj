@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks.impl.zutil
+(ns ^:no-doc lread.test-doc-blocks.impl.zutil
   "Misc rewrite-cljc zipper utils."
   (:require [rewrite-cljc.zip :as z]))
 

@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks.runtime
+(ns ^:no-doc lread.test-doc-blocks.runtime
   "Test time macros called from generated tests.")
 
 (defn cljs-env?

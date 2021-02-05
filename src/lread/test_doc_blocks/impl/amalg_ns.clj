@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks.impl.amalg-ns
+(ns ^:no-doc lread.test-doc-blocks.impl.amalg-ns
   "Support for amalgamating refs from found (require ...) and (import ...) forms.
 
   Here we try to amalgate the forms of interest we found via lread.test-doc-blocks.impl.inline-ns.

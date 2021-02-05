@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks.impl.process
+(ns ^:no-doc lread.test-doc-blocks.impl.process
   (:require [clojure.string :as string]
             [lread.test-doc-blocks.impl.amalg-ns :as amalg-ns]
             [lread.test-doc-blocks.impl.body-prep :as body-prep]

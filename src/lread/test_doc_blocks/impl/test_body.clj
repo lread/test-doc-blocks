@@ -1,4 +1,4 @@
-(ns lread.test-doc-blocks.impl.test-body
+(ns ^:no-doc lread.test-doc-blocks.impl.test-body
   "Convert a prepared doc block into a test body."
   (:require [lread.test-doc-blocks.impl.zutil :as zutil]
             [rewrite-cljc.node :as n]
