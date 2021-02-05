@@ -6,54 +6,27 @@
 
 (ns release
   (:require [babashka.classpath :as cp]
-            [babashka.deps :as deps]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as string]))
 
-(deps/add-deps '{:deps {version-clj/version-clj {:mvn/version  "0.1.2"}}})
 (cp/add-classpath (.getParent (io/file *file*)))
 
 (require '[helper.fs :as fs]
          '[helper.shell :as shell]
-         '[helper.status :as status]
-         '[version-clj.core :as version])
-
-(defn- most-recent-released-version []
-  (let [vtag (->  (shell/command ["git" 
-                                  "tag" "--sort=committerdate" 
-                                  "--list" "v[0-9]*"] {:out :string})
-                  :out
-                  string/split-lines
-                  last
-                  string/trim)]
-    (when (seq vtag)
-      (subs vtag 1))))
+         '[helper.status :as status])
 
 (defn clean []
   (doseq [dir ["target" ".cpcache"]]
     (fs/delete-file-recursively dir true)))
 
-(defn- commit-count-since 
-  "Stolen from a ClojurScript bash script along with explanation:
-
-  The command `git describe --match v0.0` will return a string like
-
-  v0.0-856-g329708b
-
-  where 856 is the number of commits since the v0.0 tag. It will always
-  find the v0.0 tag and will always return the total number of commits (even
-  if the tag is v0.0.1)."
-  [version]
-  (->>  (shell/command ["git" 
-                        "--no-replace-objects" 
-                        "describe" 
-                        "--match" (str  "v" version ".*")] {:out :string})
-        :out
-        string/trim
-        (re-matches #".*-(\d+)-.*$")
-        last
-        Long/parseLong))
+(defn- repo-commit-count
+  "Number of commits in the repo"
+  []
+  (->  (shell/command ["git" "rev-list" "HEAD" "--count"] {:out :string})
+       :out
+       string/trim
+       Long/parseLong))
 
 (defn- dev-specified-version []
   (-> "version.edn"
@@ -62,25 +35,15 @@
 
 (defn- calculate-version []
   (status/line :info "Calculating release version")
-  (let [version-repo (most-recent-released-version)
-        major-minor-repo (->> (or version-repo "0.0.0") 
-                              version/version-data 
-                              (take 2) 
-                              (string/join "."))
-        version-target (dev-specified-version)
-        major-minor-target (str (:major version-target) "." (:minor version-target))]
-    (status/line :detail (str "Found version in repo: " (or version-repo "<none>")))
-    (status/line :detail (str "Our major.minor target version is: " major-minor-target))
-    (let [commit-count (case (version/version-compare major-minor-target major-minor-repo)
-                         -1 (status/fatal "Target version is lower than version in repo")
-                         0 (inc ;; inc to account for upcoming commit 
-                            (commit-count-since major-minor-repo)) 
-                         1 0)
-          new-version (str major-minor-target "." commit-count 
-                           (cond->> (:qualifier version-target)
-                             true (str "-")))]
-      (status/line :detail (str  "Release version is: " new-version))
-      new-version)))
+  (let [version-template (dev-specified-version)
+        patch (repo-commit-count)
+        version (str (:major version-template) "." 
+                     (:minor version-template) "."
+                     patch
+                     (cond->> (:qualifier version-template)
+                       true (str "-")))]
+    (status/line :detail (str "version: " version))
+    version))
 
 (defn- update-file! [fname match replacement]
   (let [old-content (slurp fname)
