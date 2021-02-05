@@ -121,12 +121,20 @@
   nil)
 
 (defn- commit-changes! [version]
-  (status/line :info (str  "Committing and pushing changes made for version " version))
-  (assert-on-ci "commit changes")
-  (shell/command ["git" "add" "README.adoc" "CHANGELOG.adoc" "pom.xml"])
-  (shell/command ["git" "commit" "--message" (str  "Release job: updates for version " version)])
-  (shell/command ["git" "push" "origin" (str "v" version)])
-  nil)
+  (let [tag-version (str "v" version)]
+    (status/line :info (str  "Committing and pushing changes made for " tag-version))
+    (assert-on-ci "commit changes")
+    (status/line :detail "Adding changes")
+    (shell/command ["git" "add" "README.adoc" "CHANGELOG.adoc" "pom.xml"])
+    (status/line :detail "Committing")
+    (shell/command ["git" "commit" "-m" (str  "Release job: updates for version " version)])
+    (status/line :detail "Version tagging")
+    (shell/command ["git" "tag" tag-version])
+    (status/line :detail "Pushing commit")
+    (shell/command ["git" "push"])
+    (status/line :detail "Pushing version tag")
+    (shell/command ["git" "push" "origin" tag-version])
+    nil))
 
 (defn- inform-cljdoc! [version]
   (status/line :info (str "Informing cljdoc of new version " version))
