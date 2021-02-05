@@ -1,7 +1,13 @@
 // NOTE: release process automatically updates titles with "Unreleased" to title with actual release version
 = Change Log
 
-For a list of breaking changes see link:breaking[breaking changes]
+For a list of breaking changes see link:#breaking[breaking-changes]
+
+// Release workflow will:
+// - Fail if there is no "== Unreleased" section header
+// - Helpfully fail when the section contains no descriptive text
+// - Replace the Unreleased section header with actual release version
+// - Prepend a new Unreleased section header
 
 == Unreleased
 
@@ -9,6 +15,14 @@ For a list of breaking changes see link:breaking[breaking changes]
 
 * First release
 
+[#breaking]
 == Breaking Changes
 
+// Release workflow will:
+// - If an "=== Unreleased Breaking Changes" section header exists here:
+//   - Helpfully fail the section contains no descriptive text
+//   - Replace the Unreleased section header with actual release version
+
 Nothing to track yet!
+
+// === Unreleased Breaking Changes
