@@ -5,6 +5,8 @@ For a list of breaking changes see link:breaking[breaking changes]
 
 == Unreleased
 
+== v1.0.2-alpha
+
 == v1.0.5-alpha
 
 * First release
