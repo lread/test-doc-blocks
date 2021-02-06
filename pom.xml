@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>lread</groupId>
   <artifactId>test-doc-blocks</artifactId>
-  <version>1.0.76-alpha</version>
+  <version>1.0.80-alpha</version>
   <name>test-doc-blocks</name>
   <description>Generate Clojure tests from AsciiDoc and CommonMark doc code blocks</description>
   <url>https://github.com/lread/test-doc-blocks</url>
@@ -17,7 +17,7 @@
     <url>https://github.com/lread/test-doc-blocks</url>
     <connection>scm:git:git@github.com:lread/test-doc-blocks.git</connection>
     <developerConnection>scm:git:git@github.com:lread/test-doc-blocks.git</developerConnection>
-    <tag>v1.0.76-alpha</tag>
+    <tag>v1.0.80-alpha</tag>
   </scm>
   <dependencies>
     <dependency>

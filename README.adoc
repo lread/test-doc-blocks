@@ -65,7 +65,7 @@ Add an alias to your `deps.edn`:
 // NOTE: mvn/version version is automatically updated by release process
 [source,clojure]
 ----
-    :gen-doc-tests {:extra-deps {lread/test-doc-blocks {:mvn/version "1.0.76-alpha"}}
+    :gen-doc-tests {:extra-deps {lread/test-doc-blocks {:mvn/version "1.0.80-alpha"}}
                     :exec-fn lread.test-doc-blocks/gen-tests}
 ----
 

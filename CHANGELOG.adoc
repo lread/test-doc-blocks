@@ -11,7 +11,11 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+== v1.0.80-alpha
+
 * Developer facing only: updates to release workflow
+
+https://github.com/lread/test-doc-blocks/compare/v1.0.76-alpha\...1.0.80-alpha[Gritty details of changes for this release]
 
 == v1.0.76-alpha
 
