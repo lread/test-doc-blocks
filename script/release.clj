@@ -108,7 +108,7 @@
                        (str
                         "https://github.com/lread/test-doc-blocks/compare/"
                         last-version
-                        "\\\\..."  ;; single backslash is escape for AsciiDoc
+                        "\\\\...v"  ;; single backslash is escape for AsciiDoc
                         version
                         "[Gritty details of changes for this release]\n\n"))
                      "$3"))

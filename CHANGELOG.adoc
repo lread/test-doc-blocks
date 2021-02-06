@@ -11,11 +11,13 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Developer facing only: more updates to release workflow
+
 == v1.0.80-alpha
 
 * Developer facing only: updates to release workflow
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.76-alpha\...1.0.80-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.76-alpha\...v1.0.80-alpha[Gritty details of changes for this release]
 
 == v1.0.76-alpha
 
@@ -29,6 +31,6 @@ https://github.com/lread/test-doc-blocks/compare/v1.0.76-alpha\...1.0.80-alpha[G
 //   - Helpfully fail the section contains no descriptive text
 //   - Replace the Unreleased section header with actual release version
 
-Nothing to track yet!
+Still in alpha, nothing to track yet!
 
 // === Unreleased Breaking Changes
