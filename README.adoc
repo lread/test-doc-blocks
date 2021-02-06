@@ -255,7 +255,7 @@ rewrite-cljc versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
 
 The project maintainer manually manages `major` `minor` and `test-qualifier` in `version.edn`.
 
-== Release
+== Releasing
 
 A release is triggered manually via a GitHub Action "Release" workflow.
 A release can currently only be cut at main branch HEAD.
@@ -275,6 +275,8 @@ Our GitHub Actions "Release" workflow:
 . Commits updated docs and release tag back to repo
 . Informs cljdoc of the new release
 . Creates a release tag at HEAD
+
+TIP: After a release don't forget to pull the changes made by the release workflow.
 
 As a developer you can run the following locally:
 
