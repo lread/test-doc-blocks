@@ -125,7 +125,7 @@
                     ;; Editor style can have multiple expectations
                     (and (zassertion-token? zloc) (z/left zloc) (z/right zloc))
                     (let [actual (z/left zloc)
-                          expecteded-pairs (get-expected-pairs zloc) ]
+                          expecteded-pairs (get-expected-pairs zloc)]
                       (-> zloc
                           z/left
                           (replace-body-assert expecteded-pairs actual)))
@@ -136,6 +136,12 @@
            zloc
            (recur (z/next zloc)))))
      z/root-string) )
+
+(defn- trim-trailing-newline [src]
+  (let [last-node (-> src z/of-string z/rightmost*)]
+    (if (z/linebreak? last-node)
+      (-> last-node z/remove* z/root-string)
+      src)))
 
 (defn- add-dummy-assertion [test-body]
   (-> test-body
@@ -149,10 +155,11 @@
       (z/root-string)))
 
 (defn to-test-body [prepared-doc-body]
-  (let [test-body (convert-repl-assertions prepared-doc-body)]
-    (if (= prepared-doc-body test-body)
-      (add-dummy-assertion test-body)
-      test-body)))
+  (let [test-body (convert-repl-assertions prepared-doc-body)
+        test-body (if (= prepared-doc-body test-body)
+                    (add-dummy-assertion test-body)
+                    test-body)]
+    (trim-trailing-newline test-body)))
 
 (comment
 (z/right nil)

@@ -11,6 +11,8 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Don't trim trailing newline for test body if last item comment
+
 == v1.0.92-alpha
 
 * Upgraded from rewrite-clj v0 to rewrite-clj v1

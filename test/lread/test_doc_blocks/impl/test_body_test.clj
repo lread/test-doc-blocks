@@ -160,3 +160,13 @@
   (is (= ["(do (do (do (clojure.test/is (= '6 (+ 1 2 3))))))"]
          (lsug sut/to-test-body
                "(do (do (do (+ 1 2 3) => 6)))"))))
+
+(deftest trim-trailing-newline-when-appropriate
+  (testing "trim for simple case"
+    (is (= "(clojure.test/is (= '6 (+ 1 2 3)))"
+           (sut/to-test-body (str "(+ 1 2 3)\n"
+                                  "=> 6\n")))))
+  (testing "don't trim for terminating comment"
+    (is (= "(clojure.test/is (= '6 (+ 1 2 3)));; comment\n"
+           (sut/to-test-body (str "(+ 1 2 3)\n"
+                                  "=> 6 ;; comment\n"))))))
