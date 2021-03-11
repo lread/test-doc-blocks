@@ -193,7 +193,7 @@ clojure -M:kaocha unit
 Run integration test via:
 [source,shell]
 ----
-clojure -M:koacha integration
+clojure -M:kaocha integration
 ----
 This will generate tests for README and example docs and then diff against a previously manually verified test run.
 The previously verified test run is stored under `test-resources/expected`.
