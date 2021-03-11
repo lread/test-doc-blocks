@@ -1,8 +1,8 @@
 {:paths ["src"]
 
- :deps {org.clojure/clojure {:mvn/version "1.10.1"}
-        org.clojure/tools.reader {:mvn/version "1.3.4"}
-        metosin/malli {:mvn/version "0.2.1"}
+ :deps {org.clojure/clojure {:mvn/version "1.10.3"}
+        org.clojure/tools.reader {:mvn/version "1.3.5"}
+        metosin/malli {:mvn/version "0.3.0"}
         rewrite-clj/rewrite-clj  {:mvn/version "1.0.574-alpha"}}
 
  :aliases {;; clojure -X support for local examples
@@ -14,7 +14,7 @@
            ;;
 
            ;; for kaocha see also tests.edn
-           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}
+           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.829"}}
                     :extra-paths ["test"]
                     :main-opts ["-m" "kaocha.runner"]}
 
@@ -24,7 +24,7 @@
            ;; Notice we are replacing deps and paths to verify that tests do not rely on test-doc-blocks or its deps
 
            ;; for kaocha see also tests.edn
-           :isolated/kaocha {:replace-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}
+           :isolated/kaocha {:replace-deps {lambdaisland/kaocha {:mvn/version "1.0.829"}}
                              :replace-paths ["test"] ;; include test to bring in kaocha hook
                              :main-opts ["-m" "kaocha.runner"]}
 
@@ -46,13 +46,13 @@
            ;; Test support
            ;;
 
-           :clj-kondo {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2020.12.12"}}
+           :clj-kondo {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.03.03"}}
                        :main-opts ["-m" "clj-kondo.main"]}
 
            ;;
            ;; Deployment
            ;; 
-           :jar {:replace-deps {seancorfield/depstar {:mvn/version "2.0.171"}}
+           :jar {:replace-deps {seancorfield/depstar {:mvn/version "2.0.193"}}
                  :exec-fn hf.depstar/jar
                  :exec-args {:jar "target/test-doc-blocks.jar"
                              :jar-type :thin}}
