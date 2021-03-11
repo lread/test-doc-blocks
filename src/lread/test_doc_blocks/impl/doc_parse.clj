@@ -241,7 +241,7 @@
                                   (dissoc :next-block-opts)
                                   (assoc :block {}))))
 
-                          (and (:new-block? p))
+                          (:new-block? p)
                           (let [state (-> state (assoc :in-code-block? true
                                                        :end-block-re (:end-block-re p)
                                                        :block-indentation (:block-indentation p)
