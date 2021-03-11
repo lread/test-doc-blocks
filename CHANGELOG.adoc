@@ -11,6 +11,9 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Upgraded from rewrite-clj v0 to rewrite-clj v1
+* Release workflow now creates a GitHub release
+
 == v1.0.85-alpha
 
 * Correct public API for cljdoc
