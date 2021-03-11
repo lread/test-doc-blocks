@@ -263,9 +263,11 @@ A release can currently only be cut at main branch HEAD.
 GitHub Actions prompts for the branch when running the Release workflow.
 I've not found a way to disable this, just leave it set to `main`.
 
+At this time, the release workflow does not run tests.
+The assumption is that you’ve waited for the last CI test run to complete and are happy with the results.
+
 Our GitHub Actions "Release" workflow:
 
-. Runs all tests.
 . Calculates version (commit count will compensate for upcoming release commit) and applies to:
 .. the `deps.edn` usage example in this doc
 .. the "unreleased" headings in change log (new "unreleased heading also prepended")

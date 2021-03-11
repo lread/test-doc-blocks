@@ -24,8 +24,8 @@ jobs:
         path: |
           ~/.m2/repository
           ~/.gitlibs
-        key: $${ runner.os }}-cljdeps-${{ hashFiles('deps.edn') }}
-        restore-keys: $${ runner.os }}-cljdeps-
+        key: $${ runner.os }}-cljdeps-release-${{ hashFiles('deps.edn') }}
+        restore-keys: $${ runner.os }}-cljdeps-release-
 
     - name: Setup Java
       uses: actions/setup-java@v1
@@ -36,7 +36,7 @@ jobs:
       run: curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install | sudo bash
 
     - name: Install Clojure
-      run: curl -s https://download.clojure.org/install/linux-install-1.10.1.763.sh | sudo bash
+      run: curl -s https://download.clojure.org/install/linux-install-1.10.1.796.sh | sudo bash
 
     - name: Tools Versions
       run: |
@@ -50,10 +50,7 @@ jobs:
         clojure -Sdescribe
 
     - name: Download Clojure Dependencies
-      run: clojure -Spath
-
-    - name: Run CI Tests
-      run: bb ./script/ci_tests.clj
+      run: clojure -A:jar:deploy -P
 
     - name: Release Prep (step 1 of 4)
       run: bb ./script/release.clj prep
