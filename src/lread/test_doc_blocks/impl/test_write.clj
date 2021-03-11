@@ -64,7 +64,7 @@
                       (conj acc (str
                                  "(clojure.test/deftest " (test-var t) "\n"
                                  "  (clojure.test/testing " " \"" (testing-text t) "\"\n"
-                                 (:test-body t) "))")))
+                                 (string/trimr (:test-body t)) "))")))
                     []
                     tests)
             (string/join "\n\n"))))
