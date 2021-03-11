@@ -74,8 +74,8 @@
   (let [opts (merge default-opts opts)]
     (if-let [errs (validate/errors [:map {:closed true}
                                     [:target-root string?]
-                                    [:docs  [:fn {:error/fn '(fn [_ _] "should be a vector of filename strings")}
-                                             '(fn [x] (and (vector? x) (first x) (every? string? x)))]]
+                                    [:docs  [:fn {:error/fn (fn [_ _] "should be a vector of filename strings")}
+                                             (fn [x] (and (vector? x) (first x) (every? string? x)))]]
                                     [:platform [:enum :clj :cljs :cljc]]]
                                    opts)]
       (do (println "Error, invalid args.")
