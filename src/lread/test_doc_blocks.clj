@@ -2,7 +2,6 @@
   "Parse code blocks from markdown and generate Clojure test code."
   (:require [clojure.java.io :as io]
             [clojure.string :as string]
-            [doric.core :as doric]
             [lread.test-doc-blocks.impl.doc-parse :as doc-parse]
             [lread.test-doc-blocks.impl.process :as process]
             [lread.test-doc-blocks.impl.test-write :as test-write]
@@ -20,16 +19,22 @@
                               path (mapv str sym-links)) {}))
       (run! #(io/delete-file %) flist))))
 
-(defn- print-table! [parsed indent-cnt]
-  (println (-> (doric/table [{:name :doc-filename             :align :left}
-                             {:name :line-no                  :align :right}
-                             {:name :header                   :align :left}
-                             {:name :test-doc-blocks/test-ns  :align :left}]
-                            parsed)
-               (string/replace #"(^|\R)" (str "$1" (apply str (repeat indent-cnt " ")))))))
+(defn- indent [s indent-cnt]
+  (string/replace s #"(^|\R)" (str "$1" (apply str (repeat indent-cnt " ")))))
+
+(defn- print-found! [parsed indent-cnt]
+  (let [fnames (->> parsed (group-by :doc-filename) (into []) (sort-by first))]
+    (doseq [[fname headers] fnames]
+      (println (indent fname indent-cnt))
+      (doseq [[header lines] (->> headers (group-by :header) (into []))]
+        (println (indent header (+ 2 indent-cnt)))
+        (doseq [line lines]
+          (println (-> (format "%03d: %s" (:line-no line) (:test-doc-blocks/test-ns line))
+                       (indent (+ 4 indent-cnt)))))))))
 
 (defn- report-on-found! [parsed]
   (println "Will generate tests for following Clojure doc blocks:")
+  (println "- under each found heading is listed <lineno>: <target test namespace>")
   (let [by-platform (->> parsed
                          (remove :test-doc-blocks/skip)
                          (group-by :test-doc-blocks/platform)
@@ -37,12 +42,13 @@
                          (sort-by first))]
     (if (seq by-platform)
       (doseq [[platform blocks] by-platform]
-        (println (str "\n" (name platform) ":"))
-        (print-table! blocks 1))
-      (println "\n-none found-")))
+        (println)
+        (println (indent (name platform) 1))
+        (print-found! blocks 3))
+      (println (indent "\n-none found-" 1))))
   (when (some :test-doc-blocks/skip parsed)
-    (println "\nAnd, as requested, skipping:")
-    (print-table! (filter :test-doc-blocks/skip parsed) 1)))
+    (println (str "\nAnd, as requested, skipping:\n"))
+    (print-found! (filter :test-doc-blocks/skip parsed) 1)))
 
 (defn- copy-runtime! [target-root]
   (let [runtime-path "lread/test_doc_blocks/runtime.cljc"
@@ -102,9 +108,5 @@
   (gen-tests {:docs ["doc/example.adoc"]})
 
   (gen-tests {:docs ""})
-
-
- 
- 
-
+  
   )
