@@ -72,7 +72,7 @@ jobs:
       id: target-version
 
     - name: Create GitHub release (step 4 of 4)
-      uses: uses: actions/create-release@v1
+      uses: actions/create-release@v1
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
