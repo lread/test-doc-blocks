@@ -26,7 +26,7 @@
   (let [fnames (->> parsed (group-by :doc-filename) (into []) (sort-by first))]
     (doseq [[fname headers] fnames]
       (println (indent fname indent-cnt))
-      (doseq [[header lines] (->> headers (group-by :header) (into []))]
+      (doseq [[header lines] (->> headers (group-by :header) (into []) (sort-by #(-> % second first :line-no)))]
         (println (indent header (+ 2 indent-cnt)))
         (doseq [line lines]
           (println (-> (format "%03d: %s" (:line-no line) (:test-doc-blocks/test-ns line))

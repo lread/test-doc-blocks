@@ -11,6 +11,8 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Correct sort order in new tree-like report of found blocks
+
 == v1.0.101-alpha
 
 * Don't trim trailing newline for test body if last item is comment
