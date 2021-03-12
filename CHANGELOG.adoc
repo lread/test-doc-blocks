@@ -11,7 +11,11 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+== v1.0.103-alpha
+
 * Correct sort order in new tree-like report of found blocks
+
+https://github.com/lread/test-doc-blocks/compare/v1.0.101-alpha\...v1.0.103-alpha[Gritty details of changes for this release]
 
 == v1.0.101-alpha
 
