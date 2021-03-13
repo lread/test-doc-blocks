@@ -13,7 +13,8 @@
   ([target-root]
    (let [docs ["README.adoc"
                "doc/example.adoc"
-               "doc/example.md"]]
+               "doc/example.md"
+               "doc/example.cljc"]]
 
      (shell/command (concat ["clojure" "-X:test-doc-blocks" "gen-tests"]
                             (when target-root

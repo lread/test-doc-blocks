@@ -1,6 +1,7 @@
 (ns ^:no-doc lread.test-doc-blocks.impl.doc-parse
   "Parse doc blocks from AsciiDoc and CommonMark files."
-  (:require [clojure.edn :as edn]
+  (:require [clj-kondo.core :as clj-kondo]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as string]
             [lread.test-doc-blocks.impl.validate :as validate]))
@@ -172,7 +173,7 @@
                       md-opts
                       md-header]})
 
-(defn- parsers-for [filename]
+(defn- parsers-for-doc [filename]
   (let [doc-type (file-ext filename)]
     (or (get parse-def doc-type)
         (throw (ex-info (format "Don't know how to parse %s, file types supported: %s"
@@ -202,7 +203,71 @@
                       block-indentation)))
     line))
 
-(defn parse-doc-code-blocks
+(defn- parse-code-blocks
+  ([doc-filename platform parsers]
+   (with-open [rdr (io/reader doc-filename)]
+     (parse-code-blocks doc-filename platform parsers rdr)))
+  ;; this arity to support REPL testing via string reader
+  ([doc-filename platform parsers rdr]
+   (loop [[line & lines] (line-seq rdr)
+          state {:default-opts {:test-doc-blocks/test-ns (test-ns-for-doc-file doc-filename)
+                                :test-doc-blocks/platform platform}
+                 :doc-filename doc-filename ;; unchanging but used for error reporting
+                 :doc-line-no 1
+                 :blocks []}]
+     (if line
+       (recur lines
+              (try
+                (-> (let [p (parse-next parsers state line)]
+                      (cond
+                        (:end-block? p)
+                        (let [lang (:block-lang state)
+                              state (dissoc state :in-code-block? :end-block-re :block-lang :block-indentation)]
+                          (if-not (= "Clojure" lang)
+                            state
+                            (-> state
+                                (update :blocks conj (-> (:block state)
+                                                         (merge (:default-opts state) (:next-block-opts state))
+                                                         (assoc :header (:header state))
+                                                         (assoc :doc-filename (:doc-filename state))))
+                                (dissoc :next-block-opts)
+                                (assoc :block {}))))
+
+                        (:new-block? p)
+                        (let [state (-> state (assoc :in-code-block? true
+                                                     :end-block-re (:end-block-re p)
+                                                     :block-indentation (:block-indentation p)
+                                                     :block-lang (:lang p)))]
+                          (if-not (= "Clojure" (:lang p))
+                            state
+                            (-> state (assoc :block {:line-no (:doc-line-no state)
+                                                     :block-text ""}))))
+
+                        (and (:in-code-block? state) (= "Clojure" (:block-lang state)))
+                        (update-in state
+                                   [:block :block-text]
+                                   #(str % (block-line state line) "\n"))
+
+                        (:header p)
+                        (merge state p)
+
+                        (:opts p)
+                        (let [opts (:opts p)
+                              apply-to (:test-doc-blocks/apply opts)
+                              opts (dissoc opts :test-doc-blocks/apply)]
+                          (if (= :all-next apply-to)
+                            (update state :default-opts merge opts)
+                            (update state :next-block-opts merge opts)))
+
+                        :else
+                        state))
+                    (update :doc-line-no inc)
+                    (assoc :line-prev line))
+                (catch Throwable e
+                  (throw (ex-info (format "Unable to parse %s, issue at line %d" doc-filename (:doc-line-no state)) {} e)))))
+       (:blocks state)))))
+
+(defn- parse-doc-code-blocks
   "Parse out clojure code blocks from markdown in `doc-filename`.
   Formats supported are md and adoc and determined by file extension.
 
@@ -216,81 +281,96 @@
      (parse-doc-code-blocks doc-filename platform rdr)))
   ;; this arity to support REPL testing via string reader
   ([doc-filename platform rdr]
-   (let [parsers (parsers-for doc-filename)]
-     (loop [[line & lines] (line-seq rdr)
-            state {:default-opts {:test-doc-blocks/test-ns (test-ns-for-doc-file doc-filename)
-                                  :test-doc-blocks/platform platform}
-                   :doc-filename doc-filename ;; unchanging but used for error reporting
-                   :doc-line-no 1
-                   :blocks []}]
-       (if line
-         (recur lines
-                (try
-                  (-> (let [p (parse-next parsers state line)]
-                        (cond
-                          (:end-block? p)
-                          (let [lang (:block-lang state)
-                                state (dissoc state :in-code-block? :end-block-re :block-lang :block-indentation)]
-                            (if-not (= "Clojure" lang)
-                              state
-                              (-> state
-                                  (update :blocks conj (-> (:block state)
-                                                           (merge (:default-opts state) (:next-block-opts state))
-                                                           (assoc :header (:header state))
-                                                           (assoc :doc-filename (:doc-filename state))))
-                                  (dissoc :next-block-opts)
-                                  (assoc :block {}))))
+   (let [parsers (parsers-for-doc doc-filename)]
+     (parse-code-blocks doc-filename platform parsers rdr))))
 
-                          (:new-block? p)
-                          (let [state (-> state (assoc :in-code-block? true
-                                                       :end-block-re (:end-block-re p)
-                                                       :block-indentation (:block-indentation p)
-                                                       :block-lang (:lang p)))]
-                            (if-not (= "Clojure" (:lang p))
-                              state
-                              (-> state (assoc :block {:line-no (:doc-line-no state)
-                                                       :block-text ""}))))
+(defn- parse-src-code-blocks
+  "Parse out clojure code blocks from markdown in doc-strings in `src-filename`.
 
-                          (and (:in-code-block? state) (= "Clojure" (:block-lang state)))
-                          (update-in state
-                                     [:block :block-text]
-                                     #(str % (block-line state line) "\n"))
+  Returns vector of maps representing blocks found
+  - :doc-filename - same as `src-filename`
+  - :line-no - line number of doc block
+  - :header - describes ns or var docstring
+  - :block-text - content of block in string"
+  ;; TODO: default test-ns should probably be based on src-ns (rather than src-filename) to avoid potential collissions
+  ([src-filename platform]
+   ;; cljdoc only supports md in docstrings
+   (let [parsers (get parse-def "md")
+         kondo-result (clj-kondo/run! {:lint [src-filename]
+                                       :config {:output {:analysis true}}})
+         kondo-errors (->> kondo-result :findings (filter #(= :error (:level %))))]
+     (if (seq kondo-errors)
+       (throw (ex-info (format "unable to parse Clojure file %s\nclj-kondo errors: %s"
+                               src-filename (into [] kondo-errors)) {}))
+       (let [analysis (:analysis kondo-result)
+             of-interest (concat (:namespace-definitions analysis)
+                                 (:var-definitions analysis))]
+         (->>  of-interest
+               (map #(dissoc % :lang)) ;; otherwise we'll get dupes for cljc
+               distinct
+               (filter :doc)           ;; docstring
+               (map (fn [kondo] (let [blocks (parse-code-blocks src-filename
+                                                                platform
+                                                                parsers
+                                                                (-> kondo
+                                                                    :doc
+                                                                    ;; TODO: must be a better way to unescape
+                                                                    (string/replace "\\\"" "\"")
+                                                                    (string/replace "\\\"" "\"")
+                                                                    (string/replace "\\\\" "\\")
+                                                                    char-array
+                                                                    io/reader))]
+                                  [kondo blocks])))
+               (filter (fn [[_kondo blocks]] (seq blocks)))
+               (mapcat (fn [[kondo blocks]]
+                         (map (fn [block] (assoc block :kondo kondo)) blocks)))
+               (map (fn [{:keys [kondo] :as block}]
+                      (-> block
+                          (assoc :line-no (+ (-> block :kondo :row) (:line-no block))
+                                 :header (if (not (:ns kondo))
+                                           "namespace docstring"
+                                           (format "%s docstring" (:name kondo))))
+                          (dissoc :kondo))))))))))
 
-                          (:header p)
-                          (merge state p)
+(defn parse-file
+  "Parse code blocks from `filename` assuming a default `platform`.
 
-                          (:opts p)
-                          (let [opts (:opts p)
-                                apply-to (:test-doc-blocks/apply opts)
-                                opts (dissoc opts :test-doc-blocks/apply)]
-                            (if (= :all-next apply-to)
-                              (update state :default-opts merge opts)
-                              (update state :next-block-opts merge opts)))
+   Default `platform` can be overriden via inline options within code blocks.
 
-                          :else
-                          state))
-                      (update :doc-line-no inc)
-                      (assoc :line-prev line))
-                  (catch Throwable e
-                    (throw (ex-info (format "Unable to parse %s, issue at line %d" doc-filename (:doc-line-no state)) {} e)))))
-         (:blocks state))))))
+   Attempts are made to parse `filenames` with the following extensions:
+
+   - `.md` - CommonMark document
+   - `.adoc` - AsciiDoc document
+   - `.clj`, `.cljs` `.cljc`, `.cljr` - Clojure source
+
+   In the case of Clojure source, each docstring is searched for CommonMark style Clojure code blocks.
+
+   Returns a vector of maps representing code blocks found:
+
+   - :doc-filename - same as `filename`
+   - :line-no - line number of doc block
+   - :header
+      - for md and adoc - last header found before code block
+      - for Clojure source - describes ns or var of docstring
+   - :block-text - content of block in string"
+  [filename platform]
+  (let [ext (file-ext filename)]
+    (if (#{"clj" "cljc" "cljs" "cljr"} ext)
+      (parse-src-code-blocks filename platform)
+      (parse-doc-code-blocks filename platform))))
 
 (comment
-  (parse-doc-code-blocks "test.adoc" :clj (io/reader (char-array
-                                               (string/join "\n" ["# hey"
-                                                                  "//#:test-doc-blocks{:a 1 :b 2 :apply :subsequent}"
-                                                                  "   ```Clojure"
-                                                                  "   clj"
-                                                                  "    clj"
-                                                                  "```"
-                                                                  ""
-                                                                  "   ```Clojure"
-                                                                  "   clj"
-                                                                  "    clj"
-                                                                  "```"
-                                                                  ""
 
+  (def x "(string/upper-case \\\"all good?\\\")\n=> \\\"ALL GOOD?\\\"\n")
+  (println x)
 
-                                                                  ]))))
+  (parse-file "doc/example.cljc" :cljc)
 
-)
+  (println (string/replace x "\\" "x"))
+
+  (-> "(string/upper-case \\\"all \\\\\\\"good\\\\\\\"?\\\")"
+      (string/replace "\\\"" "\"")
+      (string/replace "\\\"" "\"")
+      println)
+
+  (println "(string/upper-case \\\"all \\\\\\\"good\\\\\\\"?\\\")"))

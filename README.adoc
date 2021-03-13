@@ -34,7 +34,7 @@ Initial concept. Currently being used to test doc blocks in rewrite-cljc.
 * Feedback welcome.
 
 == Rationale
-I wanted to make sure the code examples I provided in rewrite-cljc documentation do not mislead and would function as expected for those who dared to try them.
+I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and function as expected for those who dared to try them.
 
 Test-doc-blocks might (or might not, see link:#limitations[limitations], and link:#interesting-alternatives[interesting alternatives]) be of interest for your Clojure project too.
 
@@ -96,8 +96,9 @@ For more detailed examples and inline options, see:
 
 * link:doc/example.adoc[AsciiDoc example]
 * link:doc/example.md[CommonMark example]
+* link:doc/example.cljc[Clojure source docstring example]
 
-The test-doc-blocks link:deps.edn[deps.edn] has some aliases that might server as useful examples:
+The test-doc-blocks link:deps.edn[deps.edn] has some aliases that might serve as useful examples:
 
 * `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
 Invoke for this project via: `clj -M:isolated/cljs-test-runner`
@@ -109,14 +110,16 @@ Invoke for this project via: `clj -M:isolated/clj-test-runner`
 === Command Line Options
 
 :docs::
-The default file to generate tests for is README.md.
+The default file tests are generated for is `README.md`.
 +
 If you want to specify a different vector of files you can do so via `:docs`:
 +
 [source,shell]
 ----
-clojure -X:gen-doc-tests :docs '["README.adoc" "doc/example.adoc" "doc/example.md"]'
+clojure -X:gen-doc-tests :docs '["README.adoc" "doc/example.adoc" "doc/example.md" "doc/example.cljc"]'
 ----
++
+`:docs` understands https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)[glob syntax].
 
 :target-root::
 The default directory to generate tests is `./target`.
@@ -142,7 +145,8 @@ Specify:
 
 +
 The default is `:cljc`.
-Platform can be overridden for code blocks via inline options.
+Platform can be overridden for code blocks via inline options. +
+No platform assumptions are currently made when generating test from doc blocks found in Clojure source files. Specify what makes sense for your tests.
 
 [#limitations]
 == Limitations
@@ -165,7 +169,7 @@ If your code or headings are expressed in embedded HTML within your doc, test-do
 
 Here are other options and related projects that I am currently aware of:
 
-* https://github.com/lambdaisland/kaocha[kaocha] - Koacha supports running cucumber tests.
+* https://github.com/lambdaisland/kaocha[kaocha] - Kaocha supports running cucumber tests.
 It uses this support in tests for its own documentation.
 A `.feature` document describes the feature and includes given, when, then scenarios that are both run and shown in documentation.
 Gritty details can be hidden in step definitions.

@@ -1,6 +1,7 @@
 (ns lread.test-doc-blocks
   "Parse code blocks from markdown and generate Clojure test code."
-  (:require [clojure.java.io :as io]
+  (:require [babashka.fs :as fs]
+            [clojure.java.io :as io]
             [clojure.string :as string]
             [lread.test-doc-blocks.impl.doc-parse :as doc-parse]
             [lread.test-doc-blocks.impl.process :as process]
@@ -74,7 +75,7 @@
   (let [opts (merge default-opts opts)]
     (if-let [errs (validate/errors [:map {:closed true}
                                     [:target-root string?]
-                                    [:docs  [:fn {:error/fn (fn [_ _] "should be a vector of filename strings")}
+                                    [:docs  [:fn {:error/fn (fn [_ _] "should be a vector of filename strings (glob is supported)")}
                                              (fn [x] (and (vector? x) (first x) (every? string? x)))]]
                                     [:platform [:enum :clj :cljs :cljc]]]
                                    opts)]
@@ -86,7 +87,8 @@
         (when (.exists (io/file target-root))
           (delete-dir! target-root))
         (let [target-root (str (io/file target-root "test"))
-              parsed (mapcat #(doc-parse/parse-doc-code-blocks % platform) docs)]
+              sources (->> docs (mapcat #(fs/glob "./" %)) sort distinct (map str))
+              parsed (mapcat #(doc-parse/parse-file % platform) sources) ]
           (report-on-found! parsed)
           (let [tests (process/convert-to-tests parsed)]
             (if (seq tests)
@@ -103,10 +105,9 @@
                      "README.adoc"
                      "doc/example.md"
                      "doc/example.adoc"]
+              :src ["doc/example.clj"]
               :platform :cljs})
 
-  (gen-tests {:docs ["doc/example.adoc"]})
+  (gen-tests {:docs ["doc/example.cljc"]})
 
-  (gen-tests {:docs ""})
-  
-  )
+  (gen-tests {:docs ""}))

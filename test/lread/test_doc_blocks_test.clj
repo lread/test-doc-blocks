@@ -17,8 +17,7 @@
 (deftest verify-generation-against-known-good-run
 
   (sut/gen-tests {:docs ["README.adoc"
-                         "doc/example.adoc"
-                         "doc/example.md"]
+                         "doc/example.{adoc,md,cljc}"]
                   :target-root "target/actual"})
 
   (let [expected-dir "test-resources/expected/test-doc-blocks/test/"
