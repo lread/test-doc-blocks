@@ -48,8 +48,7 @@
            ;; Test support
            ;;
 
-           :clj-kondo {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.03.03"}}
-                       :main-opts ["-m" "clj-kondo.main"]}
+           :clj-kondo {:main-opts ["-m" "clj-kondo.main"]}
 
            ;;
            ;; Deployment
