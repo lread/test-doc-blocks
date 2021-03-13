@@ -11,6 +11,8 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Support generating tests from CommonMark code blocks found in Clojure source docstrings
+
 == v1.0.103-alpha
 
 * Correct sort order in new tree-like report of found blocks
