@@ -11,7 +11,11 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+== v1.0.114-alpha
+
 * Ensure test-doc-blocks works on Windows
+
+https://github.com/lread/test-doc-blocks/compare/v1.0.107-alpha\...v1.0.114-alpha[Gritty details of changes for this release]
 
 == v1.0.107-alpha
 
