@@ -148,6 +148,9 @@ The default is `:cljc`.
 Platform can be overridden for code blocks via inline options. +
 No platform assumptions are currently made when generating test from doc blocks found in Clojure source files. Specify what makes sense for your tests.
 
+TIP: Windows users, trying correctly escaping -X args on the command line can lead to frustration.
+Consider specifying options in `deps.edn` instead.
+
 [#limitations]
 == Limitations
 
