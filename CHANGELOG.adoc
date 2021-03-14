@@ -11,6 +11,8 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Ensure test-doc-blocks works on Windows
+
 == v1.0.107-alpha
 
 * Support generating tests from CommonMark code blocks found in Clojure source docstrings
