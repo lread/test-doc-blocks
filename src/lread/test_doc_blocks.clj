@@ -9,6 +9,10 @@
             [lread.test-doc-blocks.impl.validate :as validate])
   (:import [java.nio.file Files]))
 
+(def windows? (-> (System/getProperty "os.name")
+                  (string/lower-case)
+                  (string/includes? "win")))
+
 (defn- delete-dir!
   "Delete dir at `path` recursively.
   For safety, throws if there are any symbolic links found in file set to be deleted."
@@ -68,6 +72,14 @@
    :docs ["README.md"]
    :platform :cljc})
 
+(defn- generic-glob
+  "Wrap glob to always take UNIX style pattern and output UNIX style paths as strings"
+  [root pattern]
+  (if windows?
+    (->> (fs/glob root (string/replace pattern "/" "\\\\"))
+         (map #(-> % str (string/replace "\\" "/"))))
+    (map str (fs/glob root pattern))))
+
 (defn gen-tests
   "Generate tests for code blocks found in markdown files.
   Invoke from clojure CLI with -X."
@@ -87,7 +99,10 @@
         (when (.exists (io/file target-root))
           (delete-dir! target-root))
         (let [target-root (str (io/file target-root "test"))
-              sources (->> docs (mapcat #(fs/glob "./" %)) sort distinct (map str))
+              sources (->> docs
+                           (mapcat #(generic-glob "./" %))
+                           sort
+                           distinct)
               parsed (mapcat #(doc-parse/parse-file % platform) sources) ]
           (report-on-found! parsed)
           (let [tests (process/convert-to-tests parsed)]

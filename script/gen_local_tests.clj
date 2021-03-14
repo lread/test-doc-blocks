@@ -11,15 +11,9 @@
 (defn- gen-tests
   ([] (gen-tests nil))
   ([target-root]
-   (let [docs ["README.adoc"
-               "doc/example.adoc"
-               "doc/example.md"
-               "doc/example.cljc"]]
-
-     (shell/command (concat ["clojure" "-X:test-doc-blocks" "gen-tests"]
-                            (when target-root
-                              [":target-root" (pr-str target-root)])
-                            [":docs" (str docs)])))))
+   (shell/command (concat ["clojure" "-X:test-doc-blocks:test-opts" "gen-tests"]
+                          (when target-root
+                            [":target-root" (pr-str target-root)])))))
 
 (defn main [args]
   (env/assert-min-versions)
