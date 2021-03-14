@@ -17,6 +17,9 @@
            :test-opts {:exec-args {:docs ["README.adoc"
                                           "doc/example.{adoc,md,cljc}"]}}
 
+           ;; and :target, even passing a "\"string\"" is hard on windows
+           :regen-opts {:exec-args {:target-root "test-resources/expected"}}
+
            ;;
            ;; test runners for test-doc-blocks
            ;;

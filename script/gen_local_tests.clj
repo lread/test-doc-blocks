@@ -9,11 +9,10 @@
          '[helper.status :as status])
 
 (defn- gen-tests
-  ([] (gen-tests nil))
-  ([target-root]
-   (shell/command (concat ["clojure" "-X:test-doc-blocks:test-opts" "gen-tests"]
-                          (when target-root
-                            [":target-root" (pr-str target-root)])))))
+  [opts-aliases]
+  (shell/command ["clojure"
+                  (format "-X:test-doc-blocks:%s" opts-aliases)
+                  "gen-tests"]))
 
 (defn main [args]
   (env/assert-min-versions)
@@ -22,12 +21,12 @@
       (= "regen-expected" cmd)
       (do
         (status/line :info "Regnerating expected tests for local documents.")
-        (gen-tests "test-resources/expected"))
+        (gen-tests "test-opts:regen-opts"))
 
       (nil? cmd)
       (do
         (status/line :info "Generating tests for local documents.")
-        (gen-tests))
+        (gen-tests "test-opts"))
 
       :else
       (status/fatal (str "Invalid cmd: " cmd " - see docs for usage.")))))
