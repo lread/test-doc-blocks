@@ -12,6 +12,7 @@
        io/file
        file-seq
        (filter #(.isFile %))
+       (map #(string/replace % "\\" "/")) ;; Windows->UNIX style paths
        (map #(string/replace (str %) dir ""))))
 
 (deftest verify-generation-against-known-good-run
