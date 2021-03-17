@@ -1,5 +1,6 @@
 = lread.test-doc-blocks
 :project-coords: lread/test-doc-blocks
+:deploy-coords: com.github.{project-coords}
 ifdef::env-github[]
 :tip-caption: :bulb:
 :note-caption: :information_source:
@@ -13,7 +14,7 @@ endif::[]
 //#:test-doc-blocks{:skip true :apply :all-next}
 
 https://github.com/{project-coords}/actions?query=workflow%3ATest[image:https://github.com/{project-coords}/workflows/Test/badge.svg[Test]]
-https://clojars.org/{project-coords}[image:https://img.shields.io/clojars/v/{project-coords}.svg[Clojars]]
+https://clojars.org/{deploy-coords}[image:https://img.shields.io/clojars/v/{deploy-coords}.svg[Clojars]]
 https://cljdoc.org/d/{project-coords}/CURRENT[image:https://cljdoc.org/badge/{project-coords}[cljdoc]]
 
 Generate Clojure tests from AsciiDoc and CommonMark doc code blocks.
