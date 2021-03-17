@@ -11,6 +11,8 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Switch to `com.github.lread/test-doc-blocks` for deployment artifact name as per new security measures at clojars.
+
 == v1.0.114-alpha
 
 * Ensure test-doc-blocks works on Windows

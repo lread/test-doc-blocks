@@ -60,7 +60,7 @@
 (defn- update-readme! [version]
   (status/line :info (str "Updating README usage to show version " version))
   (update-file! "README.adoc"
-                #"( +\{:extra-deps \{lread/test-doc-blocks \{:mvn/version \").*(\"\}\})"
+                #"( +\{:extra-deps \{com.github.lread/test-doc-blocks \{:mvn/version \").*(\"\}\})"
                 (str  "$1" version "$2")))
 
 (defn- adoc-section-search[content find-section]
