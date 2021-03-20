@@ -23,12 +23,12 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.10.3</version>
+      <version>1.9.0</version>
     </dependency>
     <dependency>
       <groupId>rewrite-clj</groupId>
       <artifactId>rewrite-clj</artifactId>
-      <version>1.0.574-alpha</version>
+      <version>1.0.594-alpha</version>
     </dependency>
     <dependency>
       <groupId>clj-kondo</groupId>

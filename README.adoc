@@ -108,6 +108,9 @@ Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaoc
 * `:isolated/clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
 Invoke for this project via: `clj -M:isolated/clj-test-runner`
 
+Test generation requires Clojure v1.9 or later. +
+Generated tests have been verified to run against Clojure v1.8 or later - except under kaocha which itself requires Clojure v1.9 or later.
+
 === Command Line Options
 
 :docs::
