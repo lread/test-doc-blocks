@@ -306,7 +306,7 @@
              of-interest (concat (:namespace-definitions analysis)
                                  (:var-definitions analysis))]
          (->>  of-interest
-               (map #(dissoc % :lang)) ;; otherwise we'll get dupes for cljc
+               (map #(dissoc % :lang :defined-by)) ;; otherwise we'll get dupes for cljc
                distinct
                (filter :doc)           ;; docstring
                (map (fn [kondo] (let [blocks (parse-code-blocks src-filename
@@ -314,10 +314,6 @@
                                                                 parsers
                                                                 (-> kondo
                                                                     :doc
-                                                                    ;; TODO: must be a better way to unescape
-                                                                    (string/replace "\\\"" "\"")
-                                                                    (string/replace "\\\"" "\"")
-                                                                    (string/replace "\\\\" "\\")
                                                                     char-array
                                                                     io/reader))]
                                   [kondo blocks])))
@@ -358,19 +354,3 @@
     (if (#{"clj" "cljc" "cljs" "cljr"} ext)
       (parse-src-code-blocks filename platform)
       (parse-doc-code-blocks filename platform))))
-
-(comment
-
-  (def x "(string/upper-case \\\"all good?\\\")\n=> \\\"ALL GOOD?\\\"\n")
-  (println x)
-
-  (parse-file "doc/example.cljc" :cljc)
-
-  (println (string/replace x "\\" "x"))
-
-  (-> "(string/upper-case \\\"all \\\\\\\"good\\\\\\\"?\\\")"
-      (string/replace "\\\"" "\"")
-      (string/replace "\\\"" "\"")
-      println)
-
-  (println "(string/upper-case \\\"all \\\\\\\"good\\\\\\\"?\\\")"))
