@@ -11,6 +11,8 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Maintenance release - deps, docs and ops updates
+
 == v1.0.116-alpha
 
 * Switch to `com.github.lread/test-doc-blocks` for deployment artifact name as per new security measures at clojars.
