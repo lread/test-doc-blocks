@@ -6,7 +6,7 @@ Test-doc-blocks will find Clojure source code blocks in your documents and gener
 The Basics
 --
 A test is generated for each Clojure code block.
-Any code block with with a (case insenstive) language of `clj` `cljs` `cljc` or starting with `Clojure` is recognized as a Clojure code block.
+Any code block with with a (case insensitive) language of `clj` `cljs` `cljc` or starting with `Clojure` is recognized as a Clojure code block.
 
 Assertions are automatically generated for:
 
@@ -16,7 +16,7 @@ Assertions are automatically generated for:
     ;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates to the expected 6
     user=> (+ 1 2 3)
     6
-    ``` 
+    ```
 - Editor style eval to comment, with some extras:
 
    ```cljc
@@ -32,7 +32,7 @@ Assertions are automatically generated for:
    ;; and verifies, when asked, to check what was written to stdout
    (println "hey there!")
    ;; stdout=> hey there!
-   
+
    ;; multiple stdout lines can be verified like so (notice the use of single ;):
    (println "is this right?\nor not?")
    ;; =stdout=>
@@ -85,7 +85,7 @@ It currently understands four options:
 - `:test-doc-blocks/apply` - controls to what code blocks options are applied
 - `:test-doc-blocks/skip` - skips the next code block
 - `:test-doc-blocks/reader-cond` - wraps your code block in a reader conditional
-- `:test-doc-blocks/test-ns` - specifies the test namespace 
+- `:test-doc-blocks/test-ns` - specifies the output test namespace
 - `:test-doc-blocks/platform` - specifies Clojure file type to generate for test ns
 - `:test-doc-blocks/meta` - attach metadata to generated tests
 
@@ -286,22 +286,22 @@ CommonMark syntax gives meaning to indented code blocks.
     ;; we handle simple cases a-OK.
     user=> (+ 1 2 3)
     6
-    ``` 
+    ```
 
   - It indents more for deeper items:
-  
+
       ```Clojure
       ;; we handle indented wrapped strings just fine
       (def s "my
       goodness
       gracious")
-   
+
       (println s)
       ;; =stdout=>
       ; my
       ; goodness
       ; gracious
-      ``` 
+      ```
 
 # Nuances
 
@@ -343,7 +343,7 @@ If your separate code blocks represent a larger flow, then order is important.
 If we start in one code block...
 
 ```clojure
-(def var-block1 (+ 1 2 3))
+(defn fn-block1 [] (+ 1 2 3))
 ```
 
 ...and continue in another:
@@ -352,13 +352,13 @@ If we start in one code block...
 
 (def var-block2 (+ 4 5 6))
 
-(+ var-block1 var-block2)
+(+ (fn-block1) var-block2)
 ;; => 21
 ```
 
 ...and then maybe another:
 ```clojure
-(+ var-block1 var-block2 79)
+(+ (fn-block1) var-block2 79)
 ;; => 100
 ```
 

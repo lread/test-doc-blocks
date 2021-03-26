@@ -29,13 +29,14 @@ toc::[]
 
 == Status
 
-Initial concept. Currently being used to test doc blocks in rewrite-cljc.
+Initial concept. Currently being used to test doc blocks in https://github.com/clj-commons/rewrite-clj[rewrite-clj].
 
 * Alpha, this might not be a good general idea, but might work well for some projects.
+It is working very well for rewrite-clj.
 * Feedback welcome.
 
 == Rationale
-I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and function as expected for those who dared to try them.
+I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and function as expected for those who dare to try them.
 
 Test-doc-blocks might (or might not, see link:#limitations[limitations], and link:#interesting-alternatives[interesting alternatives]) be of interest for your Clojure project too.
 
@@ -77,7 +78,7 @@ Then the most basic usage is:
 clojure -X:gen-doc-tests
 ----
 
-This generates Clojure tests for code blocks in your `README.md` to the `target/test-doc-blocks/test` directory.
+This generates Clojure tests for code blocks in your `README.md` file to the `target/test-doc-blocks/test` directory.
 Any existing tests under `target/test-doc-blocks` will be replaced.
 
 The generated tests have no dependency on test-doc-blocks and can be run with your preferred test runner.
@@ -152,8 +153,8 @@ The default is `:cljc`.
 Platform can be overridden for code blocks via inline options. +
 No platform assumptions are currently made when generating test from doc blocks found in Clojure source files. Specify what makes sense for your tests.
 
-TIP: Windows users, trying correctly escaping -X args on the command line can lead to frustration.
-Consider specifying options in `deps.edn` instead.
+TIP: Windows users, trying to correctly escape -X args on the command line can lead to frustration.
+Consider instead specifying options under `:exec-args` in your `:gen-doc-tests` alias in `deps.edn`.
 
 [#limitations]
 == Limitations
@@ -167,14 +168,15 @@ If we've overlooked a common syntax, let us know.
 
 Some limitations we have no current plans to address:
 
-* Code blocks using `ns` or `in-ns` will not work with test-doc-blocks.
+* Code blocks using `ns` or `in-ns` will not work with test-doc-blocks. +
+* For REPL style code blocks we only look for `user=>` prompts and no other ns prompts.
 * It is possible to embed HTML into your docs.
 If your code or headings are expressed in embedded HTML within your doc, test-doc-blocks won't find them.
 
 [#interesting-alternatives]
 == Interesting Alternatives
 
-Here are other options and related projects that I am currently aware of:
+Other options and related projects that I am currently aware of:
 
 * https://github.com/lambdaisland/kaocha[kaocha] - Kaocha supports running cucumber tests.
 It uses this support in tests for its own documentation.
@@ -190,7 +192,7 @@ Gritty details can be hidden in step definitions.
 
 In addition to the https://clojure.org/guides/getting_started[Clojure CLI], you will need to install https://github.com/borkdude/babashka[babashka] to run scripts.
 
-The example ClojureScript test runner does make use of https://nodejs.org[Node.js]
+The example ClojureScript test runner makes use of https://nodejs.org[Node.js]
 
 === Tests
 
@@ -216,6 +218,8 @@ When you are happy with current behaviour of generation of tests:
 ----
 bb script/gen_local_tests.clj regen-expected
 ----
+
+And commit/push the expected results.
 
 ==== Generated
 
@@ -306,6 +310,7 @@ As a developer you can run the following locally:
 ** @sogaiu
 ** @dominicin
 ** @pez
+** @seancorfield
 ** @uochan
 
 === Current Maintainers
@@ -316,6 +321,7 @@ As a developer you can run the following locally:
 
 Copyright © 2021 Lee Read, all rights reserved.
 
-Distributed under the EPL License, same as Clojure. See LICENSE.
+Distributed under the EPL License, same as Clojure.
+See LICENSE.
 
 Concept based on @seancorfield's https://github.com/seancorfield/readme[readme] which is distributed under EPL v1.0 or later.

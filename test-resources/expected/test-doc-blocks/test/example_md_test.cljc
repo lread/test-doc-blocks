@@ -105,7 +105,7 @@ gracious")
 
 (clojure.test/deftest block-0012
   (clojure.test/testing  "doc/example.md - line 345 - Test Run Order"
-(def var-block1 (+ 1 2 3))
+(defn fn-block1 [] (+ 1 2 3))
 
 ; test-doc-blocks dummy assertion to appease tools that fail on no assertions
 (clojure.test/is (= '"dummy" "dummy"))))
@@ -116,10 +116,10 @@ gracious")
 
 (def var-block2 (+ 4 5 6))
 
-(clojure.test/is (= '21 (+ var-block1 var-block2)))))
+(clojure.test/is (= '21 (+ (fn-block1) var-block2)))))
 
 (clojure.test/deftest block-0014
   (clojure.test/testing  "doc/example.md - line 360 - Test Run Order"
-(clojure.test/is (= '100 (+ var-block1 var-block2 79)))))
+(clojure.test/is (= '100 (+ (fn-block1) var-block2 79)))))
 
 (defn test-ns-hook [] (block-0001) (block-0002) (block-0003) (block-0004) (block-0005) (block-0006) (block-0007) (block-0008) (block-0009) (block-0010) (block-0011) (block-0012) (block-0013) (block-0014))
