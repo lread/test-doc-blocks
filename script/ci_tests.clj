@@ -1,14 +1,15 @@
 #!/usr/bin/env bb
 
 (ns ci-tests
-  (:require [helper.env :as env]
-            [helper.fs :as fs]
+  (:require [babashka.fs :as fs]
+            [helper.env :as env]
             [helper.shell :as shell]
             [lread.status-line :as status]))
 
-(defn- clean []
+(defn clean []
   (doseq [dir ["target" ".cpcache"]]
-    (fs/delete-file-recursively dir true)))
+    (when (fs/exists? dir)
+      (fs/delete-tree dir))))
 
 (defn- lint[]
   (shell/command ["bb" "./script/lint.clj"]))
