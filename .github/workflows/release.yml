@@ -28,15 +28,16 @@ jobs:
         restore-keys: $${ runner.os }}-cljdeps-release-
 
     - name: Setup Java
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v2
       with:
-        java-version: 11
+        distribution: 'adopt'
+        java-version: '11'
 
     - name: Install Babashka
       run: curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install | sudo bash
 
     - name: Install Clojure
-      run: curl -s https://download.clojure.org/install/linux-install-1.10.2.796.sh | sudo bash
+      run: curl -s https://download.clojure.org/install/linux-install-1.10.3.814.sh | sudo bash
 
     - name: Tools Versions
       run: |

@@ -11,6 +11,8 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Maintenance release - bump deps
+
 == v1.0.124-alpha
 
 * Maintenance release - deps, docs and ops updates
