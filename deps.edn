@@ -73,9 +73,4 @@
            :deploy {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
                     :exec-fn deps-deploy.deps-deploy/deploy
                     :exec-args {:installer :remote
-                                :artifact "target/test-doc-blocks.jar"}}
-
-           ;;
-           ;; Script deps
-           ;;
-           :script {:extra-paths ["script"]}}}
+                                :artifact "target/test-doc-blocks.jar"}}}}

@@ -216,7 +216,7 @@ When you are happy with current behaviour of generation of tests:
 
 [source,shell]
 ----
-bb script/gen_local_tests.clj regen-expected
+bb script/gen_local_tests.clj --regen-expected
 ----
 
 And commit/push the expected results.
@@ -258,6 +258,8 @@ To run linting as the CI server does:
 ----
 bb script/lint.clj
 ----
+
+If, for whatever reason, you want to rebuild the lint cache supply the `--rebuild-cache` option.
 
 == Versioning
 

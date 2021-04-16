@@ -1,4 +1,4 @@
-{:config-paths ^:replace []
+{:config-paths ^:replace ["lread/status-line"]
  :linters
  {:shadowed-var {:level :warning}
   :unsorted-required-namespaces {:level :warning}}}

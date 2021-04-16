@@ -1,43 +1,40 @@
 #!/usr/bin/env bb
 
 (ns ci-tests
-  (:require [babashka.classpath :as cp]))
+  (:require [helper.env :as env]
+            [helper.fs :as fs]
+            [helper.shell :as shell]
+            [lread.status-line :as status]))
 
-(cp/add-classpath "./script")
-(require '[helper.env :as env]
-         '[helper.fs :as fs]
-         '[helper.shell :as shell]
-         '[helper.status :as status])
-
-(defn clean []
+(defn- clean []
   (doseq [dir ["target" ".cpcache"]]
     (fs/delete-file-recursively dir true)))
 
-(defn lint[]
+(defn- lint[]
   (shell/command ["bb" "./script/lint.clj"]))
 
-(defn unit-tests []
-  (status/line :info "Running test-doc-blocks unit tests")
+(defn- unit-tests []
+  (status/line :head "Running test-doc-blocks unit tests")
   (shell/command ["clojure" "-M:kaocha" "unit"]))
 
-(defn generate-tests []
+(defn- generate-tests []
   (shell/command ["bb" "./script/gen_local_tests.clj"]))
 
-(defn run-generated-tests []
-  (status/line :info "Running locally generated tests under Clojure via kaocha")
+(defn- run-generated-tests []
+  (status/line :head "Running locally generated tests under Clojure via kaocha")
   (shell/command ["clojure" "-M:isolated/kaocha" "generated"])
 
-  (status/line :info "Running locally generated tests under Clojure via Clojure test-runner")
+  (status/line :head "Running locally generated tests under Clojure via Clojure test-runner")
   (shell/command ["clojure" "-M:isolated/clj-test-runner"])
 
-  (status/line :info "Running locally generated tests under ClojureScript via cljs-test-runner")
+  (status/line :head "Running locally generated tests under ClojureScript via cljs-test-runner")
   (shell/command ["clojure" "-M:isolated/cljs-test-runner"]))
 
-(defn integration-tests []
-  (status/line :info "Running test-doc-blocks integration tests")
+(defn- integration-tests []
+  (status/line :head "Running test-doc-blocks integration tests")
   (shell/command ["clojure" "-M:kaocha" "integration" ]))
 
-(defn main[]
+(defn -main[]
   (env/assert-min-versions)
   (clean)
   (lint)
@@ -48,4 +45,5 @@
   (println "ci tests all done")
   nil)
 
-(main)
+(env/when-invoked-as-script
+ (-main))

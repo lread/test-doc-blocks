@@ -2,23 +2,21 @@
 
 ;;
 ;; This script is ultimately run from GitHub Actions
-;; 
+;;
 
 (ns release
-  (:require [babashka.classpath :as cp]
+  (:require [babashka.fs :as fs]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.string :as string]))
-
-(cp/add-classpath (.getParent (io/file *file*)))
-
-(require '[helper.fs :as fs]
-         '[helper.shell :as shell]
-         '[helper.status :as status])
+            [clojure.string :as string]
+            [helper.env :as env]
+            [helper.shell :as shell]
+            [lread.status-line :as status]))
 
 (defn clean! []
   (doseq [dir ["target" ".cpcache"]]
-    (fs/delete-file-recursively dir true)))
+    (when (fs/exists? dir)
+      (fs/delete-tree dir))))
 
 (defn- last-release-tag []
   (->  (shell/command ["git" "describe" "--abbrev=0" "--match" "v[0-9]*"] {:out :string})
@@ -39,26 +37,26 @@
       edn/read-string))
 
 (defn- calculate-version []
-  (status/line :info "Calculating release version")
+  (status/line :head "Calculating release version")
   (let [version-template (dev-specified-version)
         patch (repo-commit-count)
-        version (str (:major version-template) "." 
+        version (str (:major version-template) "."
                      (:minor version-template) "."
                      patch
                      (cond->> (:qualifier version-template)
                        true (str "-")))]
-    (status/line :detail (str "version: " version))
+    (status/line :detail "version: %s" version)
     version))
 
 (defn- update-file! [fname match replacement]
   (let [old-content (slurp fname)
         new-content (string/replace-first old-content match replacement)]
     (if (= old-content new-content)
-      (status/fatal (str  "Expected " fname " to be updated."))
+      (status/die 1 "Expected %s to be updated." fname)
       (spit fname new-content))))
 
 (defn- update-readme! [version]
-  (status/line :info (str "Updating README usage to show version " version))
+  (status/line :head "Updating README usage to show version %s" version)
   (update-file! "README.adoc"
                 #"( +\{:extra-deps \{com.github.lread/test-doc-blocks \{:mvn/version \").*(\"\}\})"
                 (str  "$1" version "$2")))
@@ -70,14 +68,14 @@
 
     (re-find (re-pattern  (str  "(?ims)^=+ " find-section " *$")) content)
     :found
-    
+
     :else
     :not-found))
 
-(defn- validate-changelog 
+(defn- validate-changelog
   "Certainly not fool proof, but should help for common mistakes"
   []
-  (status/line :info "Validating change log")
+  (status/line :head "Validating change log")
   (let [content (slurp "CHANGELOG.adoc")
         unreleased-status (adoc-section-search content "Unreleased")
         unreleased-breaking-status (adoc-section-search content "Unreleased Breaking Changes")]
@@ -91,16 +89,16 @@
                                                     "   Please put some descriptive text in there to help our users understand what is in the release\n"
                                                     "   OR delete the section if there are no breaking changes for this release."))
       :not-found (status/line :detail "✅ Unreleased Breaking Changes section not found, assuming no breaking changes for this release."))
-      
+
     (if (or (not (= :found unreleased-status))
             (= :found-with-no-text unreleased-breaking-status))
-      (status/fatal "Changelog needs some love")
+      (status/die 1 "Changelog needs some love")
       (status/line :detail "Changelog looks good for update by release workflow."))
     {:unreleased unreleased-status
      :unreleased-breaking unreleased-breaking-status}))
 
 (defn- update-changelog! [version last-version {:keys [unreleased-breaking]}]
-  (status/line :info (str "Updating Change Log unreleased headers to release " version))
+  (status/line :head "Updating Change Log unreleased headers to release %s" version)
   (update-file! "CHANGELOG.adoc"
                 #"(?ims)^(=+) +unreleased *$(.*?)(^=+)"
                 (str "$1 Unreleased\n\n$1 v" version "$2"
@@ -118,7 +116,7 @@
                   (str "$1 v" version))))
 
 (defn- create-jar! [version]
-  (status/line :info (str "Creating jar for version " version))
+  (status/line :head "Creating jar for version %s" version)
   (status/line :detail "Reflecting deps in deps.edn to pom.xml")
   (shell/command ["clojure" "-Spom"])
   (status/line :detail "Updating pom.xml version and creating thin jar")
@@ -129,19 +127,19 @@
   "Little blocker to save myself from myself when testing."
   [action]
   (when (not (System/getenv "CI"))
-    (status/fatal (format  "We only want to %s from CI" action))))
+    (status/die 1 "We only want to %s from CI" action)))
 
 (defn- deploy-jar!
   "For this to work, appropriate CLOJARS_USERNAME and CLOJARS_PASSWORD must be in environment."
   []
-  (status/line :info "Deploying jar to clojars")
+  (status/line :head "Deploying jar to clojars")
   (assert-on-ci "deploy a jar")
   (shell/command ["clojure" "-X:deploy"])
   nil)
 
 (defn- commit-changes! [version]
   (let [tag-version (str "v" version)]
-    (status/line :info (str  "Committing and pushing changes made for " tag-version))
+    (status/line :head "Committing and pushing changes made for %s" tag-version)
     (assert-on-ci "commit changes")
     (status/line :detail "Adding changes")
     (shell/command ["git" "add" "README.adoc" "CHANGELOG.adoc" "pom.xml"])
@@ -156,7 +154,7 @@
     nil))
 
 (defn- inform-cljdoc! [version]
-  (status/line :info (str "Informing cljdoc of new version " version))
+  (status/line :head "Informing cljdoc of new version %s" version)
   (assert-on-ci "inform cljdoc")
   (let [exit-code (->  (shell/command-no-exit ["curl" "-X" "POST"
                                                "-d" "project=lread/test-doc-blocks"
@@ -164,14 +162,13 @@
                                                "https://cljdoc.org/api/request-build2"])
                        :exit)]
     (when (not (zero? exit-code))
-      (status/line :warn (str  "Informing cljdoc did not seem to work, exited with " exit-code)))))
-
+      (status/line :warn "Informing cljdoc did not seem to work, attempt exited with %d" exit-code))))
 
 (defn- validate-args [args]
   (let [cmd (first args)]
     (when (or (not= 1 (count args))
               (not (some #{cmd} '("prep" "deploy-remote" "commit" "validate"))))
-      (status/fatal (string/join "\n"
+      (status/die 1 (string/join "\n"
                                  ["Usage: release cmd"
                                   ""
                                   "Where cmd can be:"
@@ -180,25 +177,25 @@
                                   " commit         - commit changes made back to repo, inform cljdoc of release"
                                   ""
                                   "These commands are expected to be run in order from CI."
-                                  "Why the awkward separation?" 
+                                  "Why the awkward separation?"
                                   "To restrict the exposure of our CLOJARS secrets during deploy workflow"
                                   ""
                                   "Additional commands for local use:"
                                   " validate      - verify that change log is good for release"])))
     cmd))
 
-(defn- main [args]
+(defn -main [& args]
   (let [cmd (validate-args args)
         target-version-filename "target/target-version.txt"]
-    (status/line :info (str  "Attempting release step: " cmd))
+    (status/line :head "Attempting release step: %s" cmd)
     (case cmd
       "prep"
       (do (clean!)
           (let [changelog-status (validate-changelog)
                 target-version (calculate-version)
                 last-version (last-release-tag)]
-            (status/line :detail (str "Last version released: " (or last-version "<none>")))
-            (status/line :detail (str "Target version:        " target-version))
+            (status/line :detail "Last version released: %s" (or last-version "<none>"))
+            (status/line :detail "Target version:        %s" target-version)
             (io/make-parents target-version-filename)
             (spit target-version-filename target-version)
             (update-readme! target-version)
@@ -210,8 +207,7 @@
 
       "commit"
       (if (not (.exists (io/file target-version-filename)))
-        (status/fatal (str "Target version file not found: " target-version-filename
-                           "\nWas prep step run?"))
+        (status/die 1 "Target version file not found: %s\nWas prep step run?" target-version-filename)
         (let [target-version (slurp target-version-filename)]
           (commit-changes! target-version)
           (inform-cljdoc! target-version)))
@@ -220,6 +216,7 @@
       (do (validate-changelog)
           nil))
 
-    (status/line :detail (str "Release step done:" cmd))))
+    (status/line :detail "Release step done: %s" cmd)))
 
-(main *command-line-args*)
+(env/when-invoked-as-script
+ (apply -main *command-line-args*))
