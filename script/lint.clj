@@ -4,57 +4,66 @@
   (:require [babashka.classpath :as bbcp]
             [babashka.fs :as fs]
             [clojure.string :as string]
-            [docopt.core :as docopt]
-            [docopt.match :as docopt-match]
-            [helper.env :as env]
+            [helper.main :as main]
             [helper.shell :as shell]
             [lread.status-line :as status]))
 
+(def clj-kondo-cache ".clj-kondo/.cache")
+
 (defn- cache-exists? []
-  (fs/exists? ".clj-kondo/.cache"))
+  (fs/exists? clj-kondo-cache))
 
 (defn- delete-cache []
   (when (cache-exists?)
-    (fs/delete-tree ".clj-kondo/.cache")))
+    (fs/delete-tree clj-kondo-cache)))
 
 (defn- build-cache []
-  (status/line :head "clj-kondo: building cache")
-  (let [clj-cp (-> (shell/command ["clojure" "-A:test" "-Spath"] {:out :string}) :out string/trim)
+  (status/line :detail "Building cache")
+  (when (cache-exists?)
+    (delete-cache))
+  (let [clj-cp (-> (shell/command {:out :string} 
+                                  "clojure -A:test -Spath" ) 
+                   :out string/trim)
         bb-cp (bbcp/get-classpath)]
-    (shell/command ["clojure" "-M:clj-kondo"
-                    "--dependencies" "--copy-configs"
-                    "--lint" clj-cp bb-cp])))
+    (shell/command "clojure -M:clj-kondo --dependencies --copy-configs --lint" clj-cp bb-cp)))
 
-(defn- lint []
-  (when (not (cache-exists?))
-    (build-cache))
+(defn- check-cache [{:keys [rebuild-cache]}]
+  (status/line :head "clj-kondo: cache check")
+  (if-let [rebuild-reason (cond
+                            rebuild-cache
+                            "Rebuild requested"
+
+                            (not (cache-exists?))
+                            "Cache not found"
+
+                            :else
+                            (let [updated-dep-files (fs/modified-since clj-kondo-cache ["deps.edn" "bb.edn"])]
+                              (when (seq updated-dep-files)
+                                (format "Found deps files newer than lint cache: %s" (mapv str updated-dep-files)))))]
+    (do (status/line :detail rebuild-reason)
+        (build-cache))
+    (status/line :detail "Using existing cache")))
+
+(defn- lint [opts]
+  (check-cache opts)
   (status/line :head "clj-kondo: linting")
   (let [{:keys [exit]}
-        (shell/command-no-exit ["clojure" "-M:clj-kondo"
-                                "--lint" "src" "test" "script" "deps.edn"])]
-    (if (not (some #{exit} '(0 2 3)))
-      (status/die exit "clj-kondo existed with unexpected exit code: %d" exit)
-      (System/exit exit))))
+        (shell/command {:continue true} 
+                       "clojure -M:clj-kondo --lint src test script deps.edn bb.edn")]
+    (cond
+      (= 2 exit) (status/die exit "clj-kondo found one or more lint errors")
+      (= 3 exit) (status/die exit "clj-kondo found one or more lint warnings")
+      (> exit 0) (status/die exit "clj-kondo returned unexpected exit code"))))
 
-(def docopt-usage "Usage: lint.clj [options]
+(def args-usage "Valid args: [options]
 
 Options:
-  --help           Show this screen.
-  --rebuild-cache  Force rebuild of lint cache.")
+  --rebuild-cache  Force rebuild of clj-kondo lint cache.
+  --help           Show this help.")
 
 (defn -main [& args]
-  (env/assert-min-versions)
-  (if-let [opts (-> docopt-usage docopt/parse (docopt-match/match-argv args))]
-    (cond
-      (get opts "--help")
-      (println docopt-usage)
+  (when-let [opts (main/doc-arg-opt args-usage args)]
+    (lint {:rebuild-cache (get opts "--rebuild-cache")})))
 
-      (get opts "--rebuild-cache")
-      (do (delete-cache) (lint))
-
-      :else
-      (lint))
-    (status/die 1 docopt-usage)))
-
-(env/when-invoked-as-script
+(main/when-invoked-as-script
  (apply -main *command-line-args*))

@@ -1,6 +1,117 @@
-{:paths [script]
- :deps {lread/status-line {:git/url "https://github.com/lread/status-line.git"
+{:min-bb-version "0.3.7"
+ :paths ["script"]
+ :deps {com.github.liquidz/antq {:mvn/version "0.16.2"}
+        lread/status-line {:git/url "https://github.com/lread/status-line.git"
                            :sha "35ed39645038e81b42cb15ed6753b8462e60a06d"}
-        docopt/docopt {:git/url "https://github.com/nubank/docopt.clj"
-                       :sha "98814f559d2e50fdf10f43cbe3b7da0ca3cca423"}
-        version-clj/version-clj {:mvn/version "2.0.1"}}}
+        dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
+        version-clj/version-clj {:mvn/version "2.0.2"}}
+
+ :tasks {;; setup
+         :requires ([babashka.fs :as fs]
+                    [clojure.string :as string]
+                    [helper.main :as main]
+                    [lread.status-line :as status])
+         :init (do
+                 (defn no-args-check []
+                   (main/doc-arg-opt *command-line-args*))
+                 (defn requested-clojure-version
+                   ([] (requested-clojure-version ["1.9" "1.10"]))
+                   ([allowed-versions]
+                    (let [args-usage (string/join "\n"
+                                                  ["Valid args: [options]"
+                                                   ""
+                                                   "Options:"
+                                                   (format "  -v, --clojure-version VERSION  Test with Clojure %s [default: 1.10]"
+                                                           (-> allowed-versions vec pr-str (string/replace "\"" "")))
+                                                   "  --help                         Show this help"])]
+                      (when-let [opts (main/doc-arg-opt args-usage *command-line-args*)]
+                        (let [clojure-version (get opts "--clojure-version")]
+                          (if (not (some #{clojure-version} allowed-versions))
+                            (status/die 1 args-usage)
+                            clojure-version))))))
+                 (defn run-under [clojure-versions task-sym]
+                   (doseq [clojure-version clojure-versions] ;; kaocha min versio is 1.9
+                     (binding [*command-line-args* ["--clojure-version" clojure-version]]
+                       (run task-sym)))))
+         :enter (let [{:keys [name accepts-args?]} (current-task)]
+                  (when-not (string/starts-with? name "-")
+                    (status/line :head "TASK %s %s" name (string/join " " *command-line-args*))))
+         :leave (let [{:keys [name]} (current-task)]
+                  (when-not (string/starts-with? name "-")
+                    (status/line :detail "\nTASK %s done." name)))
+
+         ;; commands
+
+         lint {:doc "[--rebuild-cache] lint source code with clj-kondo"
+               :task lint/-main}
+
+         clean {:doc "delete generated/cached build work"
+                :task (when (no-args-check)
+                        (doseq [dir ["target" ".cpcache"]]
+                          (println "Deleting" dir)
+                          (when (fs/exists? dir)
+                            (fs/delete-tree dir))))}
+
+         test-unit {:doc "test-doc-block units tests under Clojure 1.10"
+                    :task (when-let [clojure-version (requested-clojure-version)]
+                            (status/line :detail "Testing with clojure v%s" clojure-version)
+                            (clojure (format "-M:kaocha:%s unit" clojure-version)))}
+
+         gen {:doc "generate tests from sample docs"
+              :task (when-let [clojure-version (requested-clojure-version)]
+                      (let [updated-docs (fs/modified-since "target/test-doc-blocks"
+                                                            (concat ["README.adoc"]
+                                                                    (fs/glob "doc" "**.{adoc,md}")))]
+                        (if (seq updated-docs)
+                          (do
+                            (println "found docs newer than last generated tests:" (mapv str updated-docs))
+                            (status/line :detail "Generating with clojure v%s" clojure-version)
+                            (clojure (format "-X:test-doc-blocks:test-opts:%s gen-tests" clojure-version)))
+                          (println "tests already generated"))))}
+
+         -gen-1.10 (run-under ["1.10"] 'gen)
+
+         gen-to-expected {:doc "generate tests from sample docs to the expected result"
+                          :task (clojure "-X:test-doc-blocks:test-opts:regen-opts gen-tests")}
+
+         test-genned-kaocha {:doc "use kaocha to run generated tests"
+                             :depends [-gen-1.10]
+                             :task (when-let [clojure-version (requested-clojure-version)]
+                                     (status/line :detail "Testing with clojure v%s" clojure-version)
+                                     (clojure (format "-M:isolated/kaocha:%s generated" clojure-version)))}
+
+         test-genned-clj {:doc "use Clojure test-runner to run generated tests"
+                          :depends [-gen-1.10]
+                          :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10"])]
+                                  (status/line :detail "Testing with clojure v%s" clojure-version)
+                                  (clojure (format "-M:isolated/clj-test-runner:%s" clojure-version)))}
+
+         test-genned-cljs {:doc "use cljs-test-runner to run generated tests"
+                           :depends [-gen-1.10]
+                           :task (clojure "-M:isolated/cljs-test-runner")}
+
+         test-genned-all {:doc "run generated tests under all envs"
+                          :depends [test-genned-kaocha test-genned-clj test-genned-cljs]}
+
+         test-integration {:doc "verify that generated tests match last verified run"
+                           :task (when-let [clojure-version (requested-clojure-version)]
+                                   (status/line :detail "Verifying under clojure v%s" clojure-version)
+                                   (clojure (format "-M:kaocha:%s integration" clojure-version)))}
+
+         outdated  {:doc "report on outdated Clojure dependencies"
+                    :task outdated/-main}
+
+         ci-test {:doc "run continuous integration service tests"
+                  :task (do
+                          (run 'clean)
+                          (run 'lint)
+                          (run-under ["1.9" "1.10"] 'test-unit)
+                          (run-under ["1.9" "1.10"] 'test-integration)
+                          (run 'gen)
+                          (run-under ["1.9" "1.10"] 'test-genned-kaocha) ;; kaocha min versio is 1.9
+                          (run-under ["1.8" "1.9" "1.10"] 'test-genned-clj) ;; also include 1.8
+                          (run 'test-genned-cljs))}
+
+         ci-release {:doc "release task, use --help for args"
+                     :depends [clean]
+                     :task ci-release/-main}}}

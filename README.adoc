@@ -188,6 +188,8 @@ Gritty details can be hidden in step definitions.
 
 == Development
 
+We make use of babashka tasks. 
+
 === Prerequisites
 
 In addition to the https://clojure.org/guides/getting_started[Clojure CLI], you will need to install https://github.com/borkdude/babashka[babashka] to run scripts.
@@ -199,14 +201,14 @@ The example ClojureScript test runner makes use of https://nodejs.org[Node.js]
 ==== Unit
 [source,shell]
 ----
-clojure -M:kaocha unit
+bb test-unit
 ----
 
 ==== Integration
 Run integration test via:
 [source,shell]
 ----
-clojure -M:kaocha integration
+bb test-integration
 ----
 This will generate tests for README and example docs and then diff against a previously manually verified test run.
 The previously verified test run is stored under `test-resources/expected`.
@@ -216,7 +218,7 @@ When you are happy with current behaviour of generation of tests:
 
 [source,shell]
 ----
-bb script/gen_local_tests.clj --regen-expected
+bb gen-to-expected
 ----
 
 And commit/push the expected results.
@@ -226,19 +228,23 @@ And commit/push the expected results.
 Generate tests for local docs via:
 [source,shell]
 ----
-bb script/gen_local_tests.clj
+bb gen
 ----
 
 Run generated tests under Clojure via:
 [source,shell]
 ----
-clojure -M:isolated/kaocha generated
+clojure test-gen-kaocha
+----
+Or
+----
+clojure test-gen-clj
 ----
 
 And under ClojureScript via:
 [source,shell]
 ----
-clojure -M:isolated/cljs-test-runner
+clojure test-gen-cljs
 ----
 
 ==== Continuous Integration
@@ -246,7 +252,7 @@ clojure -M:isolated/cljs-test-runner
 To run what CI runs:
 [source,shell]
 ----
-bb script/ci_tests.clj
+bb ci-test
 ----
 
 === Linting
@@ -256,7 +262,7 @@ To run linting as the CI server does:
 
 [source,shll]
 ----
-bb script/lint.clj
+bb lint
 ----
 
 If, for whatever reason, you want to rebuild the lint cache supply the `--rebuild-cache` option.
@@ -299,8 +305,8 @@ TIP: After a release don't forget to pull the changes made by the release workfl
 
 As a developer you can run the following locally:
 
-* `bb script/release.clj validate` - to validate your change log is setup appropriately for release
-* `bb script/release.clj prep` - to complete all steps up to, but not including, deploy, note that this will affect changes to `README.adoc`, `CHANGELOG.adoc` and `pom.xml`, you'll NOT want to commit these changes.
+* `bb release validate` - to validate your change log is setup appropriately for release
+* `bb release prep` - to complete all steps up to, but not including, deploy, note that this will affect changes to `README.adoc`, `CHANGELOG.adoc` and `pom.xml`, you'll NOT want to commit these changes.
 
 == People
 
