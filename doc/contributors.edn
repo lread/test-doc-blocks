@@ -1,0 +1,11 @@
+;; inputs for contributors section of README.adoc
+{:contributors
+ [{:github-id "sogaiu" :contributions [:feedback]}
+  {:github-id "borkdude" :contributions [:feedback]}
+  {:github-id "SevereOverfl0w" :contributions [:feedback]}
+  {:github-id "PEZ" :contributions [:feedback]}
+  {:github-id "seancorfield" :contributions [:inspiration :feedback :testing]}
+  {:github-id "uochan" :contributions [:feedback]}]
+ :maintainers
+ [{:github-id "lread"
+   :contributions [:code]}]}

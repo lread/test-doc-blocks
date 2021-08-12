@@ -10,14 +10,12 @@ ifdef::env-github[]
 endif::[]
 :toc: macro
 
-// Exercise our :apply option by skipping all code blocks by default for this doc
-//#:test-doc-blocks{:skip true :apply :all-next}
 
 https://github.com/{project-coords}/actions?query=workflow%3ATest[image:https://github.com/{project-coords}/workflows/Test/badge.svg[Test]]
 https://clojars.org/{deploy-coords}[image:https://img.shields.io/clojars/v/{deploy-coords}.svg[Clojars]]
-https://cljdoc.org/d/{project-coords}/CURRENT[image:https://cljdoc.org/badge/{project-coords}[cljdoc]]
+https://cljdoc.org/d/{deploy-coords}/CURRENT[image:https://cljdoc.org/badge/{deploy-coords}[cljdoc]]
 
-Generate Clojure tests from AsciiDoc and CommonMark doc code blocks.
+Test AsciiDoc and CommonMark code blocks found in articles and docstrings.
 
 [CAUTION]
 ====
@@ -36,297 +34,51 @@ It is working very well for rewrite-clj.
 * Feedback welcome.
 
 == Rationale
-I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and function as expected for those who dare to try them.
+I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and function as expected for those who dare to try them. 
+You might want to attempt the same for your library.
 
-Test-doc-blocks might (or might not, see link:#limitations[limitations], and link:#interesting-alternatives[interesting alternatives]) be of interest for your Clojure project too.
+== Docs
 
-If your example code blocks are REPL style:
-
-//#:test-doc-blocks{:skip false}
-[source,clojure]
-----
-user=> (* 6 7)
-42
-----
-
-Or editor style:
-
-//#:test-doc-blocks{:skip false}
-[source,clojure]
-----
-(* 6 7)
-;; => 42
-----
-
-And don't rely on any special unspecified setup, then test-doc-blocks might work for your project too.
-
-== Usage
-
-Add an alias to your `deps.edn`:
-
-// NOTE: mvn/version version is automatically updated by release process
-[source,clojure]
-----
-    :gen-doc-tests {:extra-deps {com.github.lread/test-doc-blocks {:mvn/version "1.0.129-alpha"}}
-                    :exec-fn lread.test-doc-blocks/gen-tests}
-----
-
-Then the most basic usage is:
-
-[source,shell]
-----
-clojure -X:gen-doc-tests
-----
-
-This generates Clojure tests for code blocks in your `README.md` file to the `target/test-doc-blocks/test` directory.
-Any existing tests under `target/test-doc-blocks` will be replaced.
-
-The generated tests have no dependency on test-doc-blocks and can be run with your preferred test runner.
-
-Test-doc-blocks looks for assertions in your doc code blocks that are in editor style and REPL style format.
-For example...
-
-//#:test-doc-blocks{:skip false}
-[source,clojure]
-----
-user=> (/ 714 17)
-42
-----
-
-...generates the test assertion `(is (= 42 (/ 714 17)))`.
-For more detailed examples and inline options, see:
-
-* link:doc/example.adoc[AsciiDoc example]
-* link:doc/example.md[CommonMark example]
-* link:doc/example.cljc[Clojure source docstring example]
-
-The test-doc-blocks link:deps.edn[deps.edn] has some aliases that might serve as useful examples:
-
-* `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
-Invoke for this project via: `clj -M:isolated/cljs-test-runner`
-* `:isolated/kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
-Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaocha link:tests.edn[tests.edn] config.
-* `:isolated/clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
-Invoke for this project via: `clj -M:isolated/clj-test-runner`
-
-Test generation requires Clojure v1.9 or later. +
-Generated tests have been verified to run against Clojure v1.8 or later - except under kaocha which itself requires Clojure v1.9 or later.
-
-=== Command Line Options
-
-:docs::
-The default file tests are generated for is `README.md`.
-+
-If you want to specify a different vector of files you can do so via `:docs`:
-+
-[source,shell]
-----
-clojure -X:gen-doc-tests :docs '["README.adoc" "doc/example.adoc" "doc/example.md" "doc/example.cljc"]'
-----
-+
-`:docs` understands https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)[glob syntax].
-
-:target-root::
-The default directory to generate tests is `./target`.
-+
-You can override this via `:target-root`:
-+
-[source,shell]
-----
-clojure -X:gen-doc-tests :target-root '"./someplace/else"'
-----
-+
-Note that test-doc-blocks will delete and recreate `test-docs-block/test` dirs under the target root.
-Keep that the location mind when figuring out where to point your test runner.
-
-:platform::
-The platform governs what Clojure file types will be generated for tests.
-+
-Specify:
-
-* `:clj` for Clojure, generates `.clj` files
-* `:cljs` for ClojureScript, generates `.cljs` files
-* `:cljc` for mixed, generates `.cljc` files
-
-+
-The default is `:cljc`.
-Platform can be overridden for code blocks via inline options. +
-No platform assumptions are currently made when generating test from doc blocks found in Clojure source files. Specify what makes sense for your tests.
-
-TIP: Windows users, trying to correctly escape -X args on the command line can lead to frustration.
-Consider instead specifying options under `:exec-args` in your `:gen-doc-tests` alias in `deps.edn`.
-
-[#limitations]
-== Limitations
-
-Some current limitations that we might entertain addressing:
-
-* If your code block depends on some external setup, we've no way to express that.
-* Test-doc-blocks will automatically handle inline `(require ...)` and `(import ...)` appearing in code blocks, but not in any complex expressions of these forms.
-* Parsing adoc and md files is on the naive side but should handle most common cases.
-If we've overlooked a common syntax, let us know.
-
-Some limitations we have no current plans to address:
-
-* Code blocks using `ns` or `in-ns` will not work with test-doc-blocks. +
-* For REPL style code blocks we only look for `user=>` prompts and no other ns prompts.
-* It is possible to embed HTML into your docs.
-If your code or headings are expressed in embedded HTML within your doc, test-doc-blocks won't find them.
-
-[#interesting-alternatives]
-== Interesting Alternatives
-
-Other options and related projects that I am currently aware of:
-
-* https://github.com/lambdaisland/kaocha[kaocha] - Kaocha supports running cucumber tests.
-It uses this support in tests for its own documentation.
-A `.feature` document describes the feature and includes given, when, then scenarios that are both run and shown in documentation.
-Gritty details can be hidden in step definitions.
-* https://github.com/seancorfield/readme[readme] - Generates tests for code blocks found in .md files and then runs them.
-* https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
-* https://github.com/sogaiu/alc.x-as-tests[alc.x-as-tests] - Runs code in `(comment ...)` blocks as tests.
-
-== Development
-
-We make use of babashka tasks. 
-
-=== Prerequisites
-
-In addition to the https://clojure.org/guides/getting_started[Clojure CLI], you will need to install https://github.com/borkdude/babashka[babashka] to run scripts.
-
-The example ClojureScript test runner makes use of https://nodejs.org[Node.js]
-
-=== Tests
-
-==== Unit
-[source,shell]
-----
-bb test-unit
-----
-
-==== Integration
-Run integration test via:
-[source,shell]
-----
-bb test-integration
-----
-This will generate tests for README and example docs and then diff against a previously manually verified test run.
-The previously verified test run is stored under `test-resources/expected`.
-
-On failure careful manual inspection is recommended.
-When you are happy with current behaviour of generation of tests:
-
-[source,shell]
-----
-bb gen-to-expected
-----
-
-And commit/push the expected results.
-
-==== Generated
-
-Generate tests for local docs via:
-[source,shell]
-----
-bb gen
-----
-
-Run generated tests under Clojure via:
-[source,shell]
-----
-clojure test-gen-kaocha
-----
-Or
-----
-clojure test-gen-clj
-----
-
-And under ClojureScript via:
-[source,shell]
-----
-clojure test-gen-cljs
-----
-
-==== Continuous Integration
-
-To run what CI runs:
-[source,shell]
-----
-bb ci-test
-----
-
-=== Linting
-We use clj-kondo to lint project source and fail the build when linting fails.
-
-To run linting as the CI server does:
-
-[source,shll]
-----
-bb lint
-----
-
-If, for whatever reason, you want to rebuild the lint cache supply the `--rebuild-cache` option.
+* link:doc/01-user-guide.adoc[User Guide]
+* link:doc/02-developer-guide.adoc[Developer Guide]
 
 == Versioning
 
-rewrite-cljc versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
+Test-doc-block versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
 
 * `major` increments when the API has been broken - something, as a rule, we'd like to avoid.
 * `minor` increments to convey significant new features have been added.
 * `patch` indicates bug fixes - it is the number of commits in the repo.
 * `test-qualifier` is absent for stable releases. Can be `alpha`, `beta`, `rc1`, etc.
 
-The project maintainer manually manages `major` `minor` and `test-qualifier` in `version.edn`.
-
-== Releasing
-
-A release is triggered manually via a GitHub Action "Release" workflow.
-A release can currently only be cut at main branch HEAD.
-
-GitHub Actions prompts for the branch when running the Release workflow.
-I've not found a way to disable this, just leave it set to `main`.
-
-At this time, the release workflow does not run tests.
-The assumption is that you’ve waited for the last CI test run to complete and are happy with the results.
-
-Our GitHub Actions "Release" workflow:
-
-. Calculates version (commit count will compensate for upcoming release commit) and applies to:
-.. the `deps.edn` usage example in this doc
-.. the "unreleased" headings in change log (new "unreleased heading also prepended")
-.. `pom.xml` version and scm->tag
-.. a newly built thin jar
-. Deploys jar to clojars
-. Commits updated docs and release tag back to repo
-. Informs cljdoc of the new release
-. Creates a release tag at HEAD
-
-TIP: After a release don't forget to pull the changes made by the release workflow.
-
-As a developer you can run the following locally:
-
-* `bb release validate` - to validate your change log is setup appropriately for release
-* `bb release prep` - to complete all steps up to, but not including, deploy, note that this will affect changes to `README.adoc`, `CHANGELOG.adoc` and `pom.xml`, you'll NOT want to commit these changes.
-
 == People
 
 === Contributors
-
-* @seancorfield - idea is based on Sean's https://github.com/seancorfield/readme[readme] project.
-* Helpful feedback and ideas from:
-** @borkdude
-** @sogaiu
-** @dominicin
-** @pez
-** @seancorfield
-** @uochan
+// Contributors updated by script, do not edit
+// AUTO-GENERATED:CONTRIBUTORS-START
+:imagesdir: ./doc/generated/contributors
+[.float-group]
+--
+image:seancorfield.png[seancorfield,role="left",width=310,link="https://github.com/seancorfield"]
+image:borkdude.png[borkdude,role="left",width=310,link="https://github.com/borkdude"]
+image:PEZ.png[PEZ,role="left",width=310,link="https://github.com/PEZ"]
+image:SevereOverfl0w.png[SevereOverfl0w,role="left",width=310,link="https://github.com/SevereOverfl0w"]
+image:sogaiu.png[sogaiu,role="left",width=310,link="https://github.com/sogaiu"]
+image:uochan.png[uochan,role="left",width=310,link="https://github.com/uochan"]
+--
+// AUTO-GENERATED:CONTRIBUTORS-END
 
 === Current Maintainers
-
-* @lread
+// Maintainers updated by script, do not edit
+// AUTO-GENERATED:MAINTAINERS-START
+:imagesdir: ./doc/generated/contributors
+[.float-group]
+--
+image:lread.png[lread,role="left",width=310,link="https://github.com/lread"]
+--
+// AUTO-GENERATED:MAINTAINERS-END
 
 == License
-
 Copyright © 2021 Lee Read, all rights reserved.
 
 Distributed under the EPL License, same as Clojure.

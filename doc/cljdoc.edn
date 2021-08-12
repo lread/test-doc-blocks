@@ -1,5 +1,8 @@
 {:cljdoc.doc/tree [["Readme" {:file "README.adoc"}]
                    ["Changelog" {:file "CHANGELOG.adoc"}]
-                   ["CommonMark Example" {:file "doc/example.md"}]
-                   ["AsciiDoc Example" {:file "doc/example.adoc"}]
+                   ["User Guide" {:file "doc/01-user-guide.adoc"}
+                    ["CommonMark Example" {:file "doc/example.md"}]
+                    ["AsciiDoc Example" {:file "doc/example.adoc"}]]
+                   ["Developer Guide" {:file "doc/02-developer-guide.adoc"}]
+                   ["Maintainer Guide" {:file "doc/03-maintainer-guide.adoc"}]
                    ["Design Notes" {:file "doc/design-notes.adoc"}]]}

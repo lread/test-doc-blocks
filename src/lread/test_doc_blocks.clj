@@ -9,7 +9,7 @@
             [lread.test-doc-blocks.impl.validate :as validate])
   (:import [java.nio.file Files]))
 
-(def windows? (-> (System/getProperty "os.name")
+(def ^:private windows? (-> (System/getProperty "os.name")
                   (string/lower-case)
                   (string/includes? "win")))
 
@@ -67,7 +67,7 @@
 ;; Entry points
 ;;
 
-(def default-opts
+(def ^:private default-opts
   {:target-root "./target"
    :docs ["README.md"]
    :platform :cljc})
@@ -81,8 +81,11 @@
     (map str (fs/glob root pattern))))
 
 (defn gen-tests
-  "Generate tests for code blocks found in markdown files.
-  Invoke from clojure CLI with -X."
+  "Generate tests for code blocks found in markdown and source files.
+
+  Invoke from clojure CLI with -X.
+
+  See [user guide](/doc/01-user-guide.adoc)."
   [opts]
   (let [opts (merge default-opts opts)]
     (if-let [errs (validate/errors [:map {:closed true}

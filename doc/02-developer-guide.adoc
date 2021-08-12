@@ -1,0 +1,183 @@
+= Developer Guide
+:toclevels: 6
+:toc:
+
+== Audience
+Thanks for your interest test-doc-blocks development.
+
+== Prerequisites
+
+In addition to the https://clojure.org/guides/getting_started[Clojure CLI], you will need to install https://github.com/borkdude/babashka[babashka] to run scripts.
+
+ClojureScript tests make use of https://nodejs.org[Node.js]
+
+
+
+== Generalities
+
+We make use of babashka tasks. 
+To see a list of available tasks run:
+
+[source,shell]
+----
+bb tasks
+----
+
+For help on a task's available command line arguments run `bb <task-name> --help`, for example:
+
+[source,shell]
+----
+bb lint --help
+----
+
+[#testing]
+== Testing
+
+=== Unit
+[source,shell]
+----
+bb test-unit
+----
+
+=== Integration
+Run integration test via:
+[source,shell]
+----
+bb test-integration
+----
+This will generate tests for code blocks within test-doc-block docs and then diff against a previously manually verified test run.
+The previously verified test run is stored under `test-resources/expected`.
+
+On failure careful manual inspection is recommended.
+When you are happy with current behaviour of generation of tests:
+
+[source,shell]
+----
+bb gen-to-expected
+----
+
+And commit/push the expected results.
+
+=== Generated
+
+Generate then run tests under Clojure via:
+[source,shell]
+----
+clojure test-gen-kaocha
+----
+Or
+----
+clojure test-gen-clj
+----
+
+Generate then run tests under ClojureScript via:
+[source,shell]
+----
+clojure test-genned-cljs
+----
+
+Reminder: test generation is always done under Clojure.
+
+== Linting
+We use clj-kondo to lint project source and fail the build when linting fails.
+
+To run linting as the CI server does:
+
+[source,shll]
+----
+bb lint
+----
+
+If, for whatever reason, you want to rebuild the lint cache, use the `--rebuild-cache` option.
+
+== Continuous Integration
+
+To run what CI runs:
+[source,shell]
+----
+bb ci-test
+----
+
+This task includes verification that test-doc-blocks works as expected under all supported versions of Clojure.
+
+== Docs
+
+=== Format
+When possible, documentation is written in AsciiDoc.
+We follow https://asciidoctor.org/docs/asciidoc-recommended-practices/#one-sentence-per-line[AsciiDoc best practice of one sentence per line].
+
+GitHub's CommonMark is used only when necessary to illustrate, test and document CommonMark features.
+
+=== Testing
+Code blocks in our docs are, naturally, tested by test-doc-blocks. 
+See link:#testing[testing section] for details.
+
+=== Cljdoc Preview
+Before a release, it can be comforting to preview what docs will look like on https://cljdoc.org/[cljdoc].
+
+Limitations
+
+* This task should be considered experimental, I have only tested running on macOS, but am fairly confident it will work on Linux.
+Not sure about Windows at this time.
+* You have to push your changes to GitHub to preview them.
+This allows for a full preview that includes any links (source, images, etc) to GitHub.
+This works fine from branches and forks - in case you don't want to affect your main development branch for a preview.
+
+**Start Local Services**
+
+To start the local cljdoc docker container:
+----
+bb cljdoc-preview start
+----
+
+The local cljdoc server allows your ingested docs to be viewed in your web browser.
+
+The start command also automatically checks docker hub for any updates so that our cljdoc preview matches the current production version of cljdoc.
+
+**Ingest Docs**
+
+To ingest rewrite-clj API and docs into the local cljdoc database:
+----
+bb cljdoc-preview ingest
+----
+
+The ingest command automatically publishes rewrite-clj to your local maven repository (cljdoc only works with published jars).
+You'll have to remember to git commit and git push your changes before ingesting.
+
+Repeat these steps any time you want to preview changes.
+
+**Preview Docs**
+
+To open a view to the ingested docs in your default web browser:
+----
+bb cljdoc-preview view
+----
+
+If you have just run the start command, be a bit patient, the cljdoc server can take a few moments to start up - especially on macOS due to poor file sharing performance.
+
+**Stop Local Services**
+
+When you are done, you'll want to stop your docker container:
+----
+bb cljdoc-preview stop
+----
+
+This will also delete temporary files created to support your preview session, most notably the local cljdoc database.
+
+Note that NO cleanup is done for any rewrite-clj artifacts published to your local maven repository.
+
+**Container Status**
+
+If you forget where you are at with your docker containers, run:
+----
+bb cljdoc-preview status
+----
+
+=== Contributors
+We honor contributors in our README file.
+To update contributors, update `doc/contributors.edn` and then run:
+
+[source,shell]
+----
+bb doc-update-readme
+----

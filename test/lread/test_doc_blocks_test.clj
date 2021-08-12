@@ -17,7 +17,7 @@
 
 (deftest verify-generation-against-known-good-run
 
-  (sut/gen-tests {:docs ["README.adoc"
+  (sut/gen-tests {:docs ["doc/01-user-guide.adoc"
                          "doc/example.{adoc,md,cljc}"]
                   :target-root "target/actual"})
 

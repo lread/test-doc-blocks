@@ -11,17 +11,17 @@
            ;; Clojure versions we support
            ;; min for generation is v1.9
            ;; min for running generated v1.8
-           :1.8 {:override-deps {org.clojure/clojure {:mvn/version "1.8.0"}}} 
+           :1.8 {:override-deps {org.clojure/clojure {:mvn/version "1.8.0"}}}
            :1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
            :1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
-           
+
            ;; clojure -X support for local examples
            :test-doc-blocks {:ns-default lread.test-doc-blocks}
 
            ;; test-doc-opts can be specified on the command line
            ;; but on Windows it can be very time consuming to learn how to escape them
            ;; sooo... I'm putting :docs here
-           :test-opts {:exec-args {:docs ["README.adoc"
+           :test-opts {:exec-args {:docs ["doc/01-user-guide.adoc"
                                           "doc/example.{adoc,md,cljc}"]}}
 
            ;; and :target, even passing a "\"string\"" is hard on windows
@@ -75,12 +75,20 @@
            :jar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.278"}}
                  :exec-fn hf.depstar/jar
                  :exec-args {:jar "target/test-doc-blocks.jar"
+                             :paths-only true
+                             :verbose true
                              :jar-type :thin}}
 
            :deploy {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
-                    :exec-fn deps-deploy.deps-deploy/deploy
-                    :exec-args {:installer :remote
+                    :exec-fn deps-deploy.deps-deploy/deploy}
+
+           ;; usage: :deploy:remote - for Clojars
+           :remote {:exec-args {:installer :remote
                                 :artifact "target/test-doc-blocks.jar"}}
+
+           ;; usage: :deploy:local - for local maven repo
+           :local {:exec-args {:installer :local
+                               :artifact "target/test-doc-blocks.jar"}}
 
            ;; Maintenance
            :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "0.16.2"}

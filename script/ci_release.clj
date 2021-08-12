@@ -51,9 +51,9 @@
       (status/die 1 "Expected %s to be updated." fname)
       (spit fname new-content))))
 
-(defn- update-readme! [version]
-  (status/line :head "Updating README usage to show version %s" version)
-  (update-file! "README.adoc"
+(defn- update-user-guide! [version]
+  (status/line :head "Updating library version in user guide to %s" version)
+  (update-file! "doc/01-user-guide.adoc"
                 #"( +\{:extra-deps \{com.github.lread/test-doc-blocks \{:mvn/version \").*(\"\}\})"
                 (str  "$1" version "$2")))
 
@@ -130,7 +130,7 @@
   []
   (status/line :head "Deploying jar to clojars")
   (assert-on-ci "deploy a jar")
-  (shell/command "clojure -X:deploy")
+  (shell/command "clojure -X:deploy:remote")
   nil)
 
 (defn- commit-changes! [version]
@@ -138,7 +138,7 @@
     (status/line :head "Committing and pushing changes made for %s" tag-version)
     (assert-on-ci "commit changes")
     (status/line :detail "Adding changes")
-    (shell/command "git add README.adoc CHANGELOG.adoc pom.xml")
+    (shell/command "git add doc/01-user-guide.adoc CHANGELOG.adoc pom.xml")
     (status/line :detail "Committing")
     (shell/command "git commit -m" (str  "Release job: updates for version " tag-version))
     (status/line :detail "Version tagging")
@@ -154,7 +154,7 @@
   (assert-on-ci "inform cljdoc")
   (let [exit-code (->  (shell/command {:continue true}
                                       "curl" "-X" "POST"
-                                      "-d" "project=lread/test-doc-blocks"
+                                      "-d" "project=com.github.lread/test-doc-blocks"
                                       "-d" (str  "version=" version)
                                       "https://cljdoc.org/api/request-build2")
                        :exit)]
@@ -191,7 +191,7 @@ Options
           (status/line :detail "Target version:        %s" target-version)
           (io/make-parents target-version-filename)
           (spit target-version-filename target-version)
-          (update-readme! target-version)
+          (update-user-guide! target-version)
           (update-changelog! target-version last-version changelog-status)
           (create-jar! target-version))
 

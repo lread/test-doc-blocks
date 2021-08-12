@@ -60,8 +60,7 @@
          gen {:doc "generate tests from sample docs"
               :task (when-let [clojure-version (requested-clojure-version)]
                       (let [updated-docs (fs/modified-since "target/test-doc-blocks"
-                                                            (concat ["README.adoc"]
-                                                                    (fs/glob "doc" "**.{adoc,md}")))]
+                                                            (fs/glob "doc" "**.{adoc,md,cljc}"))]
                         (if (seq updated-docs)
                           (do
                             (println "found docs newer than last generated tests:" (mapv str updated-docs))
@@ -74,24 +73,25 @@
          gen-to-expected {:doc "generate tests from sample docs to the expected result"
                           :task (clojure "-X:test-doc-blocks:test-opts:regen-opts gen-tests")}
 
-         test-genned-kaocha {:doc "use kaocha to run generated tests"
-                             :depends [-gen-1.10]
-                             :task (when-let [clojure-version (requested-clojure-version)]
-                                     (status/line :detail "Testing with clojure v%s" clojure-version)
-                                     (clojure (format "-M:isolated/kaocha:%s generated" clojure-version)))}
+         test-gen-kaocha {:doc "use kaocha to run generated tests"
+                          :task (when-let [clojure-version (requested-clojure-version)]
+                                  (run '-gen-1.10)
+                                  (status/line :detail "Testing with clojure v%s" clojure-version)
+                                  (clojure (format "-M:isolated/kaocha:%s generated" clojure-version)))}
 
-         test-genned-clj {:doc "use Clojure test-runner to run generated tests"
-                          :depends [-gen-1.10]
+         test-gen-clj {:doc "use Clojure test-runner to run generated tests"
                           :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10"])]
+                                  (run '-gen-1.10)
                                   (status/line :detail "Testing with clojure v%s" clojure-version)
                                   (clojure (format "-M:isolated/clj-test-runner:%s" clojure-version)))}
 
-         test-genned-cljs {:doc "use cljs-test-runner to run generated tests"
-                           :depends [-gen-1.10]
-                           :task (clojure "-M:isolated/cljs-test-runner")}
+         test-gen-cljs {:doc "use cljs-test-runner to run generated tests"
+                           :task (do
+                                   (run '-gen-1.10)
+                                   (clojure "-M:isolated/cljs-test-runner"))}
 
-         test-genned-all {:doc "run generated tests under all envs"
-                          :depends [test-genned-kaocha test-genned-clj test-genned-cljs]}
+         test-gen-all {:doc "run generated tests under all platforms"
+                          :depends [test-gen-kaocha test-gen-clj test-gen-cljs]}
 
          test-integration {:doc "verify that generated tests match last verified run"
                            :task (when-let [clojure-version (requested-clojure-version)]
@@ -101,17 +101,26 @@
          outdated  {:doc "report on outdated Clojure dependencies"
                     :task outdated/-main}
 
+         doc-update-readme {:doc "honour our contributors in README"
+                            :task doc-update-readme/-main}
+
+         cljdoc-preview    {:doc "preview what docs will look like on cljdoc, use --help for args"
+                            :task cljdoc-preview/-main}
+
          ci-test {:doc "run continuous integration service tests"
-                  :task (do
+                  :task (when (no-args-check)
                           (run 'clean)
                           (run 'lint)
                           (run-under ["1.9" "1.10"] 'test-unit)
                           (run-under ["1.9" "1.10"] 'test-integration)
                           (run 'gen)
-                          (run-under ["1.9" "1.10"] 'test-genned-kaocha) ;; kaocha min versio is 1.9
-                          (run-under ["1.8" "1.9" "1.10"] 'test-genned-clj) ;; also include 1.8
-                          (run 'test-genned-cljs))}
+                          (run-under ["1.9" "1.10"] 'test-gen-kaocha) ;; kaocha min versio is 1.9
+                          (run-under ["1.8" "1.9" "1.10"] 'test-gen-clj) ;; also include 1.8
+                          (run 'test-gen-cljs))}
 
          ci-release {:doc "release task, use --help for args"
-                     :depends [clean]
-                     :task ci-release/-main}}}
+                     :requires [ci-release]
+                     :task (do
+                             (binding [*command-line-args* []]
+                               (run 'clean))
+                             (apply ci-release/-main *command-line-args*))}}}
