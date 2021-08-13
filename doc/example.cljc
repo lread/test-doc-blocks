@@ -3,8 +3,8 @@
 
    Test doc block will scan docstrings for CommonMark Clojure code blocks and generate tests for them. 
 
-   Test doc blocks currently ONLY looks at doc strings, so if your code block need specific requires, 
-   you'll have to include in your at least your first block.
+   Test doc blocks currently ONLY looks at doc strings, so if your code block needs specific requires, 
+   you'll have to include them in, at least, your first block.
 
    In this namespace doc string we'll include 2 blocks:
 

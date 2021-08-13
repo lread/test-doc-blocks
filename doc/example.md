@@ -1,14 +1,22 @@
 CommonMark test-doc-blocks Example
 ==========
 
-Test-doc-blocks will find Clojure source code blocks in your documents and generate tests for them.
+Test-doc-blocks will find Clojure source code blocks in your docstrings and `.md` files and generate tests for them. 
+
+You tell test-doc-blocks which files to scan on the [command line](/01-user-guide.adoc#command-line).
 
 The Basics
 --
-A test is generated for each Clojure code block.
-Any code block with with a (case insensitive) language of `clj` `cljs` `cljc` or starting with `Clojure` is recognized as a Clojure code block.
+A test is generated for each Clojure code block.  An example of a CommonMark Clojure code block:
+~~~markdown
+```Clojure
+;; Some valid Clojure code here
+```
+~~~
 
-Assertions are automatically generated for:
+Here we used `Clojure` as the code block language, but all code blocks with with a (case insensitive) language of `clj` `cljs` `cljc` or starting with `Clojure` are recognized as Clojure code blocks.
+
+Within your Clojure code blocks, assertions are automatically generated for:
 
 - REPL session style prompts:
 
@@ -80,7 +88,7 @@ You can, to some limited extent, communicate your intent to test-doc-blocks.
 
 Test-doc-blocks will look for CommonMark comments that begin with `:test-doc-blocks`.
 
-It currently understands four options:
+It currently understands the following options:
 
 - `:test-doc-blocks/apply` - controls to what code blocks options are applied
 - `:test-doc-blocks/skip` - skips the next code block
@@ -100,7 +108,7 @@ You can change this by including the `:test-doc-blocks/apply` option:
 
 ### Skipping Code Blocks - :skip
 
-By default test-doc-blocks will create tests for all Clojure code blocks it finds.
+By default test-doc-blocks will create tests for all Clojure code blocks it finds in the files you specified.
 
 Tell test-doc-blocks to skip the next Clojure code block via the following CommonMark comment:
 
@@ -149,12 +157,12 @@ Later in doc, cross-platform cljc code that relies on the above:
 ```
 ~~~
 
-No special checking is done; but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
+No special checking is done, but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
 
 ### Specifying Test Namespace - :test-ns
 
-If you don't tell test-doc-blocks what namespace you want tests in, it will come up with one based on the document filename.
-For this file, test-doc-blocks, up to this point has been generating tests to `example-md-test`.
+If you don't tell test-doc-blocks what namespace you want tests in, it will come up with one based on the document or source code filename.
+This file is named `example.md`. Test-doc-blocks, up to this point has been generating tests to the `example-md-test` namespace.
 
 If this does not work for you, you can override this default via a CommonMark comment:
 
@@ -168,7 +176,7 @@ user=> (* 2 4)
 ```
 ~~~
 
-:bulb: Do what you like, but test runners usually look for tests namespaces ending in `-test`.
+💡 Do what you like, but test runners usually look for tests namespaces ending in `-test`.
 
 The `:test-doc-blocks/test-ns` option applies to all subsequent code blocks in the document.
 
@@ -234,7 +242,6 @@ We offer two syntaxes:
 Example code blocks:
 
 ~~~markdown
-[source,asciidoctor]
 <!-- #:test-doc-blocks{:meta :testing-meta123} -->
 ```clojure
 ;; this code block will generate a test with metadata {:testing-meta123 true}
@@ -278,7 +285,6 @@ This code block should be include "Section Titles" as part of the context for it
 # Indented Blocks
 
 CommonMark syntax gives meaning to indented code blocks.
-
 
 - In CommonMark, a block is indented to be attached to a list item:
 
@@ -378,10 +384,10 @@ The `pr` docstring states:
 > By default, pr and prn print in a way that objects can be read by the reader
 
 Some libraries break this contract.
-For example, rewrite-clj overrides `pr` to display output for its nodes that is easily digestable by humans, but not at all digestable by Clojure.
+For example, rewrite-clj overrides `pr` to display output for its nodes that is easily digestible by humans, but not at all digestible by Clojure.
 
-If `pr` has been overriden for your library, you have choices for test-doc-blocks:
+If `pr` has been overridden for your library, you have choices for test-doc-blocks:
 
 1. Skip the block (see inline options)
-2. Avoid REPL assertions that effect the overriden pr
+2. Avoid REPL assertions that effect the overridden pr
 3. Have your code blocks include call `pr` on affected evaluations and use `=stdout=>` to compare for expected output.

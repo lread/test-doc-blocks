@@ -1,13 +1,24 @@
 = AsciiDoc test-doc-blocks Example
 :toc:
 
-Test-doc-blocks will find Clojure source code blocks in your documents and generate tests for them.
+Test-doc-blocks will find Clojure source code blocks in your `.adoc` files and generate tests for them. 
+
+You tell test-doc-blocks which files to scan on the link:/01-user-guide.adoc#command-line[command line].
 
 == The Basics
-A test is generated for each Clojure code block.
-Any code block with with a (case insensitive) language of `clj` `cljs` `cljc` or starting with `Clojure` is recognized as a Clojure code block.
+A test is generated for each Clojure code block. An example of an AsciiDoc Clojure code block:
 
-Assertions are automatically generated for:
+[source,asciidoctor]
+....
+[source,clojure]
+----
+;; Some valid Clojure code here
+----
+....
+
+Here we used `clojure` as the code block language, but all code block with with a (case insensitive) language of `clj` `cljs` `cljc` or starting with `Clojure` are recognized as Clojure code blocks.
+
+Within your Clojure code blocks, assertions are automatically generated for:
 
 * REPL session style prompts :
 +
@@ -87,7 +98,7 @@ You can, to some limited extent, communicate your intent to test-doc-blocks.
 
 Test-doc-blocks will look for AsciiDoc comments that begin with `:test-doc-blocks`.
 
-It currently understands four options:
+It currently understands the following options:
 
 * `:test-doc-blocks/apply` - controls to what code blocks options are applied
 * `:test-doc-blocks/skip` - skips the next code block
@@ -98,7 +109,7 @@ It currently understands four options:
 
 === Applying Options - :apply
 
-By default, new options are applied to the next Clojure code block only.
+By default test-doc-blocks will create tests for all Clojure code blocks it finds in the files you specified.
 
 You can change this by including the `:test-doc-blocks/apply` option:
 
@@ -164,12 +175,12 @@ Later in doc, cross-platform cljc code that relies on the above:
 ----
 ....
 
-No special checking is done; but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
+No special checking is done, but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
 
 === Specifying Test Namespace - :test-ns
 
 If you don't tell test-doc-blocks what namespace you want tests in, it will come up with one based on the document filename.
-For this file, test-doc-blocks, up to this point, has been generating tests to `example-adoc-test`.
+This file is named `example.adoc`. Test-doc-blocks, up to this point, has been generating tests to the `example-adoc-test` namespace.
 
 If this does not work for you, you can override this default in via an AsciiDoc comment:
 
@@ -410,10 +421,10 @@ The `pr` docstring states:
 > By default, pr and prn print in a way that objects can be read by the reader
 
 Some libraries break this contract.
-For example, rewrite-clj overrides `pr` to display output for its nodes that is easily digestable by humans, but not at all digestable by Clojure.
+For example, rewrite-clj overrides `pr` to display output for its nodes that is easily digestible by humans, but not at all digestible by Clojure.
 
-If `pr` has been overriden for your library, you have choices for test-doc-blocks:
+If `pr` has been overridden for your library, you have choices for test-doc-blocks:
 
 1. Skip the block (see inline options)
-2. Avoid REPL assertions that effect the overriden pr
+2. Avoid REPL assertions that effect the overridden pr
 3. Have your code blocks include call `pr` on affected evaluations and use `=stdout=>` to compare for expected output.

@@ -100,17 +100,18 @@ For detailed examples and inline options:
 
 * For those writing docs in AsciiDoc, an link:example.adoc[AsciiDoc example] 
 * For CommonMark authors, a link:example.md[CommonMark example] 
-* And for those wanting to test code blocks in their docstrings, link:example.cljc[Clojure source docstring example], 
+* And for those wanting to test code blocks in their docstrings, link:example.cljc[Clojure source docstring example] 
 
-The test-doc-blocks link:deps.edn[deps.edn] has some aliases that might serve as useful examples:
+The test-doc-blocks link:/deps.edn[deps.edn] has some aliases that might serve as useful examples:
 
 * `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
 Invoke for this project via: `clj -M:isolated/cljs-test-runner`
 * `:isolated/kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
-Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaocha link:tests.edn[tests.edn] config.
+Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaocha link:/tests.edn[tests.edn] config.
 * `:isolated/clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
 Invoke for this project via: `clj -M:isolated/clj-test-runner`
 
+[#command-line-options]
 === Command Line Options
 
 :docs::
@@ -126,7 +127,7 @@ clojure -X:gen-doc-tests :docs '["README.adoc" "doc/example.adoc" "doc/example.m
 `:docs` understands https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)[glob syntax].
 
 :target-root::
-The default directory to generate tests is `./target`.
+The default directory where tests are generated is `./target`.
 +
 You can override this via `:target-root`:
 +
@@ -135,7 +136,7 @@ You can override this via `:target-root`:
 clojure -X:gen-doc-tests :target-root '"./someplace/else"'
 ----
 +
-Note that test-doc-blocks will delete and recreate `test-docs-block/test` dir under the target root.
+Note that test-doc-blocks will delete and recreate the `test-docs-block/test` dir under the target root.
 Keep the target location mind when figuring out where to point your test runner.
 
 :platform::

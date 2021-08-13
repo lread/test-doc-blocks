@@ -179,7 +179,7 @@
                  "-v" (str (cwd) ":" (cwd) ":ro")
                  "--entrypoint" "clojure"
                  (:image container)
-                 "-A:cli"
+                 "-M:cli"
                  "ingest"
                   ;; project and version are used to locate the maven artifact (presumably locally)
                  "--project" project "--version" version

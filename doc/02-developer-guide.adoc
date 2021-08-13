@@ -49,6 +49,7 @@ This will generate tests for code blocks within test-doc-block docs and then dif
 The previously verified test run is stored under `test-resources/expected`.
 
 On failure careful manual inspection is recommended.
+This can be a bit tedious/annoying when only line numbers have changed, but so be it for now. 
 When you are happy with current behaviour of generation of tests:
 
 [source,shell]
@@ -63,17 +64,17 @@ And commit/push the expected results.
 Generate then run tests under Clojure via:
 [source,shell]
 ----
-clojure test-gen-kaocha
+bb test-gen-kaocha
 ----
 Or
 ----
-clojure test-gen-clj
+bb test-gen-clj
 ----
 
 Generate then run tests under ClojureScript via:
 [source,shell]
 ----
-clojure test-genned-cljs
+bb test-gen-cljs
 ----
 
 Reminder: test generation is always done under Clojure.
@@ -111,6 +112,15 @@ GitHub's CommonMark is used only when necessary to illustrate, test and document
 === Testing
 Code blocks in our docs are, naturally, tested by test-doc-blocks. 
 See link:#testing[testing section] for details.
+
+=== Contributors
+We honor contributors in our README file.
+To update contributors, update `doc/contributors.edn` and then run:
+
+[source,shell]
+----
+bb doc-update-readme
+----
 
 === Cljdoc Preview
 Before a release, it can be comforting to preview what docs will look like on https://cljdoc.org/[cljdoc].
@@ -173,11 +183,3 @@ If you forget where you are at with your docker containers, run:
 bb cljdoc-preview status
 ----
 
-=== Contributors
-We honor contributors in our README file.
-To update contributors, update `doc/contributors.edn` and then run:
-
-[source,shell]
-----
-bb doc-update-readme
-----

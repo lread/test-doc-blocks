@@ -19,7 +19,7 @@ Test AsciiDoc and CommonMark code blocks found in articles and docstrings.
 
 [CAUTION]
 ====
-Example code in docs, while likely not malicious, could be illustrating, for example, how to wipe a drive. +
+Example code in docs, while likely not malicious, could be illustrating, for example, how to wipe a drive. 
 So, do be deliberate and careful about what docs you run through test-doc-blocks.
 ====
 
@@ -29,13 +29,12 @@ toc::[]
 
 Initial concept. Currently being used to test doc blocks in https://github.com/clj-commons/rewrite-clj[rewrite-clj].
 
-* Alpha, this might not be a good general idea, but might work well for some projects.
-It is working very well for rewrite-clj.
+* Working very well for rewrite-clj, might work for other projects too.
 * Feedback welcome.
 
 == Rationale
-I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and function as expected for those who dare to try them. 
-You might want to attempt the same for your library.
+I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and do function as expected for those who dare to try them. 
+You might want the same for your library.
 
 == Docs
 
