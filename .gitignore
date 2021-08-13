@@ -5,4 +5,5 @@
 /.clj-kondo/.cache
 /.cpcache
 /.lsp
+/fiddle.clj
 .DS_Store
