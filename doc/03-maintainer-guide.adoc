@@ -54,7 +54,7 @@ bb release prep
 Be aware though that you will NOT want to check in changes `prep` makes to `CHANGELOG.adoc`, `pom.xml` and `doc/01-user-guide.adoc`.
 
 === Invoking a Release
-As a maintainer you should have sufficient privileges to see a "Run Workflow" dropdown button on the https://github.com/lread/test-doc-blocks/actions?query=workflow%3A%22Release%22[Release] action page.
+As a maintainer you should have sufficient privileges to see a "Run Workflow" dropdown button on the https://github.com/lread/test-doc-blocks/actions/workflows/release.yml?query=workflow%3ARelease[Release] action page.
 The dropdown will prompt for a branch.
 I did not see a way to disable this prompt, simply leave it at "main" and run the workflow.
 
