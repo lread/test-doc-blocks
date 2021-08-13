@@ -52,6 +52,7 @@
                                        :replace-paths ["target/test-doc-blocks/test"]
                                        :main-opts ["-m" "cljs-test-runner.main"
                                                    "--compile-opts" "{:warnings,{:single-segment-namespace,false}}"
+                                                   "--out" "target/cljs-test-runner-out"
                                                    "--dir" "target/test-doc-blocks/test"]}
 
            :isolated/clj-test-runner
