@@ -11,7 +11,11 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+== v1.0.137-alpha
+
 * Freshen up docs, deps and internal scripts
+
+https://github.com/lread/test-doc-blocks/compare/v1.0.129-alpha\...v1.0.137-alpha[Gritty details of changes for this release]
 
 == v1.0.129-alpha
 
