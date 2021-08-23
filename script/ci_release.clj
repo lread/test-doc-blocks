@@ -5,7 +5,8 @@
 ;;
 
 (ns ci-release
-  (:require [clojure.edn :as edn]
+  (:require [clean]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as string]
             [helper.main :as main]
@@ -184,16 +185,17 @@ Options
     (let [target-version-filename "target/target-version.txt"]
       (cond
         (get opts "prep")
-        (let [changelog-status (validate-changelog)
-              target-version (calculate-version)
-              last-version (last-release-tag)]
-          (status/line :detail "Last version released: %s" (or last-version "<none>"))
-          (status/line :detail "Target version:        %s" target-version)
-          (io/make-parents target-version-filename)
-          (spit target-version-filename target-version)
-          (update-user-guide! target-version)
-          (update-changelog! target-version last-version changelog-status)
-          (create-jar! target-version))
+        (do (clean/clean!)
+            (let [changelog-status (validate-changelog)
+                  target-version (calculate-version)
+                  last-version (last-release-tag)]
+              (status/line :detail "Last version released: %s" (or last-version "<none>"))
+              (status/line :detail "Target version:        %s" target-version)
+              (io/make-parents target-version-filename)
+              (spit target-version-filename target-version)
+              (update-user-guide! target-version)
+              (update-changelog! target-version last-version changelog-status)
+              (create-jar! target-version)))
 
         (get opts "deploy-remote")
         (deploy-jar!)

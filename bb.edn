@@ -46,11 +46,7 @@
                :task lint/-main}
 
          clean {:doc "delete generated/cached build work"
-                :task (when (no-args-check)
-                        (doseq [dir ["target" ".cpcache"]]
-                          (println "Deleting" dir)
-                          (when (fs/exists? dir)
-                            (fs/delete-tree dir))))}
+                :task clean/-main }
 
          test-unit {:doc "test-doc-block units tests under Clojure 1.10"
                     :task (when-let [clojure-version (requested-clojure-version)]
@@ -120,7 +116,4 @@
 
          ci-release {:doc "release task, use --help for args"
                      :requires [ci-release]
-                     :task (do
-                             (binding [*command-line-args* []]
-                               (run 'clean))
-                             (apply ci-release/-main *command-line-args*))}}}
+                     :task ci-release/-main}}}
