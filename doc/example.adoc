@@ -1,12 +1,13 @@
 = AsciiDoc test-doc-blocks Example
 :toc:
 
-Test-doc-blocks will find Clojure source code blocks in your `.adoc` files and generate tests for them. 
+Test-doc-blocks will find Clojure source code blocks in your `.adoc` files and generate tests for them.
 
 You tell test-doc-blocks which files to scan on the link:/01-user-guide.adoc#command-line[command line].
 
 == The Basics
-A test is generated for each Clojure code block. An example of an AsciiDoc Clojure code block:
+Test-doc-blocks generates a test for each Clojure code block.
+An example of an AsciiDoc Clojure code block:
 
 [source,asciidoctor]
 ....
@@ -16,9 +17,9 @@ A test is generated for each Clojure code block. An example of an AsciiDoc Cloju
 ----
 ....
 
-Here we used `clojure` as the code block language, but all code block with with a (case insensitive) language of `clj` `cljs` `cljc` or starting with `Clojure` are recognized as Clojure code blocks.
+Here we used `clojure` as the code block language, but all code blocks with a (case insensitive) language of `clj` `cljs` `cljc` or starting with `Clojure` are recognized as Clojure code blocks.
 
-Within your Clojure code blocks, assertions are automatically generated for:
+Within your Clojure code blocks, test-doc-blocks automatically generates assertions for:
 
 * REPL session style prompts :
 +
@@ -82,7 +83,7 @@ Sometimes we might care about evaluated result, stderr and stdout.
 ----
 
 Test-doc-blocks will plunk your code blocks into a test even when there are no REPL assertions found.
-It is sometimes just nice to know that your code snippit will run without exception.
+It is sometimes just nice to know that your code snippet will run without exception.
 
 [source,clojure]
 ----
@@ -109,7 +110,7 @@ It currently understands the following options:
 
 === Applying Options - :apply
 
-By default test-doc-blocks will create tests for all Clojure code blocks it finds in the files you specified.
+By default, test-doc-blocks will create tests for all Clojure code blocks it finds in the files you specified.
 
 You can change this by including the `:test-doc-blocks/apply` option:
 
@@ -118,7 +119,7 @@ You can change this by including the `:test-doc-blocks/apply` option:
 
 === Skipping Code Blocks - :skip
 
-By default test-doc-blocks will create tests for all Clojure code blocks it finds.
+By default, test-doc-blocks will create tests for all Clojure code blocks it finds.
 
 Tell test-doc-blocks to skip the next Clojure code block via the following AsciiDoc comment:
 
@@ -175,14 +176,14 @@ Later in doc, cross-platform cljc code that relies on the above:
 ----
 ....
 
-No special checking is done, but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
+Test-doc-blocks does no special checking, but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
 
 === Specifying Test Namespace - :test-ns
 
-If you don't tell test-doc-blocks what namespace you want tests in, it will come up with one based on the document filename.
+By default, test-doc-blocks will generate tests to namespaces based on document filenames.
 This file is named `example.adoc`. Test-doc-blocks, up to this point, has been generating tests to the `example-adoc-test` namespace.
 
-If this does not work for you, you can override this default in via an AsciiDoc comment:
+If this does not work for you, you can override this default via an AsciiDoc comment:
 
 [source,asciidoctor]
 ....
@@ -218,7 +219,7 @@ Changing the test-ns is useful for code blocks that need to be isolated.
 
 By default, test-doc-blocks generates `.cljc` tests.
 
-You can override this default on the command line via `:platform` and via inline option via `:test-doc-blocks/platform`.
+You can override this default on the command line via `:platform` and via an inline `:test-doc-blocks/platform`.
 Valid values are:
 
 * `:cljc` - the default - generates `.cljc` test files
@@ -254,7 +255,7 @@ Test runners support including and excluding tests based on truthy metadata.
 
 You can attach metadata to generated tests via the `:test-doc-blocks/meta` option.
 
-A new `:test-doc-blocks/meta` will override any and all previous meta values.
+A new `:test-doc-blocks/meta` will override any previous meta values.
 
 We offer two syntaxes:
 
@@ -316,7 +317,7 @@ And this level 2 type
 ---------------------
 ----
 
-This code block should be include "Section Titles" as part of the context for its generated test.
+This code block should include "Section Titles" as part of the context for its generated test.
 
 [source,mardown]
 ....
@@ -426,5 +427,5 @@ For example, rewrite-clj overrides `pr` to display output for its nodes that is 
 If `pr` has been overridden for your library, you have choices for test-doc-blocks:
 
 1. Skip the block (see inline options)
-2. Avoid REPL assertions that effect the overridden pr
+2. Avoid REPL assertions that affect the overridden pr
 3. Have your code blocks include call `pr` on affected evaluations and use `=stdout=>` to compare for expected output.

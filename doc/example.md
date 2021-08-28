@@ -1,22 +1,22 @@
 CommonMark test-doc-blocks Example
 ==========
 
-Test-doc-blocks will find Clojure source code blocks in your docstrings and `.md` files and generate tests for them. 
+Test-doc-blocks will find Clojure source code blocks in your docstrings and `.md` files and generate tests for them.
 
 You tell test-doc-blocks which files to scan on the [command line](/01-user-guide.adoc#command-line).
 
 The Basics
 --
-A test is generated for each Clojure code block.  An example of a CommonMark Clojure code block:
+Test-doc-blocks generates a test for each Clojure code block.  An example of a CommonMark Clojure code block:
 ~~~markdown
 ```Clojure
 ;; Some valid Clojure code here
 ```
 ~~~
 
-Here we used `Clojure` as the code block language, but all code blocks with with a (case insensitive) language of `clj` `cljs` `cljc` or starting with `Clojure` are recognized as Clojure code blocks.
+Here we used `Clojure` as the code block language, but all code blocks with a (case insensitive) language of `clj` `cljs` `cljc` or starting with `Clojure` are recognized as Clojure code blocks.
 
-Within your Clojure code blocks, assertions are automatically generated for:
+Within your Clojure code blocks, test-doc-blocks automatically generates assertions for:
 
 - REPL session style prompts:
 
@@ -74,7 +74,7 @@ Within your Clojure code blocks, assertions are automatically generated for:
    ```
 
 Test-doc-blocks will plunk your code blocks into a test even when there are no assertions.
-It is sometimes just nice to know that your code snippit will run without exception.
+It is sometimes just nice to know that your code snippet will run without exception.
 
 ```clojure
 (->> "here we are only checking that our code will run"
@@ -108,7 +108,7 @@ You can change this by including the `:test-doc-blocks/apply` option:
 
 ### Skipping Code Blocks - :skip
 
-By default test-doc-blocks will create tests for all Clojure code blocks it finds in the files you specified.
+By default, test-doc-blocks will create tests for all Clojure code blocks it finds in the files you specified.
 
 Tell test-doc-blocks to skip the next Clojure code block via the following CommonMark comment:
 
@@ -157,11 +157,11 @@ Later in doc, cross-platform cljc code that relies on the above:
 ```
 ~~~
 
-No special checking is done, but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
+Test-doc-blocks does no special checking, but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
 
 ### Specifying Test Namespace - :test-ns
 
-If you don't tell test-doc-blocks what namespace you want tests in, it will come up with one based on the document or source code filename.
+By default, test-doc-blocks will generate tests to namespaces based on document filenames.
 This file is named `example.md`. Test-doc-blocks, up to this point has been generating tests to the `example-md-test` namespace.
 
 If this does not work for you, you can override this default via a CommonMark comment:
@@ -198,7 +198,7 @@ Changing the test-ns is useful for code blocks that need to be isolated.
 
 By default, test-doc-blocks generates `.cljc` tests.
 
-You can override this default on the command line via `:platform` and via inline option via `:test-doc-blocks/platform`.
+You can override this default on the command line via `:platform` and via an inline `:test-doc-blocks/platform`.
 Valid values are:
 
 - `:cljc` - the default - generates `.cljc` test files
@@ -232,7 +232,7 @@ Test runners support including and excluding tests based on truthy metadata.
 
 You can attach metadata to generated tests via the `:test-doc-blocks/meta` option.
 
-A new `:test-doc-blocks/meta` will override any and all previous meta values.
+A new `:test-doc-blocks/meta` will override any previous meta values.
 
 We offer two syntaxes:
 
@@ -271,7 +271,7 @@ user=> (into [] {:a 1})
 
 Test-doc-blocks will try to give each test block some context by including its filename, section title and starting line number.
 
-This code block should be include "Section Titles" as part of the context for its generated test.
+This code block should include "Section Titles" as part of the context for its generated test.
 
 ~~~markdown
 ```Clojure
@@ -389,5 +389,5 @@ For example, rewrite-clj overrides `pr` to display output for its nodes that is 
 If `pr` has been overridden for your library, you have choices for test-doc-blocks:
 
 1. Skip the block (see inline options)
-2. Avoid REPL assertions that effect the overridden pr
+2. Avoid REPL assertions that affect the overridden pr
 3. Have your code blocks include call `pr` on affected evaluations and use `=stdout=>` to compare for expected output.

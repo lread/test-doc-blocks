@@ -51,11 +51,11 @@ If you so wish, you can also locally run all steps up to, but not including, dep
 ----
 bb release prep
 ----
-Be aware though that you will NOT want to check in changes `prep` makes to `CHANGELOG.adoc`, `pom.xml` and `doc/01-user-guide.adoc`.
+Locally verify, but do NOT check in changes `prep` makes to `CHANGELOG.adoc`, `pom.xml` and `doc/01-user-guide.adoc`.
 
 === Invoking a Release
-As a maintainer you should have sufficient privileges to see a "Run Workflow" dropdown button on the https://github.com/lread/test-doc-blocks/actions/workflows/release.yml?query=workflow%3ARelease[Release] action page.
+As a maintainer, you should have sufficient privileges to see a "Run Workflow" dropdown button on the https://github.com/lread/test-doc-blocks/actions/workflows/release.yml?query=workflow%3ARelease[Release] action page.
 The dropdown will prompt for a branch.
-I did not see a way to disable this prompt, simply leave it at "main" and run the workflow.
+I did not see a way to disable this prompt, leave it at "main" and run the workflow.
 
 TIP: Don't forget to pull after a release to get the changes made by the release workflow.

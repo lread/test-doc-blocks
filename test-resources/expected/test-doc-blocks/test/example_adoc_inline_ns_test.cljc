@@ -10,7 +10,7 @@
   (:import #?@(:clj [java.util.List java.util.Queue java.util.Set] :cljs [goog.math.Long goog.math.Vec2 goog.math.Vec3])))
 
 (clojure.test/deftest block-0001
-  (clojure.test/testing  "doc/example.adoc - line 361 - Inline requires and imports"
+  (clojure.test/testing  "doc/example.adoc - line 362 - Inline requires and imports"
 ;; Stick the basics for requires, shorthand notation isn't supported
 
 ;; Some examples:

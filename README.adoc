@@ -15,11 +15,11 @@ https://github.com/{project-coords}/actions?query=workflow%3ATest[image:https://
 https://clojars.org/{deploy-coords}[image:https://img.shields.io/clojars/v/{deploy-coords}.svg[Clojars]]
 https://cljdoc.org/d/{deploy-coords}/CURRENT[image:https://cljdoc.org/badge/{deploy-coords}[cljdoc]]
 
-Test AsciiDoc and CommonMark code blocks found in articles and docstrings.
+Test AsciiDoc and CommonMark code blocks found in articles and docstrings
 
 [CAUTION]
 ====
-Example code in docs, while likely not malicious, could be illustrating, for example, how to wipe a drive. 
+Sample code in docs, while likely not malicious, could be illustrating, for example, how to wipe a drive.
 So, do be deliberate and careful about what docs you run through test-doc-blocks.
 ====
 
@@ -33,7 +33,7 @@ Initial concept. Currently being used to test doc blocks in https://github.com/c
 * Feedback welcome.
 
 == Rationale
-I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and do function as expected for those who dare to try them. 
+I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and do function as expected for those who dare to try them.
 You might want the same for your library.
 
 == Docs
@@ -83,4 +83,4 @@ Copyright © 2021 Lee Read, all rights reserved.
 Distributed under the EPL License, same as Clojure.
 See LICENSE.
 
-Concept based on @seancorfield's https://github.com/seancorfield/readme[readme] which is distributed under EPL v1.0 or later.
+Based on concepts in @seancorfield's https://github.com/seancorfield/readme[readme], which is distributed under EPL v1.0 or later.

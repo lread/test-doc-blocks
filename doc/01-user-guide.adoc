@@ -12,7 +12,7 @@ You are someone who wants to verify that the Clojure/ClojureScript code examples
 == Prerequisites
 Test generation requires Clojure v1.9 or above.
 
-Generated tests have been verified to run on Clojure v1.8 and above (if supported by your test runner).
+Generated tests can be run on Clojure v1.8 and above (if supported by your test runner).
 
 You'll use your test runner of choice, for example: https://github.com/cognitect-labs/test-runner[Clojure test-runner], https://github.com/Olical/cljs-test-runner[cljs-test-runner] or https://github.com/lambdaisland/kaocha[kaocha].
 
@@ -66,7 +66,7 @@ And don't rely on any special unspecified setup, then test-doc-blocks will gener
 == Usage
 Add an alias to your `deps.edn`:
 
-// NOTE: mvn/version version is automatically updated by release process
+// NOTE: mvn/version version is automatically updated by the release process
 [source,clojure]
 ----
     :gen-doc-tests {:extra-deps {com.github.lread/test-doc-blocks {:mvn/version "1.0.137-alpha"}}
@@ -83,7 +83,8 @@ clojure -X:gen-doc-tests
 This generates Clojure tests for code blocks in your `README.md` file to the `target/test-doc-blocks/test` directory.
 Any existing tests under `target/test-doc-blocks` will be replaced.
 
-The generated tests have no dependency on test-doc-blocks and can be run with your preferred test runner.
+The generated tests have no dependency on test-doc-blocks.
+You can run them with your preferred test runner.
 
 Test-doc-blocks looks for assertions in your doc code blocks that are in editor style and REPL style format.
 For example...
@@ -96,18 +97,23 @@ user=> (/ 714 17)
 ----
 
 ...generates the test assertion `(is (= 42 (/ 714 17)))`.
+
+=== Detailed Examples with Inline Options
+
 For detailed examples and inline options:
 
-* For those writing docs in AsciiDoc, an link:example.adoc[AsciiDoc example] 
-* For CommonMark authors, a link:example.md[CommonMark example] 
-* And for those wanting to test code blocks in their docstrings, link:example.cljc[Clojure source docstring example] 
+* link:example.adoc[AsciiDoc example]
+* link:example.md[CommonMark example]
+* link:example.cljc[Clojure source docstring example]
+
+=== deps.edn Examples
 
 The test-doc-blocks link:/deps.edn[deps.edn] has some aliases that might serve as useful examples:
 
 * `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
 Invoke for this project via: `clj -M:isolated/cljs-test-runner`
 * `:isolated/kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
-Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaocha link:/tests.edn[tests.edn] config.
+Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaocha link:/tests.edn[tests.edn] config which tells koacha to run tests in order (rather than randomized order).
 * `:isolated/clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
 Invoke for this project via: `clj -M:isolated/clj-test-runner`
 
@@ -137,10 +143,10 @@ clojure -X:gen-doc-tests :target-root '"./someplace/else"'
 ----
 +
 Note that test-doc-blocks will delete and recreate the `test-docs-block/test` dir under the target root.
-Keep the target location mind when figuring out where to point your test runner.
+Keep the target location in mind when figuring out where to point your test runner.
 
 :platform::
-The platform governs what Clojure file types will be generated for tests.
+The platform governs what Clojure file types test-doc-blocks generates for tests.
 +
 Specify:
 
@@ -150,10 +156,10 @@ Specify:
 
 +
 The default is `:cljc`.
-Platform can be overridden for code blocks via inline options. +
-No platform assumptions are currently made when generating test from doc blocks found in Clojure source files. Specify what makes sense for your tests.
+You can override the platform for code blocks via inline options. +
+Test-doc-blocks makes no platform assumptions when generating tests from doc blocks found in Clojure source files. Specify what makes sense for your tests.
 
-TIP: Windows users: trying to correctly escape -X args on the command line can lead to frustration.
+TIP: Windows users: trying to escape -X args on the command line can lead to frustration.
 Consider instead specifying options under `:exec-args` in your `:gen-doc-tests` alias in `deps.edn`.
 
 [#limitations]
@@ -169,9 +175,9 @@ If we've overlooked a common syntax, let us know.
 Some limitations we have no current plans to address:
 
 * Code blocks using `ns` or `in-ns` will not work with test-doc-blocks. +
-* For REPL style code blocks we only look for `user=>` prompts and no other ns prompts.
+* For REPL style code blocks, we only look for `user=>` prompts and no other ns prompts.
 * It is possible to embed HTML into your docs.
-If your code or headings are expressed in embedded HTML within your doc, test-doc-blocks won't find them.
+If you express code or headings in embedded HTML within your doc, test-doc-blocks won't find them.
 
 [#interesting-alternatives]
 == Interesting Alternatives
@@ -179,9 +185,9 @@ If your code or headings are expressed in embedded HTML within your doc, test-do
 Other options and related projects that I am currently aware of:
 
 * https://github.com/lambdaisland/kaocha[kaocha] - Kaocha supports running cucumber tests.
-It uses this support in tests for its own documentation.
-A `.feature` document describes the feature and includes given, when, then scenarios that are both run and shown in documentation.
-Gritty details can be hidden in step definitions.
+It uses this support in tests for some of its documentation.
+A `.feature` document describes the feature and includes given, when, then scenarios that are both run and shown in the documentation.
+You can use step definitions to hide any gritty details.
 * https://github.com/seancorfield/readme[readme] - Generates tests for code blocks found in .md files and then runs them.
 * https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
 * https://github.com/sogaiu/alc.x-as-tests[alc.x-as-tests] - Runs code in `(comment ...)` blocks as tests.
