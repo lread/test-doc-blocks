@@ -5,7 +5,7 @@
         babashka/fs {:mvn/version "0.0.5"}
         clj-kondo/clj-kondo {:mvn/version "2021.08.06"}
         metosin/malli {:mvn/version "0.6.1"}
-        rewrite-clj/rewrite-clj  {:mvn/version "1.0.644-alpha"}}
+        rewrite-clj/rewrite-clj  {:mvn/version "1.0.682-alpha"}}
 
  :aliases {;;
            ;; Clojure versions we support
@@ -59,7 +59,7 @@
            {:replace-deps {org.clojure/clojure {:mvn/version "1.8.0"}
                            com.cognitect/test-runner
                            {:git/url "https://github.com/cognitect-labs/test-runner"
-                            :sha "4e7e1c0dfd5291fa2134df052443dc29695d8cbe"}}
+                            :git/sha "334f2e2" :git/tag "v0.4.0"}}
             :replace-paths ["target/test-doc-blocks/test"]
             :main-opts ["-m" "cognitect.test-runner"
                         "-d" "target/test-doc-blocks/test"]}
@@ -92,7 +92,7 @@
                                :artifact "target/test-doc-blocks.jar"}}
 
            ;; Maintenance
-           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "0.16.2"}
+           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "0.16.3"}
                                    org.slf4j/slf4j-simple {:mvn/version "1.7.32"} ;; to rid ourselves of logger warnings
                                    }
                       :main-opts ["-m" "antq.core"
