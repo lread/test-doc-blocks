@@ -1,6 +1,53 @@
 = Design Notes
 :toc:
 
+
+== 2021-Aug
+
+=== Support :refer-clojure?
+
+While adding test-doc-blocks to honeysql, I noticed its code blocks use `(refer-clojure :exclude '[...])`.
+
+==== Background
+Test-doc-blocks does move up supported namespace function calls up into the generated test ns declarations.
+It currently does this for `(require ...)` and `(import ...)` calls only. For example:
+
+[source,clojure]
+----
+(require '[clojure.edn :as edn])
+(import '[MyThing one])
+----
+
+Will be included in the target test ns as:
+
+[source,clojure]
+----
+(ns my-generate-test-ns
+  (:require [clojure.edn :as edn]
+            <... other test based requires ...>)
+  (:import [MyThing one])
+----
+
+This is done to support ClojureScript which does not support these functions inline at runtime.
+
+Originally I was thinking we did not need to bother with `(refer-clojure ...)` calls, I thought the result would be some compiler warnings that we could ignore when running generated tests.
+
+But... I think we might need to address this as cljc tests were failing for ClojureScript without the explicit clojure core exclusions. Somehow there was an issue with a HoneySql helper referred `for` that was not overidding clojure core's `for` without the explicit clojure core exclusion.
+
+==== Strategy
+
+When a doc contains code blocks with multiple `require` and `import` calls, test-doc-blocks will do its best to amalgamate them when moving the to the `ns` declaration.
+
+Amalgamation does not make sense for multiple `refer-clojure` calls.
+It would confuse more than help.
+
+A doc author will want to either:
+
+1. include one `refer-clojure` in a code block at the top of their doc that applies to all code blocks in the doc
+2. Or include multiple code blocks with different `refer-clojure` calls, but in this case use `test-doc-block/ns` inline option to selectively target `refer-clojure` calls to specific code blocks.
+
+Test-doc-blocks will helpfully fail test generation if it finds more than one `refer-clojure` call per platform in a generated test ns.
+
 == 2021-Jan
 
 === Thoughts and Ramblings
@@ -59,11 +106,11 @@ He gave it a whirl on honeysql and when he found a few problems I offered to giv
 * Bad `:doc` cmd line arg error message was too vague. Fixed.
 * Require/import refs were not being correctly migrated to ns when more than single. Fixed.
 * A difference in test-doc-blocks and the readme project is that test-doc-blocks always quotes expectations.
-We thought that maybe evaling the expectation might useful if only rarely. 
-It turns out we don't need this for honeysql after all so I'm going to hold off for now. 
+We thought that maybe evaling the expectation might useful if only rarely.
+It turns out we don't need this for honeysql after all so I'm going to hold off for now.
 * I decided to try to run honeysql readme through cljs test runner too (readme project only did clj).
-The README `(require ...)` had to be updated for cljs. 
-And this made me think that an inline `reader-conditional` option might be nice. 
+The README `(require ...)` had to be updated for cljs.
+And this made me think that an inline `reader-conditional` option might be nice.
 Sometimes you want to show something for Clojure or ClojureScript users but don't want to show the reader conditional in your code block.
 
 I think this might have been from last days of December but I'm only recording it now:

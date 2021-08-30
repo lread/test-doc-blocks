@@ -128,13 +128,14 @@ A cljc library might want to explain ClojureScript vs Clojure usage without usin
 To wrap the generated test for your code block in a reader conditional use the `:test-doc-blocks/reader-conditional` inline option.
 
 This can be especially handy to show differences in `(requires ...)` for clj and cljs in separate code blocks.
-Here's a somewhat contrived example.
+Here's a contrived example:
 
 Clojure specific code:
 ~~~markdown
 <!-- #:test-doc-blocks {:reader-cond :clj} -->
 ```Clojure
 ;; This code block will be wrapped in a #?(:clj (do ...))
+(refer-clojure :exclude '[read-string])
 (require '[clojure.edn :refer [read-string]])
 ```
 ~~~
@@ -159,6 +160,7 @@ Later in doc, cross-platform cljc code that relies on the above:
 
 Test-doc-blocks does no special checking, but `:reader-cond` only makes sense for `:cljc` platform code blocks and when your code block contains no reader conditionals.
 
+<a name="test-ns"></a>
 ### Specifying Test Namespace - :test-ns
 
 By default, test-doc-blocks will generate tests to namespaces based on document filenames.
@@ -338,6 +340,44 @@ If we've missed some, let us know.
           (import '[java.util List Queue Set])]
     :cljs [(import 'goog.math.Long '[goog.math Vec2 Vec3])])
 ```
+
+It is important to remember that inline requires and imports are amalgamated across all code blocks in a doc to the target test namespace.
+
+If you need to, you can control your target test namespace for code blocks via the [:test-ns](#test-ns) inline option.
+
+## Inline refer-clojure
+
+Sometimes your Clojure code blocks will make use of inline `refer-clojure` calls.
+Like `require` and `import` calls, test-doc-blocks will attempt to lift these up to the ns declaration of the generated test.
+
+A library that encourages the use of `:refers` for its API will often include a code block with the suggested `(refer-clojure :exclude [...])` near the top of its documents.
+
+<!-- #:test-doc-blocks{:test-ns example-md-inline-refer-clojure-test} -->
+```Clojure
+;; a contrived example that uses uses clojure.edn/read-string in place of clojure.core/read-string
+;; and excludes clojure.core/for
+(refer-clojure :exclude '[for read-string])
+(require '[clojure.edn :refer [read-string]])
+
+;; our own for
+(defn for [x]
+  (* 4 x))
+
+(-> #'read-string meta :ns ns-name str)
+;; => "clojure.edn"
+
+(read-string "[1 2 3]")
+;; => [1 2 3]
+
+(for 4)
+;; => 16
+```
+
+It is important to remember than inline `refer-clojure` calls are amalgamated across all code blocks in a doc to the target test namespace.
+
+Test-doc-blocks will fail test generation if it finds more than one `refer-clojure` call per target test namespace per platform (i.e. :clj :cljs).
+
+If you need to, you can control your target test namespace for code blocks via the [:test-ns](#test-ns) inline option.
 
 ## Test Run Order
 In the general case, running tests in no specific or random order is a good thing.

@@ -1,5 +1,6 @@
 (ns ^:no-doc lread.test-doc-blocks.impl.process
-  (:require [clojure.string :as string]
+  (:require [clojure.set :as cset]
+            [clojure.string :as string]
             [lread.test-doc-blocks.impl.amalg-ns :as amalg-ns]
             [lread.test-doc-blocks.impl.body-prep :as body-prep]
             [lread.test-doc-blocks.impl.inline-ns :as inline-ns]
@@ -64,16 +65,72 @@
 
 (defn- amalg-ns-refs [tests]
   {:imports (amalg-ns/amalg-imports (mapcat #(get-in % [:ns-forms :imports]) tests))
-   :requires (amalg-ns/amalg-requires (mapcat #(get-in % [:ns-forms :requires]) tests))})
+   :requires (amalg-ns/amalg-requires (mapcat #(get-in % [:ns-forms :requires]) tests))
+   :refer-clojures (amalg-ns/amalg-refer-clojures (mapcat #(get-in % [:ns-forms :refer-clojures]) tests))})
 
 (defn- amalgamate-ns-refs
-  "Returns test def `t` with new `:ns-refs`"
+  "Returns test def `t` with new `:ns-refs-amalg`"
   [t]
   (try
-    (assoc t :ns-refs (amalg-ns-refs (:tests t)))
+    (assoc t :ns-refs-amalg (amalg-ns-refs (:tests t)))
     (catch Throwable e
       (throw (ex-info (format "unable to amalgamate inline namespace refs for test namespace %s" (:test-ns t))
                       {} e)))))
+
+(defn- unwrap-quoted [coll]
+  (map #(if (and (list? %)
+                 (= 'quote (first %)))
+          (second %)
+          %) coll))
+
+(defn- ensure-one-refer-clojures-per-namespace-platform
+  "Returns `t` if valid, throws if not."
+  [t]
+  (let [r (-> t :ns-refs-amalg :refer-clojures)
+        plat-refs (->> r
+                       (reduce-kv (fn [m platform refs]
+                                    (if (= :default platform)
+                                      (assoc m platform refs)
+                                      (assoc m platform (cset/union (:default r) refs))))
+                                  {})
+                       (sort-by key)
+                       reverse) ;; for consistent error order reporting :default first
+        errors (keep (fn [[platform refs]]
+                       (when (> (count refs) 1)
+                         (format "Expected only one unique refer-clojure per target test namespace per platform, but found target-ns %s, platform %s to have %d active occurrences: %s"
+                                 (:test-ns t) platform (count refs) (vec refs))))
+                     plat-refs)]
+    (if (seq errors)
+      ;; fail fast on first error for now
+      (throw (ex-info (first errors) {}))
+      t)))
+
+(defn- summarize-refs [refs]
+  {:default (->> refs :default vec (sort-by str) vec)
+   :reader-cond (->> (dissoc refs :default)
+                     (map (fn [[k v]] [k v]))
+                     (sort-by first)
+                     (mapcat (fn [[platform elems]] (concat [platform] [(vec (sort-by str elems))]))))})
+
+(defn- summarize-refer-clojures [refer-clojures]
+  (-> (reduce-kv (fn [m platform refs]
+                   (let [refs (some->> refs first rest (concat [:refer-clojure]) unwrap-quoted seq)]
+                     (if (= :default platform)
+                       (assoc m :default refs)
+                       (assoc-in m [:reader-cond platform] refs))))
+                 {}
+                 refer-clojures)
+      (update :reader-cond #(->> (sort-by key %)
+                                 (mapcat identity)))))
+
+(defn- massage-ns-refs
+  "Returns `t` with new `:ns-refs` massaged for easy writing."
+  [t]
+  (let [arefs (:ns-refs-amalg t)
+        ns-refs {:refer-clojures (summarize-refer-clojures (:refer-clojures arefs))
+                 :requires (summarize-refs (:requires arefs))
+                 :imports (summarize-refs (:imports arefs))}]
+    (assoc t :ns-refs ns-refs)))
 
 (defn convert-to-tests
   "Takes parsed input [{block}...] and preps for output to
@@ -89,13 +146,17 @@
              (map remove-inline-ns-forms)
              (map create-test-body)
              restructure-to-tests
-             (map amalgamate-ns-refs)))
+             (map amalgamate-ns-refs)
+             (map ensure-one-refer-clojures-per-namespace-platform)
+             (map massage-ns-refs)))
 
 (comment
   (->> (group-by (juxt :a :b) [{:a 1 :b 2 :c 3}
-                              {:a 1 :b 3 :c 4}
-                              {:a 2 :b 1 :c 5}])
-       (map (fn [[[test-ns platform] tests]] {:test-ns test-ns :platform platform :tests tests}))
-      )
+                               {:a 1 :b 3 :c 4}
+                               {:a 2 :b 1 :c 5}])
+       (map (fn [[[test-ns platform] tests]] {:test-ns test-ns :platform platform :tests tests})))
 
+  (reduce-kv (fn [m k v]
+               (assoc m k (count v)))
+             {} {:a #{1 2} :b #{} :c #{}})
   )

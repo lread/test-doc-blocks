@@ -1,5 +1,5 @@
 (ns ^:no-doc lread.test-doc-blocks.impl.inline-ns
-  "Support for finding a removing (require ...) and (import ...) forms.
+  "Support for finding a removing (require ...), (import ...) and (refer-clojure ...) forms.
   We'll call these forms of interest.
 
   Inline requires must be toplevel in Clojure and aren't supported outside the REPL for ClojureScript.
@@ -64,7 +64,9 @@
     {:requires (->> (find-ns-forms-of-interest zloc 'require)
                     (map z/string))
      :imports (->> (find-ns-forms-of-interest zloc 'import)
-                   (map z/string))}))
+                   (map z/string))
+     :refer-clojures (->> (find-ns-forms-of-interest zloc 'refer-clojure)
+                          (map z/string))}))
 
 (defn remove-forms
   "Returns `block-text` with same inline elements found by [[find-forms]] removed."
@@ -73,4 +75,5 @@
       z/of-string
       (remove-ns-forms-of-interest 'require)
       (remove-ns-forms-of-interest 'import)
+      (remove-ns-forms-of-interest 'refer-clojure)
       z/root-string))

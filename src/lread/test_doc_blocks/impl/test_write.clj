@@ -14,16 +14,13 @@
 (defn- testing-text [{:keys [doc-filename line-no header]}]
   (string/join " - " (keep identity [doc-filename (str "line " line-no) header])))
 
-(defn- expand-refs [refs]
-  {:common (->> refs :common vec (sort-by str) vec)
-   :reader-cond (->> (dissoc refs :common)
-                     (map (fn [[k v]] [k v]))
-                     (sort-by first)
-                     (mapcat (fn [[platform elems]] (concat [platform] [(vec (sort-by str elems))]))))})
+(defn- str-splicing-reader-cond [l]
+  (when (seq l)
+    [(str "#?@(" (string/join " " (map str l)) ")")]))
 
 (defn- str-reader-cond [l]
   (when (seq l)
-    [(str "#?@(" (string/join " " (map str l)) ")")]))
+    (str "#?(" (string/join " " (map str l)) ")")))
 
 (defn- base-requires [platform]
   (let [base ['clojure.test 'clojure.string]
@@ -35,21 +32,21 @@
       :cljc (conj base (str "#?(:cljs " runtime-cljs ")")
                        (str "#?(:clj " runtime-clj ")")))))
 
-(defn- ns-declaration [test-ns platform {:keys [requires imports] :as _ns-ref} ]
-  (let [requires (expand-refs requires)
-        imports (expand-refs imports)]
-    (str "(ns " test-ns  "\n"
-         "  (:require " (->> []
-                             (into (:common requires))
-                             (into (str-reader-cond (:reader-cond requires)))
+(defn- ns-declaration [test-ns platform {:keys [refer-clojures requires imports] :as _ns-ref}]
+  (str "(ns " test-ns
+       (some->> (:default refer-clojures) seq (str "\n  "))
+       (some->> (:reader-cond refer-clojures) seq str-reader-cond (str "\n  "))
+       "\n  (:require " (->> []
+                             (into (:default requires))
+                             (into (str-splicing-reader-cond (:reader-cond requires)))
                              (into (base-requires platform))
                              (string/join "\n            ")) ")"
-         (when (or (seq (:common imports)) (seq (:reader-cond imports)))
-           (str "\n  (:import " (->> []
-                                     (into (:common imports))
-                                     (into (str-reader-cond (:reader-cond imports)))
-                                     (string/join "\n    ")) ")"))
-         ")\n")))
+       (when (or (seq (:default imports)) (seq (:reader-cond imports)))
+         (str "\n  (:import " (->> []
+                                   (into (:default imports))
+                                   (into (str-splicing-reader-cond (:reader-cond imports)))
+                                   (string/join "\n    ")) ")"))
+       ")\n"))
 
 (defn- test-var [tst]
   (let [meta-data (when-let [md (:test-doc-blocks/meta tst)]

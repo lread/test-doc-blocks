@@ -1,5 +1,5 @@
 (ns ^:no-doc lread.test-doc-blocks.impl.amalg-ns
-  "Support for amalgamating refs from found (require ...) and (import ...) forms.
+  "Support for amalgamating refs from found (require ...), (import ...) and (refer-clojure ...) forms.
 
   Here we try to amalgate the forms of interest we found via lread.test-doc-blocks.impl.inline-ns.
   The end goal is to plunk these into the generated test ns declaration.
@@ -65,6 +65,14 @@
                %))
        set))
 
+(defn- parse-refer-clojures [refers feature]
+  (->> refers
+       (mapcat #(read-ns-ref % feature))
+       (tree-seq seq? identity)
+       (filter list?)
+       (filter #(= 'refer-clojure (first %)))
+       set))
+
 (defn- amalg [parse-fn inputs]
   (let [platforms [:clj :cljs :cljr]
         m (reduce (fn [acc platform]
@@ -77,7 +85,7 @@
                 (if (seq d)
                   (assoc acc platform d)
                   acc)))
-            {:common common}
+            {:default common}
             platforms)) )
 
 (defn amalg-imports [imports]
@@ -86,14 +94,18 @@
 (defn amalg-requires [requires]
   (amalg parse-requires requires))
 
+(defn amalg-refer-clojures [refer-clojures]
+  (amalg parse-refer-clojures refer-clojures))
+
+
 (comment
 
   ;; ok, next (import ...)
   (def imports ["(import java.util Date)"
-              "(#?(:clj (import java.util.logging Logger
+                "(#?(:clj (import java.util.logging Logger
 Level)))"
-              "(import [org.apache.commons.codec.digest DigestUtils])"
-              "#?(:cljs (import 'goog.math.Long
+                "(import [org.apache.commons.codec.digest DigestUtils])"
+                "#?(:cljs (import 'goog.math.Long
         '[goog.math Vec2 Vec3]
         '[goog.math Integer]))"])
 
@@ -107,8 +119,12 @@ Level)))"
                  "(require '[doo :as da])"
                  "(require '[coo :as ca])"])
 
-
-
   (amalg-requires requires)
+  (amalg-requires [])
 
-  )
+  (def refers [#_#_#_"(refer-clojure :excludes '[map for filter])"
+               "(refer-clojure :excludes '[map for filter])"
+               "(refer-clojure :excludes '[for])"
+               "(#?(:clj  (refer-clojure :excludes '[blap])))"])
+
+  (amalg-refer-clojures refers))

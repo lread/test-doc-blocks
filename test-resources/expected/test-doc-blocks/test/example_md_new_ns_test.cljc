@@ -5,7 +5,7 @@
             #?(:clj lread.test-doc-blocks.runtime)))
 
 (clojure.test/deftest block-0001
-  (clojure.test/testing  "doc/example.md - line 171 - Specifying Test Namespace - :test-ns"
+  (clojure.test/testing  "doc/example.md - line 173 - Specifying Test Namespace - :test-ns"
 ;; this code block will generate tests under example-md-new-ns-test
 
 (clojure.test/is (= '8 (* 2 4)))))
