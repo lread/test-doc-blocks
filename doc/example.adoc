@@ -1,9 +1,12 @@
 = AsciiDoc test-doc-blocks Example
 :toc:
 
+If you are writing your docs in AsciiDoc, read on.
+If you are writing your docs in CommonMark, you'll want to read link:/doc/example.md[CommonMark test-doc-blocks Example] instead.
+
 Test-doc-blocks will find Clojure source code blocks in your `.adoc` files and generate tests for them.
 
-You tell test-doc-blocks which files to scan on the link:/01-user-guide.adoc#command-line[command line].
+You tell test-doc-blocks which files to scan on the link:/doc/01-user-guide.adoc#command-line[command line].
 
 == The Basics
 Test-doc-blocks generates a test for each Clojure code block.
