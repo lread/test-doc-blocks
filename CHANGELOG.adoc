@@ -11,7 +11,7 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
-* Add support for `(refer-clojure ...)` in doc blocks https://github.com/lread/test-doc-blocks/issues/5(#5)
+* Add support for `(refer-clojure ...)` in doc blocks https://github.com/lread/test-doc-blocks/issues/5[#5]
 * Bump rewrite-clj to v1.0.682-alpha
 
 == v1.0.137-alpha

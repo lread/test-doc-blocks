@@ -191,3 +191,4 @@ You can use step definitions to hide any gritty details.
 * https://github.com/seancorfield/readme[readme] - Generates tests for code blocks found in .md files and then runs them.
 * https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
 * https://github.com/sogaiu/alc.x-as-tests[alc.x-as-tests] - Runs code in `(comment ...)` blocks as tests.
+* https://github.com/pink-gorilla/notebook[notebook] - Some day notebook type tools might serve both as tests and docs

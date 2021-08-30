@@ -122,7 +122,7 @@ We describe inline features in:
 
 * link:example.adoc[example.adoc]
 * link:example.md[example.md]
-* link:example.clj[example.clj]
+* link:example.cljc[example.cljc]
 
 Keep in mind that `example.adoc` and `example.md` will, by design, describe the same features and, except where there are AsciiDoc vs CommonMark differences, have the same text.
 It is a burden keeping these docs in synch, but worth it for the end user who is likely only using either AsciiDoc or CommonMark.
@@ -199,4 +199,3 @@ If you forget where you are at with your docker containers, run:
 ----
 bb cljdoc-preview status
 ----
-
