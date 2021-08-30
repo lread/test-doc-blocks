@@ -46,7 +46,7 @@
                :task lint/-main}
 
          clean {:doc "delete generated/cached build work"
-                :task clean/-main }
+                :task clean/-main}
 
          test-unit {:doc "test-doc-block units tests under Clojure 1.10"
                     :task (when-let [clojure-version (requested-clojure-version)]
@@ -55,14 +55,24 @@
 
          gen {:doc "generate tests from sample docs"
               :task (when-let [clojure-version (requested-clojure-version)]
-                      (let [updated-docs (fs/modified-since "target/test-doc-blocks"
-                                                            (fs/glob "doc" "**.{adoc,md,cljc}"))]
-                        (if (seq updated-docs)
+                      (let [target "target/test-doc-blocks"
+                            success-marker (fs/file target "SUCCESS")
+                            regen-reason (if (not (fs/exists? success-marker))
+                                           "a previous successful gen result not found"
+                                           (let [newer-thans (fs/modified-since target
+                                                                                 (concat
+                                                                                  (fs/glob "doc" "**.{adoc,md,cljc}")
+                                                                                  (fs/glob "src" "**/*.*")))]
+                                             (when (seq newer-thans)
+                                               (str "found files newer than last gen: " (mapv str newer-thans)))))]
+                        (if regen-reason
                           (do
-                            (println "found docs newer than last generated tests:" (mapv str updated-docs))
-                            (status/line :detail "Generating with clojure v%s" clojure-version)
-                            (clojure (format "-X:test-doc-blocks:test-opts:%s gen-tests" clojure-version)))
-                          (println "tests already generated"))))}
+                            (fs/delete-if-exists success-marker)
+                            (status/line :detail "Generating tests: %s" regen-reason)
+                            (status/line :detail "using clojure v%s" clojure-version)
+                            (clojure (format "-X:test-doc-blocks:test-opts:%s gen-tests" clojure-version))
+                            (spit success-marker "SUCCESS"))
+                          (status/line :detail "Tests already successfully generated - run a \"bb clean\" to force regen"))))}
 
          -gen-1.10 (run-under ["1.10"] 'gen)
 
@@ -76,32 +86,32 @@
                                   (clojure (format "-M:isolated/kaocha:%s generated" clojure-version)))}
 
          test-gen-clj {:doc "use Clojure test-runner to run generated tests"
-                          :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10"])]
-                                  (run '-gen-1.10)
-                                  (status/line :detail "Testing with clojure v%s" clojure-version)
-                                  (clojure (format "-M:isolated/clj-test-runner:%s" clojure-version)))}
+                       :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10"])]
+                               (run '-gen-1.10)
+                               (status/line :detail "Testing with clojure v%s" clojure-version)
+                               (clojure (format "-M:isolated/clj-test-runner:%s" clojure-version)))}
 
          test-gen-cljs {:doc "use cljs-test-runner to run generated tests"
-                           :task (do
-                                   (run '-gen-1.10)
-                                   (clojure "-M:isolated/cljs-test-runner"))}
+                        :task (do
+                                (run '-gen-1.10)
+                                (clojure "-M:isolated/cljs-test-runner"))}
 
          test-gen-all {:doc "run generated tests under all platforms"
-                          :depends [test-gen-kaocha test-gen-clj test-gen-cljs]}
+                       :depends [test-gen-kaocha test-gen-clj test-gen-cljs]}
 
          test-integration {:doc "verify that generated tests match last verified run"
                            :task (when-let [clojure-version (requested-clojure-version)]
                                    (status/line :detail "Verifying under clojure v%s" clojure-version)
                                    (clojure (format "-M:kaocha:%s integration" clojure-version)))}
 
-         outdated  {:doc "report on outdated Clojure dependencies"
-                    :task outdated/-main}
+         outdated {:doc "report on outdated Clojure dependencies"
+                   :task outdated/-main}
 
          doc-update-readme {:doc "honour our contributors in README"
                             :task doc-update-readme/-main}
 
-         cljdoc-preview    {:doc "preview what docs will look like on cljdoc, use --help for args"
-                            :task cljdoc-preview/-main}
+         cljdoc-preview {:doc "preview what docs will look like on cljdoc, use --help for args"
+                         :task cljdoc-preview/-main}
 
          ci-test {:doc "run continuous integration service tests"
                   :task (when (no-args-check)
