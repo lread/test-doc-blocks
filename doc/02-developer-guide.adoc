@@ -116,6 +116,19 @@ We use GitHub's CommonMark only when necessary to illustrate, test and document 
 Code blocks in our docs are, naturally, tested by test-doc-blocks.
 See link:#testing[testing section] for details.
 
+=== Example docs
+
+We describe inline features in:
+
+* link:example.adoc[example.adoc]
+* link:example.md[example.md]
+* link:example.clj[example.clj]
+
+Keep in mind that `example.adoc` and `example.md` will, by design, describe the same features and, except where there are AsciiDoc vs CommonMark differences, have the same text.
+It is a burden keeping these docs in synch, but worth it for the end user who is likely only using either AsciiDoc or CommonMark.
+
+These documents are also run through our test suite to test the features they describe.
+
 === Contributors
 We honor contributors in our README file.
 To update contributors, update `doc/contributors.edn` and then run:
