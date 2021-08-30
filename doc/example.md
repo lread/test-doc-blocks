@@ -6,7 +6,7 @@ If you are writing your docs in AsciiDoc, you'll want to read [AsciiDoc test-doc
 
 Test-doc-blocks will find Clojure source code blocks in your docstrings and `.md` files and generate tests for them.
 
-You tell test-doc-blocks which files to scan on the [command line](/doc/01-user-guide.adoc#command-line).
+You tell test-doc-blocks which files to scan on the [command line](/doc/01-user-guide.adoc#command-line-options).
 
 The Basics
 --
