@@ -27,10 +27,7 @@ toc::[]
 
 == Status
 
-Initial concept. Currently being used to test doc blocks in https://github.com/clj-commons/rewrite-clj[rewrite-clj].
-
-* Working very well for rewrite-clj, might work for other projects too.
-* Feedback welcome.
+Alpha - early adopters and feedback welcome!
 
 == Rationale
 I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and do function as expected for those who dare to try them.
@@ -40,6 +37,14 @@ You might want the same for your library.
 
 * link:doc/01-user-guide.adoc[User Guide]
 * link:doc/02-developer-guide.adoc[Developer Guide]
+
+== Used to Test Docs In...
+
+* https://github.com/seancorfield/honeysql[honeysql] - Turn Clojure data structures into SQL
+* https://github.com/clj-commons/rewrite-clj[rewrite-clj] - Rewrite Clojure Code and EDN!
+* test-doc-blocks - Test AsciiDoc and CommonMark code blocks found in articles and docstrings _(meta, right?)_
+
+Have an update? Let us know!
 
 == Versioning
 
