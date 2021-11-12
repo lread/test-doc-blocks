@@ -1,4 +1,3 @@
 {:config-paths ^:replace ["lread/status-line" "rewrite-clj/rewrite-clj"]
  :linters
- {:shadowed-var {:level :warning}
-  :unsorted-required-namespaces {:level :warning}}}
+ {:unsorted-required-namespaces {:level :warning}}}
