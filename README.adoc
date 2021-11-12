@@ -65,6 +65,7 @@ Test-doc-block versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
 --
 image:seancorfield.png[seancorfield,role="left",width=310,link="https://github.com/seancorfield"]
 image:borkdude.png[borkdude,role="left",width=310,link="https://github.com/borkdude"]
+image:holyjak.png[holyjak,role="left",width=310,link="https://github.com/holyjak"]
 image:PEZ.png[PEZ,role="left",width=310,link="https://github.com/PEZ"]
 image:SevereOverfl0w.png[SevereOverfl0w,role="left",width=310,link="https://github.com/SevereOverfl0w"]
 image:sogaiu.png[sogaiu,role="left",width=310,link="https://github.com/sogaiu"]

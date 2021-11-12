@@ -18,6 +18,7 @@
 (def contributions-lookup
   {:feedback             "💬 feedback"
    :code                 "💻 code"
+   :docs                 "📝 docs"
    :inspiration          "💡 inspiration"
    :testing              "🧪 testing"})
 
@@ -207,4 +208,3 @@
 
 (main/when-invoked-as-script
  (apply -main *command-line-args*))
-
