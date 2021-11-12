@@ -193,7 +193,6 @@ It is simpler but but also has less features.
 It uses this support in tests for some of its documentation.
 A `.feature` document describes the feature and includes given, when, then scenarios that are both run and shown in the documentation.
 You can use step definitions to hide any gritty details.
-* https://github.com/holyjak/clj-concordion[clj-concordian] - Concordian seems like a relative of Cucumber.
-It focuses on "Specification by Example".
+* https://github.com/holyjak/clj-concordion[clj-concordian] - A BDD / Specification by Example tool somewhat similar to Cucumber but far simpler.
 * https://github.com/pink-gorilla/notebook[notebook] - Some day notebook type tools might serve both as tests and docs.
 Until that golden day, test-doc-blocks and the above tools are worthy of consideration.
