@@ -73,27 +73,12 @@
            ;;
            ;; Deployment
            ;;
-           :jar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.278"}}
-                 :exec-fn hf.depstar/jar
-                 :exec-args {:jar "target/test-doc-blocks.jar"
-                             :paths-only true
-                             :verbose true
-                             :jar-type :thin}}
-
-           :deploy {:replace-deps {slipset/deps-deploy {:sha "9b8db1f57722d19cf92de57ac7db28d71a915bcf"}}
-                    :exec-fn deps-deploy.deps-deploy/deploy}
-
-           ;; usage: :deploy:remote - for Clojars
-           :remote {:exec-args {:installer :remote
-                                :artifact "target/test-doc-blocks.jar"}}
-
-           ;; usage: :deploy:local - for local maven repo
-           :local {:exec-args {:installer :local
-                               :artifact "target/test-doc-blocks.jar"}}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.6.3" :git/sha "4a1b53a"}
+                          io.github.slipset/deps-deploy {:sha "9b8db1f57722d19cf92de57ac7db28d71a915bcf"}}
+                   :ns-default build}
 
            ;; Maintenance
            :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "1.2.0"}
                                    org.slf4j/slf4j-simple {:mvn/version "1.7.32"} ;; to rid ourselves of logger warnings
                                    }
-                      :main-opts ["-m" "antq.core"
-                                  "--reporter=edn"]}}}
+                      :main-opts ["-m" "antq.core"]}}}

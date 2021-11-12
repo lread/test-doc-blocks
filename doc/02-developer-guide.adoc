@@ -82,6 +82,15 @@ bb test-gen-cljs
 
 Reminder: test generation itself always happens under Clojure.
 
+== Checking for Outdated Dependencies
+
+To see if there are new versions of dependencies available, run:
+
+[source,shell]
+----
+bb outdated
+----
+
 == Linting
 We use clj-kondo to lint project source and fail the build when linting fails.
 
@@ -169,6 +178,10 @@ bb cljdoc-preview ingest
 ----
 
 The ingest command automatically publishes rewrite-clj to your local maven repository (cljdoc only works with published jars).
+
+The locally published version will include a `-cljdoc-preview` suffix.
+I find this distinction helps to reduce confusion around locally vs remotely installed artifacts.
+
 You'll have to remember to git commit and git push your changes before ingesting.
 
 Repeat these steps any time you want to preview changes.

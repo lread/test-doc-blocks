@@ -1,7 +1,6 @@
 {:min-bb-version "0.3.7"
  :paths ["script"]
- :deps {com.github.liquidz/antq {:mvn/version "1.2.0"}
-        lread/status-line {:git/url "https://github.com/lread/status-line.git"
+ :deps {lread/status-line {:git/url "https://github.com/lread/status-line.git"
                            :sha "35ed39645038e81b42cb15ed6753b8462e60a06d"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
         version-clj/version-clj {:mvn/version "2.0.2"}}

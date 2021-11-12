@@ -11,6 +11,10 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* Bump deps
+* Internal test-doc-blocks developer facing:
+** Migrate from `depstar` to `tools.build`
+
 == v1.0.146-alpha
 
 * Add support for `(refer-clojure ...)` in doc blocks https://github.com/lread/test-doc-blocks/issues/5[#5]
