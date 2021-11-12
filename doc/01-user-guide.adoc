@@ -184,7 +184,7 @@ If you express code or headings in embedded HTML within your doc, test-doc-block
 
 Other options and related projects that I am currently aware of:
 
-* https://github.com/seancorfield/readme[readme] - Generates tests for code blocks found in .md files and then runs them.
+* [.line-through]#https://github.com/seancorfield/readme[readme]# (archived) - Generates tests for code blocks found in .md files and then runs them.
 This project was the inspiration for test-doc-blocks.
 It is simpler but but also has less features.
 * https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
