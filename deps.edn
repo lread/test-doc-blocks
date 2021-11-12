@@ -2,10 +2,10 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.9.0"}
         org.clojure/tools.reader {:mvn/version "1.3.6"}
-        babashka/fs {:mvn/version "0.0.5"}
-        clj-kondo/clj-kondo {:mvn/version "2021.08.06"}
-        metosin/malli {:mvn/version "0.6.1"}
-        rewrite-clj/rewrite-clj  {:mvn/version "1.0.682-alpha"}}
+        babashka/fs {:mvn/version "0.1.0"}
+        clj-kondo/clj-kondo {:mvn/version "2021.10.19"}
+        metosin/malli {:mvn/version "0.6.2"}
+        rewrite-clj/rewrite-clj  {:mvn/version "1.0.699-alpha"}}
 
  :aliases {;;
            ;; Clojure versions we support
@@ -32,7 +32,7 @@
            ;;
 
            ;; for kaocha see also tests.edn
-           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}}
+           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.60.945"}}
                     :extra-paths ["test"]
                     :main-opts ["-m" "kaocha.runner"]}
 
@@ -43,7 +43,7 @@
 
            ;; for kaocha see also tests.edn
            :isolated/kaocha {:replace-deps {org.clojure/clojure {:mvn/version "1.9.0"}
-                                            lambdaisland/kaocha {:mvn/version "1.0.861"}}
+                                            lambdaisland/kaocha {:mvn/version "1.60.945"}}
                              :replace-paths ["test"] ;; include test to bring in kaocha hook
                              :main-opts ["-m" "kaocha.runner"]}
 
@@ -59,7 +59,7 @@
            {:replace-deps {org.clojure/clojure {:mvn/version "1.8.0"}
                            com.cognitect/test-runner
                            {:git/url "https://github.com/cognitect-labs/test-runner"
-                            :git/sha "334f2e2" :git/tag "v0.4.0"}}
+                            :git/sha "b3fd0d2" :git/tag "v0.5.0"}}
             :replace-paths ["target/test-doc-blocks/test"]
             :main-opts ["-m" "cognitect.test-runner"
                         "-d" "target/test-doc-blocks/test"]}
@@ -80,7 +80,7 @@
                              :verbose true
                              :jar-type :thin}}
 
-           :deploy {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
+           :deploy {:replace-deps {slipset/deps-deploy {:sha "9b8db1f57722d19cf92de57ac7db28d71a915bcf"}}
                     :exec-fn deps-deploy.deps-deploy/deploy}
 
            ;; usage: :deploy:remote - for Clojars
@@ -92,7 +92,7 @@
                                :artifact "target/test-doc-blocks.jar"}}
 
            ;; Maintenance
-           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "0.16.3"}
+           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "1.2.0"}
                                    org.slf4j/slf4j-simple {:mvn/version "1.7.32"} ;; to rid ourselves of logger warnings
                                    }
                       :main-opts ["-m" "antq.core"

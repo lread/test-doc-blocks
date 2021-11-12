@@ -28,17 +28,17 @@
     <dependency>
       <groupId>rewrite-clj</groupId>
       <artifactId>rewrite-clj</artifactId>
-      <version>1.0.682-alpha</version>
+      <version>1.0.699-alpha</version>
     </dependency>
     <dependency>
       <groupId>clj-kondo</groupId>
       <artifactId>clj-kondo</artifactId>
-      <version>2021.08.06</version>
+      <version>2021.10.19</version>
     </dependency>
     <dependency>
       <groupId>metosin</groupId>
       <artifactId>malli</artifactId>
-      <version>0.6.1</version>
+      <version>0.6.2</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>babashka</groupId>
       <artifactId>fs</artifactId>
-      <version>0.0.5</version>
+      <version>0.1.0</version>
     </dependency>
   </dependencies>
   <build>
