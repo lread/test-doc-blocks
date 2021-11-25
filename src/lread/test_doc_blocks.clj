@@ -39,22 +39,23 @@
                        (indent (+ 4 indent-cnt)))))))))
 
 (defn- report-on-found! [parsed]
-  (println "Will generate tests for following Clojure doc blocks:")
-  (println "- under each found heading is listed <lineno>: <target test namespace>")
   (let [by-platform (->> parsed
                          (remove :test-doc-blocks/skip)
                          (group-by :test-doc-blocks/platform)
                          (into [])
                          (sort-by first))]
-    (if (seq by-platform)
+    (when (seq by-platform)
+      (println "Will generate tests for following Clojure doc blocks:")
+      (println "- under each found heading is listed <lineno>: <target test namespace>")
       (doseq [[platform blocks] by-platform]
         (println)
         (println (indent (name platform) 1))
         (print-found! blocks 3))
-      (println (indent "\n-none found-" 1))))
+      (println)))
   (when (some :test-doc-blocks/skip parsed)
-    (println (str "\nAnd, as requested, skipping:\n"))
-    (print-found! (filter :test-doc-blocks/skip parsed) 1)))
+    (println (str "As requested, skipping:\n"))
+    (print-found! (filter :test-doc-blocks/skip parsed) 1)
+    (println)))
 
 (defn- copy-runtime! [target-root]
   (let [runtime-path "lread/test_doc_blocks/runtime.cljc"
@@ -81,14 +82,21 @@
          (map #(-> % str (string/replace "\\" "/"))))
     (map str (fs/glob root pattern))))
 
+(defn- realize-files [file-patterns]
+  (let [files (reduce (fn [acc pat]
+                          (let [matched-files (generic-glob "./" pat)]
+                            (if (seq matched-files)
+                              (concat acc matched-files)
+                              (reduced {:error (str "file not found for: " pat)}))))
+                        []
+                        file-patterns)]
+    (if (:error files)
+      files
+      (-> files sort distinct))))
+
 (def ^:private valid-platforms [:clj :cljs :cljc])
 
-(defn gen-tests
-  "Generate tests for code blocks found in markdown and source files.
-
-  Invoke from clojure CLI with -X.
-
-  See [user guide](/doc/01-user-guide.adoc)."
+(defn- gen-tests*
   [opts]
   (let [opts (merge default-opts opts)]
     (if-let [errs (validate/errors [:map {:closed true}
@@ -97,28 +105,38 @@
                                              (fn [x] (and (vector? x) (first x) (every? string? x)))]]
                                     [:platform (into [:enum] valid-platforms)]]
                                    opts)]
-      (do (println "Error, invalid args.")
-          (println (pr-str errs))
-          (System/exit 1))
+      {:error (str "invalid args: " (pr-str errs))}
       (let [{:keys [target-root docs platform]} (merge default-opts opts)
             target-root (str (io/file target-root "test-doc-blocks"))]
         (when (.exists (io/file target-root))
           (delete-dir! target-root))
-        (let [target-root (str (io/file target-root "test"))
-              sources (->> docs
-                           (mapcat #(generic-glob "./" %))
-                           sort
-                           distinct)
-              parsed (mapcat #(doc-parse/parse-file % platform) sources)]
-          (report-on-found! parsed)
-          (let [tests (process/convert-to-tests parsed)]
-            (if (seq tests)
-              (do (println "\nGenerating tests to:" target-root)
-                  (run! #(test-write/write-tests! target-root %) tests)
-                  (copy-runtime! target-root))
-              (do (println "\nError, no tests to generate.")
-                  (System/exit 2))))
-          (println "Done"))))))
+        (let [sources (realize-files docs)]
+          (if (:error sources)
+            sources
+            (do
+              (println (format "Analyzing code blocks in files:\n %s\n" (string/join "\n " sources)))
+              (let [parsed (mapcat #(doc-parse/parse-file % platform) sources)]
+                (report-on-found! parsed)
+                (if (not (seq (remove :test-doc-blocks/skip parsed)))
+                  {:error "no code blocks for test generation found"}
+                  (let [target-root (str (io/file target-root "test"))
+                        tests (process/convert-to-tests parsed)]
+                    (println "Generating tests to:" target-root)
+                    (run! #(test-write/write-tests! target-root %) tests)
+                    (copy-runtime! target-root)))))))))))
+
+(defn gen-tests
+  "Generate tests for code blocks found in markdown and source files.
+
+  Invoke from clojure CLI with -X.
+
+  See [user guide](/doc/01-user-guide.adoc)."
+  [opts]
+  (let [{:keys [error]} (gen-tests* opts)]
+    (when error
+      (println (str "* Error: " error))
+      (System/exit 1))
+    (println "Done")))
 
 (def ^:private docopt-usage
   "test-doc-blocks
