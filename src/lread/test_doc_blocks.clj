@@ -120,7 +120,7 @@
                   (System/exit 2))))
           (println "Done"))))))
 
-(def docopt-usage
+(def ^:private docopt-usage
   "test-doc-blocks
 
 Usage:
