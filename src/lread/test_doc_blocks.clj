@@ -3,6 +3,7 @@
   (:require [babashka.fs :as fs]
             [clojure.java.io :as io]
             [clojure.string :as string]
+            [docopt.core :as docopt]
             [lread.test-doc-blocks.impl.doc-parse :as doc-parse]
             [lread.test-doc-blocks.impl.process :as process]
             [lread.test-doc-blocks.impl.test-write :as test-write]
@@ -80,6 +81,8 @@
          (map #(-> % str (string/replace "\\" "/"))))
     (map str (fs/glob root pattern))))
 
+(def ^:private valid-platforms [:clj :cljs :cljc])
+
 (defn gen-tests
   "Generate tests for code blocks found in markdown and source files.
 
@@ -92,7 +95,7 @@
                                     [:target-root string?]
                                     [:docs  [:fn {:error/fn (fn [_ _] "should be a vector of filename strings (glob is supported)")}
                                              (fn [x] (and (vector? x) (first x) (every? string? x)))]]
-                                    [:platform [:enum :clj :cljs :cljc]]]
+                                    [:platform (into [:enum] valid-platforms)]]
                                    opts)]
       (do (println "Error, invalid args.")
           (println (pr-str errs))
@@ -106,7 +109,7 @@
                            (mapcat #(generic-glob "./" %))
                            sort
                            distinct)
-              parsed (mapcat #(doc-parse/parse-file % platform) sources) ]
+              parsed (mapcat #(doc-parse/parse-file % platform) sources)]
           (report-on-found! parsed)
           (let [tests (process/convert-to-tests parsed)]
             (if (seq tests)
@@ -117,15 +120,55 @@
                   (System/exit 2))))
           (println "Done"))))))
 
-(comment
-  (gen-tests {:target-root "./target/"
-              :docs ["doc/erp.adoc"
-                     "README.adoc"
-                     "doc/example.md"
-                     "doc/example.adoc"]
-              :src ["doc/example.clj"]
-              :platform :cljs})
+(def docopt-usage
+  "test-doc-blocks
 
-  (gen-tests {:docs ["doc/example.cljc"]})
+Usage:
+  test-doc-blocks gen-tests [--target-root=<dir>] [--platform=<platform>] [<file>...]
+  test-doc-blocks --help
 
-  (gen-tests {:docs ""}))
+Options:
+  -t, --target-root=<dir>    Target directory where tests are generated [default: ./target]
+  -p, --platform=<platform>  By default, generate test files for one of clj, cljs or cljc [default: cljc]
+
+Where:
+  <file>...  Specifies adoc, md, clojure file(s) with code blocks from which you want to generate tests.
+             Supports Java glob syntax, see https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob
+             (Be sure to use appropriate quoting when you don't want your shell to interpret glob wildcards).
+
+Replace test-doc-blocks with your appropriate Clojure tools CLI launch sequence. For example, via an alias:
+|
+| clojure -M:test-doc-blocks gen-tests --platform clj 'src/**.clj' doc/example.adoc
+|
+Or calling main directly:
+|
+| clojure -M -m lread.test-doc-blocks gen-tests --target ./some/other/dir 'src/**.{clj,cljs,cljc}' README.md
+|
+
+Clojure CLI -X syntax is also supported, see the test-doc-blocks user guide.")
+
+(defn -main
+  "Conventional command-line support. Use --help for help."
+  [& args]
+  (docopt/docopt docopt-usage args
+                 (fn result-fn [arg-map]
+                   (if (get arg-map "--help")
+                     (println docopt-usage)
+                     (let [platform (get arg-map "--platform")
+                           ;; don't punish user for specifying keyword instead of string, ex :clj and clj are equivalent
+                           platform (if (string/starts-with? platform ":") (subs platform 1) platform)
+                           valid-platforms (map name valid-platforms)]
+                       (if (not (some #{platform} valid-platforms))
+                         (println (format "*\n* Usage error: platform must be one of: %s\n*\n\n%s"
+                                          (string/join ", " valid-platforms) docopt-usage))
+                         (let [target-root (get arg-map "--target-root")
+                               docs (get arg-map "<file>")
+                               opts (cond-> {}
+                                      target-root (assoc :target-root target-root)
+                                      (seq docs) (assoc :docs docs)
+                                      platform (assoc :platform (keyword platform)))]
+                           (gen-tests opts))))))
+                 (fn usage-fn [_]
+                   (println "*\n* Usage error\n*\n")
+                   (println docopt-usage)
+                   (System/exit 1))))

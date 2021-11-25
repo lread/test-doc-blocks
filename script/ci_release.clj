@@ -18,18 +18,23 @@
        :out
        string/trim))
 
-(defn- update-file! [fname match replacement]
+(defn- update-file! [fname match-replacements]
   (let [old-content (slurp fname)
-        new-content (string/replace-first old-content match replacement)]
-    (if (= old-content new-content)
-      (status/die 1 "Expected %s to be updated." fname)
-      (spit fname new-content))))
+        new-content (reduce (fn [in [desc match replacement]]
+                              (let [out (string/replace-first in match replacement)]
+                                (if (= in out)
+                                  (status/die 1 "Expected to %s in %s" desc fname)
+                                  out)))
+                            old-content
+                            match-replacements)]
+    (spit fname new-content)))
 
 (defn- update-user-guide! [version]
   (status/line :head "Updating library version in user guide to %s" version)
   (update-file! "doc/01-user-guide.adoc"
-                #"( +\{:extra-deps \{com.github.lread/test-doc-blocks \{:mvn/version \").*(\"\}\})"
-                (str  "$1" version "$2")))
+                [["update lib version"
+                  #"(?m)(^:lib-version: ).*$"
+                  (str "$1" version)]]))
 
 (defn- adoc-section-search[content find-section]
   (cond
@@ -70,20 +75,22 @@
 (defn- update-changelog! [version last-version {:keys [unreleased-breaking]}]
   (status/line :head "Updating Change Log unreleased headers to release %s" version)
   (update-file! "CHANGELOG.adoc"
-                #"(?ims)^(=+) +unreleased *$(.*?)(^=+)"
-                (str "$1 Unreleased\n\n$1 v" version "$2"
-                     (when last-version
-                       (str
-                        "https://github.com/lread/test-doc-blocks/compare/"
-                        last-version
-                        "\\\\...v"  ;; single backslash is escape for AsciiDoc
-                        version
-                        "[Gritty details of changes for this release]\n\n"))
-                     "$3"))
+                [["update unreleased header"
+                  #"(?ims)^(=+) +unreleased *$(.*?)(^=+)"
+                  (str "$1 Unreleased\n\n$1 v" version "$2"
+                       (when last-version
+                         (str
+                          "https://github.com/lread/test-doc-blocks/compare/"
+                          last-version
+                          "\\\\...v"  ;; single backslash is escape for AsciiDoc
+                          version
+                          "[Gritty details of changes for this release]\n\n"))
+                       "$3")]])
   (when (= :found unreleased-breaking)
     (update-file! "CHANGELOG.adoc"
-                  #"(?ims)(=+) +unreleased breaking changes *$"
-                  (str "$1 v" version))))
+                  [["update unreleased breaking changes header"
+                    #"(?ims)(=+) +unreleased breaking changes *$"
+                    (str "$1 v" version)]])))
 
 (defn- create-jar! []
   (status/line :head "Creating jar for release")

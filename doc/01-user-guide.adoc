@@ -1,7 +1,9 @@
-// NOTE: release workflow automatically updates rewrite-clj versions in this file
 = User Guide
 :toclevels: 5
 :toc:
+:clojure-version: 1.10.3
+// NOTE: lib-version is automatically updated by release workflow
+:lib-version: 1.0.146-alpha
 
 // Exercise our :apply option by skipping all code blocks by default for this doc
 //#:test-doc-blocks{:skip true :apply :all-next}
@@ -14,14 +16,14 @@ Test generation requires Clojure v1.9 or above.
 
 Generated tests can be run on Clojure v1.8 and above (if supported by your test runner).
 
-You'll use your test runner of choice, for example: https://github.com/cognitect-labs/test-runner[Clojure test-runner], https://github.com/Olical/cljs-test-runner[cljs-test-runner] or https://github.com/lambdaisland/kaocha[kaocha].
+You'll use your test runner of choice, for example: https://github.com/cognitect-labs/test-runner[Clojure test-runner], https://github.com/Olical/cljs-test-runner[cljs-test-runner], https://github.com/lambdaisland/kaocha[kaocha], or some https://github.com/technomancy/leiningen[lein] test runner.
 
 == Introduction
 Test-doc-blocks might (or might not, see link:#limitations[limitations], and link:#interesting-alternatives[interesting alternatives]) be of interest for your Clojure/ClojureScript project.
 
 Test-doc-blocks recognizes:
 
-* CommonMark code blocks found in docstrings, `.md` files and `.adoc` files.
+* CommonMark code blocks found in Clojure sources docstrings, `.md` files and `.adoc` files.
 * AsciiDoc code blocks found in `.adoc` files.
 
 An AsciiDoc code block looks like this:
@@ -61,23 +63,35 @@ Or editor style:
 
 And don't rely on any special unspecified setup, then test-doc-blocks will generate tests that verify that, yes, indeed:
 
-`(* 6 7)` evaluates to `42`.
+`(* 6 7)` evaluates to `42` via test assertion `(is (= 42 (* 6 7)))`.
 
 == Usage
-Add an alias to your `deps.edn`:
 
-// NOTE: mvn/version version is automatically updated by the release process
-[source,clojure]
+=== Clojure CLI
+
+An example `deps.edn` alias:
+
+[source,clojure,subs="attributes+"]
 ----
-    :gen-doc-tests {:extra-deps {com.github.lread/test-doc-blocks {:mvn/version "1.0.146-alpha"}}
-                    :exec-fn lread.test-doc-blocks/gen-tests}
+  :gen-doc-tests {:replace-deps {org.clojure/clojure {:mvn/version "{clojure-version}"}
+                                 com.github.lread/test-doc-blocks {:mvn/version "{lib-version}"}}
+                  ;; for -X syntax support specify exec-fn
+                  :exec-fn lread.test-doc-blocks/gen-tests
+                  ;; for -M syntax support specify main-opts
+                  :main-opts ["-m" "lread.test-doc-blocks" "gen-tests"]}
 ----
+We use `:replace-deps` to keep deps to the minimum while generating our tests.
 
 The most basic usage is:
 
 [source,shell]
 ----
 clojure -X:gen-doc-tests
+----
+Or:
+[source,shell]
+----
+clojure -M:gen-doc-tests
 ----
 
 This generates Clojure tests for code blocks in your `README.md` file to the `target/test-doc-blocks/test` directory.
@@ -86,81 +100,248 @@ Any existing tests under `target/test-doc-blocks` will be replaced.
 The generated tests have no dependency on test-doc-blocks.
 You can run them with your preferred test runner.
 
-Test-doc-blocks looks for assertions in your doc code blocks that are in editor style and REPL style format.
-For example...
+[TIP]
+====
+Windows users: if trying to escape `-X` args on the command line is leading to frustration, consider:
 
-//#:test-doc-blocks{:skip false}
-[source,clojure]
+* using the `-M` syntax
+* or specifying options under `:exec-args` or `:main-opts` in your `:gen-doc-tests` alias in your `deps.edn`.
+====
+
+==== deps.edn Examples
+
+The test-doc-blocks link:/deps.edn[deps.edn] has some aliases that might serve as useful examples for running generated tests:
+
+* `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
+Invoke for this project via: `clj -M:isolated/cljs-test-runner`
+* `:isolated/kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
+Invoke for this project via: `clj -M:isolated/kaoacha generated`.
++
+IMPORTANT: Review the kaocha link:/tests.edn[tests.edn] config which tells koacha to run tests in order (rather than randomized order).
+* `:isolated/clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
+Invoke for this project via: `clj -M:isolated/clj-test-runner`
+
+[#leiningen]
+=== Leiningen
+
+An an example subset of a `project.clj`:
+
+[source,clojure,subs="attributes+"]
 ----
-user=> (/ 714 17)
-42
+(defproject my-lovely-library "0.0.0"
+  ;; ...
+  :profiles {:gen-doc-tests {:test-paths   ["target/test-doc-blocks/test"]
+                             :dependencies [[com.github.lread/test-doc-blocks "{lib-version}"]]}}
+  :aliases  {"run-doc-tests" ^{:doc "Generate, then run, tests from doc code blocks"}
+             ["with-profile" "gen-doc-tests" "do"
+              ["run" "-m" "lread.test-doc-blocks" "gen-tests"
+               ;; change gen-tests options as appropriate for your project
+               "--platform" "clj"
+               "src/**.clj" "doc/example.md"]
+              ["test"]]})
 ----
 
-...generates the test assertion `(is (= 42 (/ 714 17)))`.
+Running
 
-=== Detailed Examples with Inline Options
+[source,shell]
+----
+lein run-doc-tests
+----
 
-For detailed examples and inline options:
+1. Generates clj tests for all code blocks found in:
+
+- all Clojure source files under `src`
+- `doc/example.md`
+
+2. Runs the generated tests.
+
+=== Detailed Doc Examples with Inline Options
+
+For detailed doc examples that include inline options you will want to read:
 
 * link:example.adoc[AsciiDoc example]
 * link:example.md[CommonMark example]
 * link:example.cljc[Clojure source docstring example]
 
-=== deps.edn Examples
-
-The test-doc-blocks link:/deps.edn[deps.edn] has some aliases that might serve as useful examples:
-
-* `:isolated/cljs-test-runner` - runs generated tests under ClojureScript using https://github.com/Olical/cljs-test-runner[cljs-test-runner] +
-Invoke for this project via: `clj -M:isolated/cljs-test-runner`
-* `:isolated/kaocha` - runs generated tests under Clojure using https://github.com/lambdaisland/kaocha[kaocha] +
-Invoke for this project via: `clj -M:isolated/kaoacha generated`. Note also kaocha link:/tests.edn[tests.edn] config which tells koacha to run tests in order (rather than randomized order).
-* `:isolated/clj-test-runner` - runs generated tests under Clojure using https://github.com/cognitect-labs/test-runner[Cognitect test-runner] +
-Invoke for this project via: `clj -M:isolated/clj-test-runner`
-
 [#command-line-options]
 === Command Line Options
 
-:docs::
+[TIP]
+====
+After you experiment with which options are appropriate for your project, you'll likely incorporate options directly into your `deps.edn` or `project.clj` file.
+====
+
+[TIP]
+====
+Leiningen users should focus on the `-M` syntax and apply it back to the link:#leiningen[leiningen example].
+====
+
+==== docs
 By default, tests are generated for `README.md` only.
-+
-If you want to specify a different vector of files you can do so via `:docs`:
-+
+
+*-X syntax* +
+If you want to specify a different vector of files you can do so via `:docs`
+
 [source,shell]
 ----
 clojure -X:gen-doc-tests :docs '["README.adoc" "doc/example.adoc" "doc/example.md" "doc/example.cljc"]'
 ----
-+
-`:docs` understands https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)[glob syntax].
 
-:target-root::
+Moving this to a `deps.edn` alias would look like:
+
+[source,clojure,subs="attributes+"]
+----
+  :gen-doc-tests
+  {:replace-deps {org.clojure/clojure {:mvn/version "{clojure-version}"}
+                  com.github.lread/test-doc-blocks {:mvn/version "{lib-version}"}}
+   :exec-fn lread.test-doc-blocks/gen-tests
+   :exec-args {:docs ["README.adoc" "doc/example.adoc" "doc/example.md" "doc/example.cljc"]}}
+----
+
+*-M syntax* +
+Equivalent `-M` syntax is:
+
+[source,shell]
+----
+clojure -M:gen-doc-tests README.adoc doc/example.adoc doc/example.md doc/example.cljc
+----
+
+Moving this to a `deps.edn` alias would look like:
+[source,clojure,subs="attributes+"]
+----
+  :gen-doc-tests
+  {:replace-deps {org.clojure/clojure {:mvn/version "{clojure-version}"}
+                  com.github.lread/test-doc-blocks {:mvn/version "{lib-version}"}}
+   :main-opts ["-m" "lread.test-doc-blocks" "gen-tests"
+                    "README.adoc" "doc/example.adoc" "doc/example.md" "doc/example.cljc"]}
+----
+
+*globs* +
+The files you specify can include https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)[glob syntax]. For example, the following is equivalent to the last example:
+
+[source,shell]
+----
+clojure -M:gen-doc-tests README.adoc doc/example.{adoc,md,cljc}
+----
+
+[TIP]
+====
+When running from a terminal shell, be sure to use any necessary quoting should you want to prevent your shell from interpreting wildcard glob characters, for example, from a bash shell:
+
+[source,shell]
+----
+clojure -M:gen-doc-tests 'src/**.clj' 'doc/*.md'
+----
+Any special quoting should not be necessary when specifying options directly in a `deps.edn` or `project.clj` file.
+====
+
+==== target-root
 The default directory where tests are generated is `./target`.
-+
-You can override this via `:target-root`:
-+
+
+*-X syntax* +
+Override via `:target-root` when using the `-X` syntax:
+
 [source,shell]
 ----
 clojure -X:gen-doc-tests :target-root '"./someplace/else"'
 ----
-+
-Note that test-doc-blocks will delete and recreate the `test-docs-block/test` dir under the target root.
-Keep the target location in mind when figuring out where to point your test runner.
 
-:platform::
+Expressed within a `deps.edn` alias, this would look like:
+
+[source,clojure]
+----
+  :gen-doc-tests
+  {:replace-deps {org.clojure/clojure {:mvn/version "1.10.3"}
+                  com.github.lread/test-doc-blocks {:mvn/version "1.0.146-alpha"}}
+   :exec-fn lread.test-doc-blocks/gen-tests
+   :exec-args {:target-root "./someplace/else"}}
+----
+
+*-M syntax* +
+Use `--target-root` when using the `-M` syntax:
+
+[source,shell]
+----
+clojure -M:gen-doc-tests --target-root ./someplace/else
+----
+
+Expressed within a `deps.edn` alias, this would look like:
+
+[source,clojure,subs="attributes+"]
+----
+  :gen-doc-tests
+  {:replace-deps {org.clojure/clojure {:mvn/version "{clojure-version}"}
+                  com.github.lread/test-doc-blocks {:mvn/version "{lib-version}"}}
+   :main-opts ["-m" "lread.test-doc-blocks" "gen-tests"
+                    "--target-root" "./someplace/else"]}
+----
+
+[NOTE]
+====
+Test-doc-blocks will delete and recreate the `test-docs-block/test` dir under the target root.
+====
+
+[WARNING]
+====
+Keep the target location in mind when figuring out where to point your test runner. +
+If you get the location wrong for your test runner, it will likely not complain; many test runners will happily pass a test run that finds 0 tests.
+====
+
+==== platform
 The platform governs what Clojure file types test-doc-blocks generates for tests.
-+
+
 Specify:
 
 * `:clj` for Clojure, generates `.clj` files
 * `:cljs` for ClojureScript, generates `.cljs` files
 * `:cljc` for mixed, generates `.cljc` files
 
-+
 The default is `:cljc`.
-You can override the platform for code blocks via inline options. +
-Test-doc-blocks makes no platform assumptions when generating tests from doc blocks found in Clojure source files. Specify what makes sense for your tests.
 
-TIP: Windows users: trying to escape -X args on the command line can lead to frustration.
-Consider instead specifying options under `:exec-args` in your `:gen-doc-tests` alias in `deps.edn`.
+*-X Syntax*
+Example platform override using `-X` syntax:
+[source,shell]
+----
+clojure -X:gen-doc-tests :platform :clj
+----
+
+The same, expressed within a `deps.edn` alias:
+[source,clojure,subs="attributes+"]
+----
+  :gen-doc-tests
+  {:replace-deps {org.clojure/clojure {:mvn/version "{clojure-version}"}
+                  com.github.lread/test-doc-blocks {:mvn/version "{lib-version}"}}
+   :exec-fn lread.test-doc-blocks/gen-tests
+   :exec-args {:platform :clj}}
+----
+
+
+*-M Syntax*
+Same override but using `-M` syntax:
+
+[source,shell]
+----
+clojure -M:gen-doc-tests --platform clj
+----
+
+The same, expressed within a `deps.edn` alias:
+[source,clojure,subs="attributes+"]
+----
+  :gen-doc-tests
+  {:replace-deps {org.clojure/clojure {:mvn/version "{clojure-version}"}
+                  com.github.lread/test-doc-blocks {:mvn/version "{lib-version}"}}
+   :main-opts ["-m" "lread.test-doc-blocks" "gen-tests"
+                    "--platform" "clj"]}
+----
+
+[TIP]
+====
+You can override the platform for code blocks via inline options within your docs. +
+====
+[NOTE]
+====
+Test-doc-blocks makes no platform assumptions when generating tests from doc blocks found in Clojure source files. Specify what makes sense for your tests.
+====
 
 [#limitations]
 == Limitations

@@ -11,6 +11,7 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 
 == Unreleased
 
+* While preserving our existing `-X` command line interface, add a more conventional main command line interface to support leiningen (and potentially Windows) users https://github.com/lread/test-doc-blocks/issues/8[#8]
 * Bump deps
 * Internal test-doc-blocks developer facing:
 ** Migrate from `depstar` to `tools.build`
