@@ -6,7 +6,8 @@
   {:github-id "PEZ" :contributions [:feedback]}
   {:github-id "seancorfield" :contributions [:inspiration :feedback :testing]}
   {:github-id "uochan" :contributions [:feedback]}
-  {:github-id "holyjak" :contributions [:docs]}]
+  {:github-id "holyjak" :contributions [:docs]}
+  {:github-id "MIJOTHY" :contributions [:feedback :docs]}]
  :maintainers
  [{:github-id "lread"
    :contributions [:code]}]}
