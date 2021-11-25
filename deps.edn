@@ -2,7 +2,7 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.9.0"}
         org.clojure/tools.reader {:mvn/version "1.3.6"}
-        babashka/fs {:mvn/version "0.1.0"}
+        babashka/fs {:mvn/version "0.1.1"}
         clj-kondo/clj-kondo {:mvn/version "2021.10.19"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
         metosin/malli {:mvn/version "0.6.2"}
@@ -74,12 +74,12 @@
            ;;
            ;; Deployment
            ;;
-           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.6.3" :git/sha "4a1b53a"}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.6.7" :git/sha "8cca4f4"}
                           io.github.slipset/deps-deploy {:sha "9b8db1f57722d19cf92de57ac7db28d71a915bcf"}}
                    :ns-default build}
 
            ;; Maintenance
-           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "1.2.0"}
+           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "1.3.0"}
                                    org.slf4j/slf4j-simple {:mvn/version "1.7.32"} ;; to rid ourselves of logger warnings
                                    }
                       :main-opts ["-m" "antq.core"]}}}

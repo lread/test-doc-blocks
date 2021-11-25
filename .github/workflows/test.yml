@@ -30,7 +30,7 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v2
       with:
-        distribution: 'adopt'
+        distribution: 'temurin'
         java-version: '11'
 
     #
@@ -59,7 +59,7 @@ jobs:
        echo "$HOME\deps.clj" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       if: matrix.os == 'windows-latest'
     - name: Install Clojure (linux)
-      run: curl -s https://download.clojure.org/install/linux-install-1.10.3.933.sh | sudo bash
+      run: curl -s https://download.clojure.org/install/linux-install-1.10.3.1029.sh | sudo bash
       if: matrix.os == 'ubuntu-latest'
 
     - name: Bring down ClojureTools early

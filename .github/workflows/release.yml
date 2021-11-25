@@ -32,15 +32,14 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v2
       with:
-        distribution: 'adopt'
+        distribution: 'temurin'
         java-version: '11'
 
     - name: Install Babashka
       run: curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install | sudo bash
 
     - name: Install Clojure
-      run: curl -s https://download.clojure.org/install/linux-install-1.10.3.933.sh | sudo bash
-
+      run: curl -s https://download.clojure.org/install/linux-install-1.10.3.1029.sh | sudo bash
 
     - name: Tools Versions
       run: |
