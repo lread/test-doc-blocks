@@ -14,7 +14,7 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 == v1.0.166-alpha
 
 * While preserving our existing `-X` command line interface, add a more conventional main command line interface to support leiningen (and potentially Windows) users https://github.com/lread/test-doc-blocks/issues/8[#8]
-* Now failing when a requested file/glob does not exist https://github.com/lread/test-doc-blocks/issues/9[#9
+* Now failing when a requested file/glob does not exist https://github.com/lread/test-doc-blocks/issues/9[#9]
 * Bump deps
 * Internal test-doc-blocks developer facing:
 ** Migrate from `depstar` to `tools.build`
