@@ -10,10 +10,10 @@ ifdef::env-github[]
 endif::[]
 :toc: macro
 
-
-https://github.com/{project-coords}/actions?query=workflow%3ATest[image:https://github.com/{project-coords}/workflows/Test/badge.svg[Test]]
-https://clojars.org/{deploy-coords}[image:https://img.shields.io/clojars/v/{deploy-coords}.svg[Clojars]]
 https://cljdoc.org/d/{deploy-coords}/CURRENT[image:https://cljdoc.org/badge/{deploy-coords}[cljdoc]]
+https://clojurians.slack.com/archives/C02NSHB3T0A[image:https://img.shields.io/badge/slack-join_chat-brightgreen.svg[Join chat]]
+https://clojars.org/{deploy-coords}[image:https://img.shields.io/clojars/v/{deploy-coords}.svg[Clojars]]
+https://github.com/{project-coords}/actions?query=workflow%3ATest[image:https://github.com/{project-coords}/workflows/Test/badge.svg[Test]]
 
 Test AsciiDoc and CommonMark code blocks found in articles and docstrings
 
