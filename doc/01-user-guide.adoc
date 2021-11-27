@@ -363,17 +363,19 @@ If you express code or headings in embedded HTML within your doc, test-doc-block
 [#interesting-alternatives]
 == Interesting Alternatives
 
-Other options and related projects that I am currently aware of:
+Other options and related projects that I am currently aware of (in alphabetical order):
 
-* [.line-through]#https://github.com/seancorfield/readme[readme]# (archived) - Generates tests for code blocks found in .md files and then runs them.
-This project was the inspiration for test-doc-blocks.
-It is simpler but but also has less features.
-* https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
 * https://github.com/sogaiu/alc.x-as-tests[alc.x-as-tests] - Runs code in `(comment ...)` blocks as tests.
+* https://github.com/holyjak/clj-concordion[clj-concordian] - "A BDD / Specification by Example tool somewhat similar to Cucumber but far simpler", according to its author, go check it out!
 * https://github.com/lambdaisland/kaocha[kaocha] - Kaocha supports running Cucumber tests.
 It uses this support in tests for some of its documentation.
 A `.feature` document describes the feature and includes given, when, then scenarios that are both run and shown in the documentation.
 You can use step definitions to hide any gritty details.
-* https://github.com/holyjak/clj-concordion[clj-concordian] - "A BDD / Specification by Example tool somewhat similar to Cucumber but far simpler", according to its author, go check it out!
 * https://github.com/pink-gorilla/notebook[notebook] - Some day notebook type tools might serve both as tests and docs.
-Until that golden day, test-doc-blocks and the above tools are worthy of consideration.
+Until that golden day, test-doc-blocks and similar tools are worthy of consideration.
+* https://github.com/hyperfiddle/rcf[RCF] - Turns your Rich Comment Forms into tests
+* https://github.com/seancorfield/readme[readme] (archived) - Generates tests for code blocks found in .md files and then runs them.
+It is simpler but but also has less features.
+This project was the inspiration for test-doc-blocks.
+*Note:* This project is now archived and recommends existing users consider test-doc-blocks instead.
+* https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.
