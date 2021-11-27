@@ -142,28 +142,27 @@
   "test-doc-blocks
 
 Usage:
-  test-doc-blocks gen-tests [--target-root=<dir>] [--platform=<platform>] [<file>...]
+  test-doc-blocks gen-tests [--help] [--target-root=<dir>] [--platform=<platform>] [<file>...]
   test-doc-blocks --help
 
 Options:
   -t, --target-root=<dir>    Target directory where tests are generated [default: ./target]
   -p, --platform=<platform>  By default, generate test files for one of clj, cljs or cljc [default: cljc]
+      --help                 This usage help
 
 Where:
   <file>...  Specifies adoc, md, clojure file(s) with code blocks from which you want to generate tests.
              Supports Java glob syntax, see https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob
              (Be sure to use appropriate quoting when you don't want your shell to interpret glob wildcards).
 
-Replace test-doc-blocks with your appropriate Clojure tools CLI launch sequence. For example, via an alias:
+Replace test-doc-blocks with your appropriate Clojure CLI launch sequence. For example:
 |
-| clojure -M:test-doc-blocks gen-tests --platform clj 'src/**.clj' doc/example.adoc
-|
-Or calling main directly:
-|
-| clojure -M -m lread.test-doc-blocks gen-tests --target ./some/other/dir 'src/**.{clj,cljs,cljc}' README.md
+| clojure -M:gen-doc-tests --platform clj 'src/**.clj' doc/example.adoc
 |
 
-Clojure CLI -X syntax is also supported, see the test-doc-blocks user guide.")
+See user guide for:
+- more -M examples including deps.edn setup
+- launching via Clojure CLI -X syntax")
 
 (defn -main
   "Conventional command-line support. Use --help for help."
