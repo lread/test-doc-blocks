@@ -2,10 +2,10 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.9.0"}
         org.clojure/tools.reader {:mvn/version "1.3.6"}
-        babashka/fs {:mvn/version "0.1.1"}
-        clj-kondo/clj-kondo {:mvn/version "2021.10.19"}
+        babashka/fs {:mvn/version "0.1.2"}
+        clj-kondo/clj-kondo {:mvn/version "2022.01.13"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
-        metosin/malli {:mvn/version "0.6.2"}
+        metosin/malli {:mvn/version "0.7.5"}
         rewrite-clj/rewrite-clj  {:mvn/version "1.0.699-alpha"}}
 
  :aliases {;;
@@ -35,7 +35,7 @@
            ;;
 
            ;; for kaocha see also tests.edn
-           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.60.945"}}
+           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.60.977"}}
                     :extra-paths ["test"]
                     :main-opts ["-m" "kaocha.runner"]}
 
@@ -46,7 +46,7 @@
 
            ;; for kaocha see also tests.edn
            :isolated/kaocha {:replace-deps {org.clojure/clojure {:mvn/version "1.9.0"}
-                                            lambdaisland/kaocha {:mvn/version "1.60.945"}}
+                                            lambdaisland/kaocha {:mvn/version "1.60.977"}}
                              :replace-paths ["test"] ;; include test to bring in kaocha hook
                              :main-opts ["-m" "kaocha.runner"]}
 
@@ -76,12 +76,12 @@
            ;;
            ;; Deployment
            ;;
-           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.6.7" :git/sha "8cca4f4"}
-                          io.github.slipset/deps-deploy {:sha "9b8db1f57722d19cf92de57ac7db28d71a915bcf"}}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.7.5" :git/sha "34727f7"}
+                          io.github.slipset/deps-deploy {:sha "d1fac08888ec8beda0579d3071bb9f804a1d446c"}}
                    :ns-default build}
 
            ;; Maintenance
-           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "1.3.0"}
-                                   org.slf4j/slf4j-simple {:mvn/version "1.7.32"} ;; to rid ourselves of logger warnings
+           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "1.3.1"}
+                                   org.slf4j/slf4j-simple {:mvn/version "1.7.33"} ;; to rid ourselves of logger warnings
                                    }
                       :main-opts ["-m" "antq.core"]}}}
