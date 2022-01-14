@@ -14,7 +14,7 @@
                  (defn no-args-check []
                    (main/doc-arg-opt *command-line-args*))
                  (defn requested-clojure-version
-                   ([] (requested-clojure-version ["1.9" "1.10"]))
+                   ([] (requested-clojure-version ["1.9" "1.10" "1.11"]))
                    ([allowed-versions]
                     (let [args-usage (string/join "\n"
                                                   ["Valid args: [options]"
@@ -85,7 +85,7 @@
                                   (clojure (format "-M:isolated/kaocha:%s generated" clojure-version)))}
 
          test-gen-clj {:doc "use Clojure test-runner to run generated tests"
-                       :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10"])]
+                       :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10" "1.11"])]
                                (run '-gen-1.10)
                                (status/line :detail "Testing with clojure v%s" clojure-version)
                                (clojure (format "-M:isolated/clj-test-runner:%s" clojure-version)))}
@@ -116,11 +116,11 @@
                   :task (when (no-args-check)
                           (run 'clean)
                           (run 'lint)
-                          (run-under ["1.9" "1.10"] 'test-unit)
-                          (run-under ["1.9" "1.10"] 'test-integration)
+                          (run-under ["1.9" "1.10" "1.11"] 'test-unit)
+                          (run-under ["1.9" "1.10" "1.11"] 'test-integration)
                           (run 'gen)
-                          (run-under ["1.9" "1.10"] 'test-gen-kaocha) ;; kaocha min versio is 1.9
-                          (run-under ["1.8" "1.9" "1.10"] 'test-gen-clj) ;; also include 1.8
+                          (run-under ["1.9" "1.10" "1.11"] 'test-gen-kaocha) ;; kaocha min versio is 1.9
+                          (run-under ["1.8" "1.9" "1.10" "1.11"] 'test-gen-clj) ;; also include 1.8
                           (run 'test-gen-cljs))}
 
          ci-release {:doc "release task, use --help for args"
