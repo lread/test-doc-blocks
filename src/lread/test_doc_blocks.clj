@@ -23,7 +23,7 @@
     (if (seq sym-links)
       (throw (ex-info (format "Won't delete %s, unsafe because it contains symbolic link(s): %s"
                               path (mapv str sym-links)) {}))
-      (run! #(io/delete-file %) flist))))
+      (run! io/delete-file flist))))
 
 (defn- indent [s indent-cnt]
   (string/replace s #"(^|\R)" (str "$1" (apply str (repeat indent-cnt " ")))))

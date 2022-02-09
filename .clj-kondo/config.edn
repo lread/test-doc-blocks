@@ -1,3 +1,4 @@
 {:config-paths ^:replace ["lread/status-line" "rewrite-clj/rewrite-clj"]
  :linters
- {:unsorted-required-namespaces {:level :warning}}}
+ {:redundant-fn-wrapper {:level :warning} ;; experimental linter, let's give it a go
+  :unsorted-required-namespaces {:level :warning}}}

@@ -38,7 +38,7 @@
 ;;
 
 (defn check-prerequisites []
-  (let [missing-cmds (doall (remove #(on-path %) ["git" "docker"]))]
+  (let [missing-cmds (doall (remove on-path ["git" "docker"]))]
     (when (seq missing-cmds)
       (status/die 1 (string/join "\n" ["Required commands not found:"
                                        (string/join "\n" missing-cmds)])))))
