@@ -297,7 +297,10 @@
    ;; cljdoc only supports md in docstrings
    (let [parsers (get parse-def "md")
          kondo-result (clj-kondo/run! {:lint [src-filename]
-                                       :config {:output {:analysis true}}})
+                                       :skip-lint true
+                                       :config {:analysis true
+                                                :var-usages false
+                                                :var-definitions {:shallow true}}})
          kondo-errors (->> kondo-result :findings (filter #(= :error (:level %))))]
      (if (seq kondo-errors)
        (throw (ex-info (format "unable to parse Clojure file %s\nclj-kondo errors: %s"

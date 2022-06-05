@@ -41,7 +41,7 @@
 
          ;; commands
 
-         lint {:doc "[--rebuild-cache] lint source code with clj-kondo"
+         lint {:doc "[--rebuild] lint source code with clj-kondo"
                :task lint/-main}
 
          clean {:doc "delete generated/cached build work"

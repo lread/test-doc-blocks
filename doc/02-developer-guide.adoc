@@ -101,7 +101,7 @@ To run linting as the CI server does:
 bb lint
 ----
 
-If, for whatever reason, you want to rebuild the lint cache, use the `--rebuild-cache` option.
+If, for whatever reason, you want to rebuild the lint cache, use the `--rebuild` option.
 
 == Continuous Integration
 

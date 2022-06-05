@@ -16,10 +16,10 @@ jobs:
       if: matrix.os == 'windows-latest'
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3.0.2
 
     - name: Clojure deps cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3.0.3
       with:
         path: |
           ~/.m2/repository
@@ -28,7 +28,7 @@ jobs:
         restore-keys: $${ runner.os }}-cljdeps-
 
     - name: Setup Java
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3.3.0
       with:
         distribution: 'temurin'
         java-version: '11'
@@ -36,31 +36,26 @@ jobs:
     #
     # Install Babashka
     #
-    - name: Install babashka (windows)
-      run: |
-       iwr -useb get.scoop.sh | iex
-       scoop bucket add scoop-clojure https://github.com/littleli/scoop-clojure
-       scoop bucket add extras
-       scoop install babashka --independent
-       echo "$HOME\scoop\shims" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      if: matrix.os == 'windows-latest'
-    - name: Install Babashka (linux)
-      run: curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install | sudo bash
-      if: matrix.os == 'ubuntu-latest'
+    - name: Install Babashka
+      uses: DeLaGuardo/setup-clojure@5.1
+      with:
+        bb: 'latest'
 
     #
     # Install Clojure
     #
     - name: Install clojure (windows)
+      if: matrix.os == 'windows-latest'
       # On windows, deps.clj's deps.exe is used in place of clojure to avoid complexities of official clojure install
       run: |
        PowerShell -Command "iwr -useb https://raw.githubusercontent.com/borkdude/deps.clj/master/install.ps1 | iex"
        Rename-Item $HOME\deps.clj\deps.exe clojure.exe
        echo "$HOME\deps.clj" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      if: matrix.os == 'windows-latest'
-    - name: Install Clojure (linux)
-      run: curl -s https://download.clojure.org/install/linux-install-1.10.3.1029.sh | sudo bash
+    - name: Install Clojure
       if: matrix.os == 'ubuntu-latest'
+      uses: DeLaGuardo/setup-clojure@5.1
+      with:
+        cli: 'latest'
 
     - name: Bring down ClojureTools early
       run: clojure -Sdescribe
@@ -77,7 +72,7 @@ jobs:
         clojure -Sdescribe
 
     - name: Download Clojure Dependencies
-      run: clojure -Spath
+      run: clojure -P
 
     - name: Run CI Tests
       run: bb ci-test
