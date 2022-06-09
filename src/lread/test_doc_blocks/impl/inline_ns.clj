@@ -39,7 +39,7 @@
   "Returns forms of interest and direct parents.
   Currently also returns any other of unintest forms in tree."
   [zloc sym]
-  (let [zloc-top (z/edn* (z/root zloc))]
+  (let [zloc-top (z/of-node* (z/root zloc))]
     (->> (z/find zloc-top z/next (inline-ns-of-interest? sym))
          (iterate #(z/find-next % z/next (inline-ns-of-interest? sym)))
          (take-while identity))))
@@ -50,7 +50,7 @@
   [zloc sym]
   (-> zloc
       z/root
-      z/edn*
+      z/of-node*
       (z/prewalk #(list-starting-with-sym? % sym)
                  (fn action [zloc] (z/replace zloc 'nil)))))
 

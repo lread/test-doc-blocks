@@ -6,7 +6,7 @@
         clj-kondo/clj-kondo {:mvn/version "2022.05.31"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
         metosin/malli {:mvn/version "0.8.4"}
-        rewrite-clj/rewrite-clj  {:mvn/version "1.0.767-alpha"}}
+        rewrite-clj/rewrite-clj  {:mvn/version "1.1.45"}}
 
  :aliases {;;
            ;; Clojure versions we support
