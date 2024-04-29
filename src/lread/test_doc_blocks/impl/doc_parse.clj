@@ -309,7 +309,7 @@
              of-interest (concat (:namespace-definitions analysis)
                                  (:var-definitions analysis))]
          (->>  of-interest
-               (map #(dissoc % :lang :defined-by)) ;; otherwise we'll get dupes for cljc
+               (map #(dissoc % :lang :defined-by :defined-by->lint-as) ) ;; otherwise we'll get dupes for cljc
                distinct
                (filter :doc)           ;; docstring
                (map (fn [kondo] (let [blocks (parse-code-blocks src-filename
