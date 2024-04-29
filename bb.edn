@@ -1,7 +1,7 @@
 {:min-bb-version "0.3.7"
  :paths ["script"]
  :deps {lread/status-line {:git/url "https://github.com/lread/status-line.git"
-                           :sha "35ed39645038e81b42cb15ed6753b8462e60a06d"}
+                           :sha "cf44c15f30ea3867227fa61ceb823e5e942c707f"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
         version-clj/version-clj {:mvn/version "2.0.2"}}
 
@@ -14,7 +14,7 @@
                  (defn no-args-check []
                    (main/doc-arg-opt *command-line-args*))
                  (defn requested-clojure-version
-                   ([] (requested-clojure-version ["1.9" "1.10" "1.11"]))
+                   ([] (requested-clojure-version ["1.9" "1.10" "1.11" "1.12"]))
                    ([allowed-versions]
                     (let [args-usage (string/join "\n"
                                                   ["Valid args: [options]"
@@ -47,7 +47,7 @@
          clean {:doc "delete generated/cached build work"
                 :task clean/-main}
 
-         test-unit {:doc "test-doc-block units tests under Clojure 1.10"
+         test-unit {:doc "test-doc-block units tests under Clojure"
                     :task (when-let [clojure-version (requested-clojure-version)]
                             (status/line :detail "Testing with clojure v%s" clojure-version)
                             (clojure (format "-M:kaocha:%s unit" clojure-version)))}
@@ -85,7 +85,7 @@
                                   (clojure (format "-M:isolated/kaocha:%s generated" clojure-version)))}
 
          test-gen-clj {:doc "use Clojure test-runner to run generated tests"
-                       :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10" "1.11"])]
+                       :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10" "1.11" "1.12"])]
                                (run '-gen-1.10)
                                (status/line :detail "Testing with clojure v%s" clojure-version)
                                (clojure (format "-M:isolated/clj-test-runner:%s" clojure-version)))}
@@ -116,11 +116,11 @@
                   :task (when (no-args-check)
                           (run 'clean)
                           (run 'lint)
-                          (run-under ["1.9" "1.10" "1.11"] 'test-unit)
-                          (run-under ["1.9" "1.10" "1.11"] 'test-integration)
+                          (run-under ["1.9" "1.10" "1.11" "1.12"] 'test-unit)
+                          (run-under ["1.9" "1.10" "1.11" "1.12"] 'test-integration)
                           (run 'gen)
-                          (run-under ["1.9" "1.10" "1.11"] 'test-gen-kaocha) ;; kaocha min versio is 1.9
-                          (run-under ["1.8" "1.9" "1.10" "1.11"] 'test-gen-clj) ;; also include 1.8
+                          (run-under ["1.9" "1.10" "1.11" "1.12"] 'test-gen-kaocha) ;; kaocha min versio is 1.9
+                          (run-under ["1.8" "1.9" "1.10" "1.11" "1.12"] 'test-gen-clj) ;; also include 1.8
                           (run 'test-gen-cljs))}
 
          ci-release {:doc "release task, use --help for args"

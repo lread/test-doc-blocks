@@ -1,12 +1,12 @@
 {:paths ["src"]
 
  :deps {org.clojure/clojure {:mvn/version "1.9.0"}
-        org.clojure/tools.reader {:mvn/version "1.3.6"}
-        babashka/fs {:mvn/version "0.1.6"}
-        clj-kondo/clj-kondo {:mvn/version "2022.05.31"}
+        org.clojure/tools.reader {:mvn/version "1.4.2"}
+        babashka/fs {:mvn/version "0.5.20"}
+        clj-kondo/clj-kondo {:mvn/version "2024.03.13"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
-        metosin/malli {:mvn/version "0.8.4"}
-        rewrite-clj/rewrite-clj  {:mvn/version "1.1.45"}}
+        metosin/malli {:mvn/version "0.16.0"}
+        rewrite-clj/rewrite-clj  {:mvn/version "1.1.47"}}
 
  :aliases {;;
            ;; Clojure versions we support
@@ -15,7 +15,8 @@
            :1.8 {:override-deps {org.clojure/clojure {:mvn/version "1.8.0"}}}
            :1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
            :1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
-           :1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.1"}}}
+           :1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.3"}}}
+           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.0-alpha10"}}}
 
            ;; clojure -X support for local examples
            :test-doc-blocks {:ns-default lread.test-doc-blocks}
@@ -34,7 +35,7 @@
            ;;
 
            ;; for kaocha see also tests.edn
-           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.66.1034"}}
+           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}}
                     :extra-paths ["test"]
                     :main-opts ["-m" "kaocha.runner"]}
 
@@ -45,12 +46,12 @@
 
            ;; for kaocha see also tests.edn
            :isolated/kaocha {:replace-deps {org.clojure/clojure {:mvn/version "1.9.0"}
-                                            lambdaisland/kaocha {:mvn/version "1.66.1034"}}
+                                            lambdaisland/kaocha {:mvn/version "1.87.1366"}}
                              :replace-paths ["test"] ;; include test to bring in kaocha hook
                              :main-opts ["-m" "kaocha.runner"]}
 
            :isolated/cljs-test-runner {:replace-deps {org.clojure/clojure {:mvn/version "1.8.0"}
-                                                      olical/cljs-test-runner {:mvn/version "3.8.0"}}
+                                                      olical/cljs-test-runner {:mvn/version "3.8.1"}}
                                        :replace-paths ["target/test-doc-blocks/test"]
                                        :main-opts ["-m" "cljs-test-runner.main"
                                                    "--compile-opts" "{:warnings,{:single-segment-namespace,false}}"
@@ -75,12 +76,15 @@
            ;;
            ;; Deployment
            ;;
-           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.2" :git/sha "ba1a2bf"}
-                          slipset/deps-deploy {:mvn/version "0.2.0"}}
+           :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.1"}
+                          slipset/deps-deploy {:mvn/version "0.2.2"}}
                    :ns-default build}
 
            ;; Maintenance
-           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "1.7.798"}
-                                   org.slf4j/slf4j-simple {:mvn/version "1.7.36"} ;; to rid ourselves of logger warnings
+           :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.11.3"}
+                                   com.github.liquidz/antq {:mvn/version "2.8.1201"}
+                                   org.slf4j/slf4j-simple {:mvn/version "2.0.13"} ;; to rid ourselves of logger warnings
                                    }
-                      :main-opts ["-m" "antq.core" "--ignore-locals"]}}}
+                      :main-opts ["-m" "antq.core" "--ignore-locals"
+                                  "--exclude=lambdaisland/kaocha@1.88.1376" ;; breaks clojure 1.9 compat: https://github.com/lambdaisland/kaocha/issues/433
+                                  ]}}}
