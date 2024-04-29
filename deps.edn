@@ -76,9 +76,12 @@
            ;;
            ;; Deployment
            ;;
-           :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.1"}
-                          slipset/deps-deploy {:mvn/version "0.2.2"}}
+           :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.1"}}
                    :ns-default build}
+
+           ;; keep deploy deps separate from build deps to avoid download-deps issues
+           ;; caused by, I think, conflicting maven deps
+           :deploy {:extra-deps {slipset/deps-deploy {:mvn/version "0.2.2"}}}
 
            ;; Maintenance
            :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.11.3"}
