@@ -25,9 +25,10 @@ jobs:
       with:
         path: |
           ~/.m2/repository
+          ~/.deps.clj
           ~/.gitlibs
-        key: $${ runner.os }}-cljdeps-release-${{ hashFiles('deps.edn') }}
-        restore-keys: $${ runner.os }}-cljdeps-release-
+        key: $${ runner.os }}-cljdeps-${{ hashFiles('deps.edn','bb.edn') }}
+        restore-keys: $${ runner.os }}-cljdeps-
 
     - name: Setup Java
       uses: actions/setup-java@v4
@@ -53,7 +54,7 @@ jobs:
         clojure -Sdescribe
 
     - name: Download Clojure Dependencies
-      run: clojure -P -M:jar:deploy
+      run: bb download-deps
 
     - name: Release Prep (step 1 of 4)
       run: bb ci-release prep

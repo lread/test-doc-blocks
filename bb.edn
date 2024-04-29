@@ -40,6 +40,8 @@
                     (status/line :detail "\nTASK %s done." name)))
 
          ;; commands
+         download-deps {:doc "bring down Clojure deps"
+                        :task (clojure "-T:build download-deps")}
 
          lint {:doc "[--rebuild] lint source code with clj-kondo"
                :task lint/-main}

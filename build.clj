@@ -1,8 +1,7 @@
 (ns build
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.tools.build.api :as b]
-            [deps-deploy.deps-deploy :as dd]))
+            [clojure.tools.build.api :as b]))
 
 (def lib 'com.github.lread/test-doc-blocks)
 (def version (let [version-template (-> "version.edn" slurp edn/read-string)
@@ -66,11 +65,28 @@
 (defn deploy
   "Deploy built jar to clojars"
   [_]
-  (dd/deploy {:installer :remote
-              :artifact jar-file
-              :pom-file (b/pom-path {:lib lib :class-dir class-dir})}))
+  ((requiring-resolve 'deps-deploy.deps-deploy/deploy)
+    {:installer :remote
+     :artifact jar-file
+     :pom-file (b/pom-path {:lib lib :class-dir class-dir})}))
 
 (defn project-lib
   "Returns project groupid/artifactid"
   [_]
   (println lib))
+
+(defn download-deps
+  "Download all deps for all aliases"
+  [_]
+  (let [aliases (->> "deps.edn"
+                     slurp
+                     edn/read-string
+                     :aliases
+                     keys
+                     sort)]
+    ;; one at a time because aliases with :replace-deps will... well... you know.
+    (println "Bring down default deps")
+    (b/create-basis {})
+    (doseq [a (sort aliases)]
+      (println "Bring down deps for alias" a)
+      (b/create-basis {:aliases [a]}))))

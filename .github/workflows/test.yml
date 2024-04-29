@@ -33,8 +33,9 @@ jobs:
       with:
         path: |
           ~/.m2/repository
+          ~/.deps.clj
           ~/.gitlibs
-        key: $${ runner.os }}-cljdeps-${{ hashFiles('deps.edn') }}
+        key: $${ runner.os }}-cljdeps-${{ hashFiles('deps.edn','bb.edn') }}
         restore-keys: $${ runner.os }}-cljdeps-
 
     - name: Setup Java
@@ -82,7 +83,7 @@ jobs:
         clojure -Sdescribe
 
     - name: Download Clojure Dependencies
-      run: clojure -P
+      run: bb download-deps
 
     - name: Run CI Tests
       run: bb ci-test
