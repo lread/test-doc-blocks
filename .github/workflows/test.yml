@@ -2,10 +2,14 @@ name: Test
 on: [push, pull_request]
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
     strategy:
+      fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu, windows ]
+        java-version: [ '11', '17', '21' ]
+
+    name: ${{matrix.os}} jdk${{matrix.java-version}}
 
     steps:
     #
@@ -13,7 +17,7 @@ jobs:
     #
     - name: Prepare git (Windows)
       run: git config --global core.autocrlf false
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows'
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -31,7 +35,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '11'
+        java-version: ${{ matrix.java-version }}
 
     #
     # Install Babashka
@@ -45,14 +49,14 @@ jobs:
     # Install Clojure
     #
     - name: Install clojure (windows)
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows'
       # On windows, deps.clj's deps.exe is used in place of clojure to avoid complexities of official clojure install
       run: |
        PowerShell -Command "iwr -useb https://raw.githubusercontent.com/borkdude/deps.clj/master/install.ps1 | iex"
        Rename-Item $HOME\deps.clj\deps.exe clojure.exe
        echo "$HOME\deps.clj" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Install Clojure
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu'
       uses: DeLaGuardo/setup-clojure@12.5
       with:
         cli: 'latest'
