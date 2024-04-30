@@ -6,3 +6,4 @@
 /.lsp
 /fiddle.clj
 .DS_Store
+/.vscode
