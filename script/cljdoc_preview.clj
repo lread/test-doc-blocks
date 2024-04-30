@@ -1,8 +1,9 @@
 #!/usr/bin/env bb
 
 (ns cljdoc-preview
-  (:require [babashka.curl :as curl]
-            [babashka.fs :as fs]
+  (:require [babashka.fs :as fs]
+            [babashka.http-client :as http]
+            [babashka.process :as process]
             [clojure.java.browse :as browse]
             [clojure.string :as string]
             [helper.main :as main]
@@ -10,24 +11,10 @@
             [lread.status-line :as status]))
 
 ;;
-;; helpers
-;;
-
-(defn- at-path [path prog-name]
-  (let [f (fs/file path prog-name)]
-    (when (fs/executable? f)
-      (str (fs/absolutize f)))))
-
-(defn- on-path [prog-name]
-  (->> (System/getenv "PATH")
-       fs/split-paths
-       (some #(at-path % prog-name))))
-
-;;
 ;; constants
 ;;
 
-(def cljdoc-root-temp-dir "/tmp/cljdoc-preview")
+(def cljdoc-root-temp-dir "./target/cljdoc-preview")
 (def cljdoc-db-dir (str cljdoc-root-temp-dir  "/db"))
 (def cljdoc-container {:name "cljdoc-server"
                        :image "cljdoc/cljdoc"
@@ -38,18 +25,15 @@
 ;;
 
 (defn check-prerequisites []
-  (let [missing-cmds (doall (remove on-path ["git" "docker"]))]
+  (let [missing-cmds (doall (remove fs/which ["git" "docker"]))]
     (when (seq missing-cmds)
       (status/die 1 (string/join "\n" ["Required commands not found:"
-                                       (string/join "\n" missing-cmds)])))))
-;;
-;; os/fs support
-;;
-(defn cwd[]
-  (System/getProperty "user.dir"))
-
-(defn home-dir[]
-  (System/getProperty "user.home"))
+                                       (string/join "\n" missing-cmds)]))))
+  (let [{:keys [exit err]} (process/shell {:continue true :err :string :out :string}
+                                           "docker version")]
+    (when-not (zero? exit)
+      (status/die 1 (str "Docker check failed with:\n\n"
+                         err)))))
 
 ;;
 ;; project build info
@@ -152,13 +136,14 @@
   (status/line :detail "%s container is running" (:name container))
   (let [url (str "http://localhost:" (:port container))]
     (loop []
-      (try
-        (curl/get url)
-        (println url "reached")
-        (catch Exception _e
-          (println "waiting on" url " - hit Ctrl-C to give up")
-          (Thread/sleep 4000)
-          (recur))))))
+      (if-not (try
+                (http/get url)
+                url
+                (catch Exception _e
+                  (Thread/sleep 4000)))
+        (do (println "waiting on" url " - hit Ctrl-C to give up")
+            (recur))
+        (println "reached" url)))))
 
 (defn status-server-print [container]
   (status/line :detail (str (:name container) ": " (status-server container))))
@@ -172,10 +157,11 @@
   (shell/command "docker"
                  "run" "--rm"
                  "-v" (str cljdoc-db-dir ":/app/data")
-                 "-v" (str (home-dir) "/.m2:/root/.m2")
-                 "-v" (str (cwd) ":" (cwd) ":ro")
+                 "-v" (str (fs/home) "/.m2:/root/.m2")
+                 "-v" (str (fs/cwd) ":" (fs/cwd) ":ro")
                  "--entrypoint" "clojure"
                  (:image container)
+                 "-Sforce"
                  "-M:cli"
                  "ingest"
                   ;; project and version are used to locate the maven artifact (presumably locally)
@@ -199,13 +185,13 @@
                  "-d"
                  "-p" (str (:port container) ":8000")
                  "-v" (str cljdoc-db-dir ":/app/data")
-                 "-v" (str (home-dir) "/.m2:/root/.m2")
-                 "-v" (str (cwd) ":" (cwd) ":ro")
+                 "-v" (str (fs/home) "/.m2:/root/.m2")
+                 "-v" (str (fs/cwd) ":" (fs/cwd) ":ro")
                  (:image container)))
 
 (defn view-in-browser [url]
   (status/line :head "opening %s in browser" url)
-  (when (not= 200 (:status (curl/get url {:throw false})))
+  (when (not= 200 (:status (http/get url {:throw false})))
     (status/die 1 "Could not reach:\n%s\nDid you run the ingest command yet?" url))
   (browse/browse-url url))
 
@@ -219,13 +205,12 @@
                          [(when (uncommitted-code?)
                             "There are changes that have not been committed, they will not be previewed")
                           (when (unpushed-commits?)
-                            "There are commits that have not been pushed, they will not be previewed")])]
+                            "There are commits that have not been pushed, articles will fail to import")])]
     (when (seq warnings)
       (status/line :warn (string/join "\n" warnings)))))
 
 (defn cleanup-resources []
-  (when (fs/exists? cljdoc-db-dir)
-    (fs/delete-tree cljdoc-db-dir)))
+  (fs/delete-tree cljdoc-db-dir))
 
 (def args-usage "Valid args: (start|ingest|view|stop|status|--help)
 
