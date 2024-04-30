@@ -14,14 +14,14 @@ Thanks for your interest test-doc-blocks development.
 == Generalities
 
 We make use of babashka tasks.
-To see a list of available tasks run:
+To see a list of available tasks, run:
 
 [source,shell]
 ----
 bb tasks
 ----
 
-For help on a task's available command line arguments run `bb <task-name> --help`, for example:
+For help on a task's available command line arguments, run `bb <task-name> --help`, for example:
 
 [source,shell]
 ----
@@ -92,7 +92,7 @@ bb outdated
 ----
 
 == Linting
-We use clj-kondo to lint project source and fail the build when linting fails.
+We use clj-kondo to lint the project source and fail the build when linting fails.
 
 To run linting as the CI server does:
 
@@ -101,7 +101,7 @@ To run linting as the CI server does:
 bb lint
 ----
 
-If, for whatever reason, you want to rebuild the lint cache, use the `--rebuild` option.
+If you want to rebuild the lint cache, use the `--rebuild` option.
 
 == Continuous Integration
 
@@ -152,12 +152,12 @@ Before a release, it can be comforting to preview what docs will look like on ht
 
 Limitations
 
-* This task should be considered experimental.
+* Considered this task experimental.
 I have only tested on macOS, but I am fairly confident it will work on Linux.
-Not sure about Windows at this time.
+I'm not sure about Windows at this time.
 * You have to push your changes to GitHub to preview them.
 This allows for a full preview that includes any links (source, images, etc.) to GitHub.
-This works fine from branches and forks - in case you don't want to affect your main development branch for a preview.
+This task works fine from branches and forks - if you don't want to affect your main development branch for a preview.
 
 **Start Local Services**
 
@@ -166,7 +166,7 @@ To start the local cljdoc docker container:
 bb cljdoc-preview start
 ----
 
-The local cljdoc server allows you to view your ingested docs in your web browser.
+The local cljdoc server lets you view your ingested docs in your web browser.
 
 The start command also automatically checks docker hub for any updates so that our cljdoc preview matches the current production version of cljdoc.
 
@@ -180,7 +180,7 @@ bb cljdoc-preview ingest
 The ingest command automatically publishes rewrite-clj to your local maven repository (cljdoc only works with published jars).
 
 The locally published version will include a `-cljdoc-preview` suffix.
-I find this distinction helps to reduce confusion around locally vs remotely installed artifacts.
+This distinction helps to reduce confusion about locally vs remotely installed artifacts.
 
 You'll have to remember to git commit and git push your changes before ingesting.
 
@@ -193,7 +193,7 @@ To open a view to the ingested docs in your default web browser:
 bb cljdoc-preview view
 ----
 
-If you have just run the start command, be a bit patient, the cljdoc server can take a few moments to start up - especially on macOS due to poor file-sharing performance.
+If you have just run the start command, be a bit patient; the cljdoc server can take a few moments to start up - especially on macOS due to poor file-sharing performance.
 
 **Stop Local Services**
 

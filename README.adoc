@@ -19,8 +19,8 @@ Test AsciiDoc and CommonMark code blocks found in articles and docstrings
 
 [CAUTION]
 ====
-Sample code in docs, while likely not malicious, could be illustrating, for example, how to wipe a drive.
-So, do be deliberate and careful about what docs you run through test-doc-blocks.
+While likely not malicious, sample code in docs could illustrate, for example, how to wipe a drive.
+So be deliberate and careful about what docs you run through test-doc-blocks.
 ====
 
 toc::[]
@@ -30,7 +30,7 @@ toc::[]
 Alpha - early adopters and feedback welcome!
 
 == Rationale
-I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and do function as expected for those who dare to try them.
+I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and function as expected for those who dare to try them.
 You might want the same for your library.
 
 == Docs
@@ -86,7 +86,7 @@ image:lread.png[lread,role="left",width=310,link="https://github.com/lread"]
 // AUTO-GENERATED:MAINTAINERS-END
 
 == License
-Copyright © 2021 Lee Read, all rights reserved.
+Copyright © 2024 Lee Read, all rights reserved.
 
 Distributed under the EPL License, same as Clojure.
 See LICENSE.

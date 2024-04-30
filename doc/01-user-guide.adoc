@@ -9,17 +9,17 @@
 //#:test-doc-blocks{:skip true :apply :all-next}
 
 == Audience
-You are someone who wants to verify that the Clojure/ClojureScript code examples in your docs work as expected.
+You want to verify that the Clojure/ClojureScript code examples in your docs work as expected.
 
 == Prerequisites
-Test generation requires Clojure v1.9 or above.
+You can generate tests with Clojure v1.9 or above.
 
-Generated tests can be run on Clojure v1.8 and above (if supported by your test runner).
+You can run generated tests with Clojure v1.8 and above (if supported by your test runner).
 
-You'll use your test runner of choice, for example: https://github.com/cognitect-labs/test-runner[Clojure test-runner], https://github.com/Olical/cljs-test-runner[cljs-test-runner], https://github.com/lambdaisland/kaocha[kaocha], or some https://github.com/technomancy/leiningen[lein] test runner.
+You'll use your test runner of choice: https://github.com/cognitect-labs/test-runner[Clojure test-runner], https://github.com/Olical/cljs-test-runner[cljs-test-runner], https://github.com/lambdaisland/kaocha[kaocha], or some https://github.com/technomancy/leiningen[lein] test runner.
 
 == Introduction
-Test-doc-blocks might (or might not, see link:#limitations[limitations], and link:#interesting-alternatives[interesting alternatives]) be of interest for your Clojure/ClojureScript project.
+Test-doc-blocks might (or might not; see link:#limitations[limitations] and link:#interesting-alternatives[interesting alternatives]) be of interest for your Clojure/ClojureScript project.
 
 Test-doc-blocks recognizes:
 
@@ -124,7 +124,7 @@ Invoke for this project via: `clj -M:isolated/clj-test-runner`
 [#leiningen]
 === Leiningen
 
-An an example subset of a `project.clj`:
+An example subset of a `project.clj`:
 
 [source,clojure,subs="attributes+"]
 ----
@@ -157,7 +157,7 @@ lein run-doc-tests
 
 === Detailed Doc Examples with Inline Options
 
-For detailed doc examples that include inline options you will want to read:
+For detailed doc examples that include inline options, you will want to read:
 
 * link:example.adoc[AsciiDoc example]
 * link:example.md[CommonMark example]
@@ -173,14 +173,14 @@ After you experiment with which options are appropriate for your project, you'll
 
 [TIP]
 ====
-Leiningen users should focus on the `-M` syntax and apply it back to the link:#leiningen[leiningen example].
+Leiningen users should focus on the `-M` syntax and apply it to the link:#leiningen[leiningen example].
 ====
 
 ==== docs
 By default, tests are generated for `README.md` only.
 
 *-X syntax* +
-If you want to specify a different vector of files you can do so via `:docs`
+If you want to specify a different vector of files, you can do so via `:docs`
 
 [source,shell]
 ----
@@ -236,7 +236,7 @@ Any special quoting should not be necessary when specifying options directly in 
 ====
 
 ==== target-root
-The default directory where tests are generated is `./target`.
+By default, test-doc-blocks generates tests to `./target`.
 
 *-X syntax* +
 Override via `:target-root` when using the `-X` syntax:
@@ -348,7 +348,6 @@ Test-doc-blocks makes no platform assumptions when generating tests from doc blo
 
 Some limitations that we might entertain addressing:
 
-* If your code block depends on some external setup, we've no way to express that.
 * Test-doc-blocks will automatically handle inline `(require ...)` and `(import ...)` appearing in code blocks, but not in any complex expressions of these forms.
 * Parsing adoc and md files is on the naive side but should handle most common cases.
 If we've overlooked a common syntax, let us know.
@@ -371,11 +370,11 @@ Other options and related projects that I am currently aware of (in alphabetical
 It uses this support in tests for some of its documentation.
 A `.feature` document describes the feature and includes given, when, then scenarios that are both run and shown in the documentation.
 You can use step definitions to hide any gritty details.
-* https://github.com/pink-gorilla/notebook[notebook] - Some day notebook type tools might serve both as tests and docs.
+* https://github.com/pink-gorilla/notebook[notebook] - Someday notebook-type tools might serve both as tests and docs.
 Until that golden day, test-doc-blocks and similar tools are worthy of consideration.
 * https://github.com/hyperfiddle/rcf[RCF] - Turns your Rich Comment Forms into tests
 * https://github.com/seancorfield/readme[readme] (archived) - Generates tests for code blocks found in .md files and then runs them.
-It is simpler but but also has less features.
+It is simpler but also has fewer features.
 This project was the inspiration for test-doc-blocks.
 *Note:* This project is now archived and recommends existing users consider test-doc-blocks instead.
 * https://github.com/liquidz/testdoc[testdoc] - Tests code blocks in docstrings and external docs.

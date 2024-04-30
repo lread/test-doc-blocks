@@ -10,7 +10,7 @@
   (:import #?@(:clj [java.util.List java.util.Queue java.util.Set] :cljs [goog.math.Long goog.math.Vec2 goog.math.Vec3])))
 
 (clojure.test/deftest block-0001
-  (clojure.test/testing  "doc/example.md - line 330 - Inline requires and imports"
+  (clojure.test/testing  "doc/example.md - line 332 - Inline requires and imports"
 ;; Stick the basics for requires, shorthand notation isn't supported
 
 ;; Some examples:
@@ -19,7 +19,8 @@ nil
 nil
 nil
 
-;; For cljc code examples it is fine for your requires and imports to contain, or be wrapped by, reader conditionals
+;; For cljc code examples it is fine for your requires and imports to contain,
+;; or be wrapped by, reader conditionals
 
 ;; Some examples of supported imports
 #?@(:clj [nil

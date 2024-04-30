@@ -12,7 +12,7 @@ You tell test-doc-blocks which files to scan on the link:/doc/01-user-guide.adoc
 Test-doc-blocks generates a test for each Clojure code block.
 An example of an AsciiDoc Clojure code block:
 
-[source,asciidoctor]
+[source,asciidoc]
 ....
 [source,clojure]
 ----
@@ -28,7 +28,8 @@ Within your Clojure code blocks, test-doc-blocks automatically generates asserti
 +
 [source,clojure]
 ----
-;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates to the expected 6
+;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates
+;; to the expected 6
 user=> (+ 1 2 3)
 6
 ----
@@ -37,7 +38,8 @@ user=> (+ 1 2 3)
 +
 [source,cljc]
 ----
-;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates to the expected 10
+;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates
+;; to the expected 10
 (+ 1 2 3 4)
 ;; => 10
 
@@ -126,7 +128,7 @@ By default, test-doc-blocks will create tests for all Clojure code blocks it fin
 
 Tell test-doc-blocks to skip the next Clojure code block via the following AsciiDoc comment:
 
-[source,asciidoctor]
+[source,asciidoc]
 ....
 //:test-doc-blocks/skip
 [source,clojure]
@@ -147,7 +149,7 @@ This can be especially handy to show differences in `(requires ...)` for clj and
 Here's a contrived example:
 
 Clojure specific code:
-[source,asciidoctor]
+[source,asciidoc]
 ....
 //#:test-doc-blocks {:reader-cond :clj}
 [source,clojure]
@@ -159,7 +161,7 @@ Clojure specific code:
 ....
 
 ClojureScript specific code:
-[source,asciidoctor]
+[source,asciidoc]
 ....
 //#:test-doc-blocks {:reader-cond :cljs}
 [source,clojure]
@@ -170,7 +172,7 @@ ClojureScript specific code:
 ....
 
 Later in doc, cross-platform cljc code that relies on the above:
-[source,asciidoctor]
+[source,asciidoc]
 ....
 [source,clojure]
 ----
@@ -190,7 +192,7 @@ This file is named `example.adoc`. Test-doc-blocks, up to this point, has been g
 
 If this does not work for you, you can override this default via an AsciiDoc comment:
 
-[source,asciidoctor]
+[source,asciidoc]
 ....
 //{:test-doc-blocks/test-ns example-adoc-new-ns-test}
 [source,clojure]
@@ -206,7 +208,7 @@ TIP: Do what you like, but test runners usually look for tests namespaces ending
 
 Changing the test-ns is useful for code blocks that need to be isolated.
 
-[source,asciidoctor]
+[source,asciidoc]
 ....
 //{:test-doc-blocks/test-ns example-adoc-new-ns.ns1-test}
 [source,clojure]
@@ -238,7 +240,7 @@ When specifying the platform, remember that:
 
 So if you are generating mixed platforms, you might want to specify the test-ns as well.
 
-[source,asciidoctor]
+[source,asciidoc]
 ....
 //#:test-doc-blocks{:platform :cljs :test-ns example-adoc-cljs-test}
 [source,clojure]
@@ -269,7 +271,7 @@ We offer two syntaxes:
 
 Example code blocks:
 
-[source,asciidoctor]
+[source,asciidoc]
 ....
 //#:test-doc-blocks{:meta :testing-meta123}
 [source,clojure]
@@ -282,7 +284,7 @@ user=> (into [] {:a 1})
 ....
 
 
-[source,asciidoctor]
+[source,asciidoc]
 ....
 //#:test-doc-blocks{:meta {:testing-meta123 "a-specific-value" :testing-meta789 :yip}}
 [source,clojure]
@@ -324,7 +326,7 @@ And this level 2 type
 
 This code block should include "Section Titles" as part of the context for its generated test.
 
-[source,mardown]
+[source,markdown]
 ....
 ```Clojure
 (require '[clojure.string :as string])
@@ -350,6 +352,48 @@ Well it does! And test-doc-blocks recognizes this fact.
 ```
 ....
 
+== Setup Code & env-test-doc-blocks
+
+When processing AsciiDoc, test-doc-blocks sets the `env-test-doc-blocks` attribute.
+You can consult this attribute in your doc via `ifdef`/`endif` like so:
+
+// skip this block, this is to show the reader the technique, we'll run the hidden version
+// below to actually test the feature
+//#:test-doc-blocks{:skip true :apply :all-next}
+[source,asciidoc]
+....
+\ifdef::env-test-doc-blocks[]
+[source,clojure]
+----
+;; The code in this block will be run in test-doc-blocks generated tests,
+;; but the block will not show when viewing the rendered doc
+(def some-setup-thingy 42)
+----
+\endif::[]
+....
+//#:test-doc-blocks{:skip false :apply :all-next}
+
+ifdef::env-test-doc-blocks[]
+[source,clojure]
+----
+;; The code in this block will be run in test-doc-blocks generated tests,
+;; but the block will not show when viewing the rendered doc
+(def some-setup-thingy 42)
+----
+endif::[]
+
+Anything content between the `ifdef`/`endif` will not be rendered (by GitHub, cljdoc, etc) but will be processed by test-doc-blocks.
+This makes it a handy place to put setup code you'd rather not explicitly document in a visible code block but rely on in other code blocks.
+
+[source,clojure]
+----
+some-setup-thingy
+;; => 42
+----
+
+This can be convenient if you'd like to hide some setup that subsequent visible code blocks rely on.
+
+
 == Nuances
 
 === Inline requires and imports
@@ -373,7 +417,8 @@ If we've missed one, let us know.
 (require 'clojure.string)
 (require '[clojure.string :as string] '[clojure.set :as cset])
 
-;; For cljc code examples it is fine for your requires and imports to contain, or be wrapped by, reader conditionals
+;; For cljc code examples it is fine for your requires and imports to contain,
+;; or be wrapped by, reader conditionals
 
 ;; Some examples of supported imports
 #?@(:clj [(import 'java.util.List)
@@ -395,8 +440,8 @@ A library that encourages the use of `:refers` for its API will often include a 
 //#:test-doc-blocks{:test-ns example-adoc-inline-refer-clojure-test}
 [source,clojure]
 ----
-;; a contrived example that uses uses clojure.edn/read-string in place of clojure.core/read-string
-;; and excludes clojure.core/for
+;; a contrived example that uses uses clojure.edn/read-string in place
+;; of clojure.core/read-string and excludes clojure.core/for
 (refer-clojure :exclude '[for read-string])
 (require '[clojure.edn :refer [read-string]])
 
