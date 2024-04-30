@@ -24,14 +24,16 @@ Within your Clojure code blocks, test-doc-blocks automatically generates asserti
 - REPL session style prompts:
 
     ```Clojure
-    ;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates to the expected 6
+    ;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates 
+    ;; to the expected 6
     user=> (+ 1 2 3)
     6
     ```
 - Editor style eval to comment, with some extras:
 
    ```cljc
-   ;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates to the expected 10
+   ;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates 
+   ;; to the expected 10
    (+ 1 2 3 4)
    ;; => 10
 
@@ -118,7 +120,7 @@ Tell test-doc-blocks to skip the next Clojure code block via the following Commo
 ~~~markdown
 <!-- :test-doc-blocks/skip -->
 ```Clojure
-;; no tests will be generated for this code Clojure code block
+;; no tests will be generated for this Clojure code block
 
 (something we don't want to test)
 ```
@@ -336,7 +338,8 @@ If we've missed some, let us know.
 (require 'clojure.string)
 (require '[clojure.string :as string] '[clojure.set :as cset])
 
-;; For cljc code examples it is fine for your requires and imports to contain, or be wrapped by, reader conditionals
+;; For cljc code examples it is fine for your requires and imports to contain, 
+;; or be wrapped by, reader conditionals
 
 ;; Some examples of supported imports
 #?@(:clj [(import 'java.util.List)
@@ -357,8 +360,8 @@ A library that encourages the use of `:refers` for its API will often include a 
 
 <!-- #:test-doc-blocks{:test-ns example-md-inline-refer-clojure-test} -->
 ```Clojure
-;; a contrived example that uses uses clojure.edn/read-string in place of clojure.core/read-string
-;; and excludes clojure.core/for
+;; a contrived example that uses uses clojure.edn/read-string in place 
+;; of clojure.core/read-string and excludes clojure.core/for
 (refer-clojure :exclude '[for read-string])
 (require '[clojure.edn :refer [read-string]])
 

@@ -17,12 +17,14 @@
 
 (clojure.test/deftest block-0002
   (clojure.test/testing  "doc/example.adoc - line 30 - The Basics"
-;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates to the expected 6
+;; test-doc-block will generate an assertion to verify (+ 1 2 3) evaluates
+;; to the expected 6
 (clojure.test/is (= '6 (+ 1 2 3)))))
 
 (clojure.test/deftest block-0003
-  (clojure.test/testing  "doc/example.adoc - line 39 - The Basics"
-;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates to the expected 10
+  (clojure.test/testing  "doc/example.adoc - line 40 - The Basics"
+;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates
+;; to the expected 10
 (clojure.test/is (= '10 (+ 1 2 3 4)))
 ;; it understands that Clojure and ClojureScript can evaluate differently
 #?(:clj (clojure.test/is (= '\C \C)))
@@ -36,7 +38,7 @@
   (clojure.test/is (= ["is this right?" "or not?"] (clojure.string/split-lines actual-out))))))
 
 (clojure.test/deftest block-0004
-  (clojure.test/testing  "doc/example.adoc - line 92 - The Basics"
+  (clojure.test/testing  "doc/example.adoc - line 94 - The Basics"
 (->> "here we are only checking that our code will run"
      reverse
      reverse
@@ -46,7 +48,7 @@
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-0005
-  (clojure.test/testing  "doc/example.adoc - line 154 - Wrap Test in a Reader Conditional - :reader-cond"
+  (clojure.test/testing  "doc/example.adoc - line 156 - Wrap Test in a Reader Conditional - :reader-cond"
 #?(:clj
 (do
 ;; This code block will be wrapped in a #?(:clj (do ...))
@@ -59,7 +61,7 @@ nil
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-0006
-  (clojure.test/testing  "doc/example.adoc - line 166 - Wrap Test in a Reader Conditional - :reader-cond"
+  (clojure.test/testing  "doc/example.adoc - line 168 - Wrap Test in a Reader Conditional - :reader-cond"
 #?(:cljs
 (do
 ;; This code block will be wrapped in a #?(:cljs (do ...))
@@ -71,18 +73,18 @@ nil
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-0007
-  (clojure.test/testing  "doc/example.adoc - line 176 - Wrap Test in a Reader Conditional - :reader-cond"
+  (clojure.test/testing  "doc/example.adoc - line 178 - Wrap Test in a Reader Conditional - :reader-cond"
 ;; And our generic cljc code:
 (clojure.test/is (= '[1 2 3] (read-string "[1 2 3]")))))
 
 (clojure.test/deftest ^:testing-meta123 block-0008
-  (clojure.test/testing  "doc/example.adoc - line 276 - Specifying Metadata - :meta"
+  (clojure.test/testing  "doc/example.adoc - line 278 - Specifying Metadata - :meta"
 ;; this code block will generate a test with metadata {:testing-meta123 true}
 
 (clojure.test/is (= '[[:a 1]] (into [] {:a 1})))))
 
 (clojure.test/deftest ^{:testing-meta123 "a-specific-value", :testing-meta789 :yip} block-0009
-  (clojure.test/testing  "doc/example.adoc - line 289 - Specifying Metadata - :meta"
+  (clojure.test/testing  "doc/example.adoc - line 291 - Specifying Metadata - :meta"
 ;; this code block will generate a test with metadata:
 ;;  {:testing-meta123 "a-specific-value" :testing-meta789 :yip}
 
@@ -93,32 +95,45 @@ nil
    ["oh" "my" "goodness"])))))
 
 (clojure.test/deftest block-0010
-  (clojure.test/testing  "doc/example.adoc - line 329 - Section Titles"
+  (clojure.test/testing  "doc/example.adoc - line 331 - Section Titles"
 nil
 
 (clojure.test/is (= '"well!how!about!that" (string/join "!" ["well" "how" "about" "that"])))))
 
 (clojure.test/deftest block-0011
-  (clojure.test/testing  "doc/example.adoc - line 345 - Support for CommonMark Code Block Syntax"
+  (clojure.test/testing  "doc/example.adoc - line 347 - Support for CommonMark Code Block Syntax"
 nil
 
 (clojure.test/is (= '{1 :a, 2 :b} (set/map-invert {:a 1 :b 2})))))
 
 (clojure.test/deftest block-0012
-  (clojure.test/testing  "doc/example.adoc - line 433 - Test Run Order"
-(defn fn-block1 [] (+ 1 2 3))
+  (clojure.test/testing  "doc/example.adoc - line 378 - Setup Code & env-test-doc-blocks"
+;; The code in this block will be run in test-doc-blocks generated tests,
+;; but the block will not show when viewing the rendered doc
+(def some-setup-thingy 42)
 
 ; test-doc-blocks dummy assertion to appease tools that fail on no assertions
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-0013
-  (clojure.test/testing  "doc/example.adoc - line 439 - Test Run Order"
+  (clojure.test/testing  "doc/example.adoc - line 389 - Setup Code & env-test-doc-blocks"
+(clojure.test/is (= '42 some-setup-thingy))))
+
+(clojure.test/deftest block-0014
+  (clojure.test/testing  "doc/example.adoc - line 478 - Test Run Order"
+(defn fn-block1 [] (+ 1 2 3))
+
+; test-doc-blocks dummy assertion to appease tools that fail on no assertions
+(clojure.test/is (= '"dummy" "dummy"))))
+
+(clojure.test/deftest block-0015
+  (clojure.test/testing  "doc/example.adoc - line 484 - Test Run Order"
 (def var-block2 (+ 4 5 6))
 
 (clojure.test/is (= '21 (+ (fn-block1) var-block2)))))
 
-(clojure.test/deftest block-0014
-  (clojure.test/testing  "doc/example.adoc - line 448 - Test Run Order"
+(clojure.test/deftest block-0016
+  (clojure.test/testing  "doc/example.adoc - line 493 - Test Run Order"
 (clojure.test/is (= '100 (+ (fn-block1) var-block2 79)))))
 
-(defn test-ns-hook [] (block-0001) (block-0002) (block-0003) (block-0004) (block-0005) (block-0006) (block-0007) (block-0008) (block-0009) (block-0010) (block-0011) (block-0012) (block-0013) (block-0014))
+(defn test-ns-hook [] (block-0001) (block-0002) (block-0003) (block-0004) (block-0005) (block-0006) (block-0007) (block-0008) (block-0009) (block-0010) (block-0011) (block-0012) (block-0013) (block-0014) (block-0015) (block-0016))

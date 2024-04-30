@@ -9,12 +9,12 @@ You are involved in maintaining/releasing test-doc-blocks.
 A release is triggered manually via a GitHub Action "Release" workflow.
 
 === Automated Workflow
-The released workflow is handled by our https://github.com/lread/test-doc-blocks/actions?query=workflow%3A%22Release%22[Release] GitHub Action.
+Our https://github.com/lread/test-doc-blocks/actions?query=workflow%3A%22Release%22[Release] GitHub Action handles the release workflow.
 
 Our GitHub Actions "Release" workflow:
 
 . Create a thin jar using our version scheme
-. Apply jar version to following docs:
+. Apply jar version to the following docs:
 .. user guide docs `deps.edn` usage example
 .. change log "unreleased" and "unreleased breaking changes" headings
 . Deploy the jar to clojars
@@ -34,7 +34,7 @@ The release workflow consults this file when constructing the version.
 
 === Special Setup
 
-GitHub has been configured with necessary secrets for GitHub Actions to deploy to clojars.
+GitHub has been configured with necessary secrets for GitHub Actions to deploy test-doc-blocks to clojars.
 
 === Local Verification
 To run the change log validation locally:
@@ -57,4 +57,4 @@ As a maintainer, you should have sufficient privileges to see a "Run Workflow" d
 The dropdown will prompt for a branch.
 I did not see a way to disable this prompt, leave it at "main" and run the workflow.
 
-TIP: Don't forget to pull after a release to get the changes made by the release workflow.
+TIP: Remember to pull after a release to get the changes made by the release workflow.
