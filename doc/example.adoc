@@ -382,7 +382,7 @@ ifdef::env-test-doc-blocks[]
 ----
 endif::[]
 
-Anything content between the `ifdef`/`endif` will not be rendered (by GitHub, cljdoc, etc) but will be processed by test-doc-blocks.
+Content between the `ifdef`/`endif` will not be rendered (by GitHub, cljdoc, etc) but will be processed by test-doc-blocks.
 This makes it a handy place to put setup code you'd rather not explicitly document in a visible code block but rely on in other code blocks.
 
 [source,clojure]
