@@ -62,16 +62,16 @@ Test-doc-block versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
 // Contributors updated by script, do not edit
 // AUTO-GENERATED:CONTRIBUTORS-START
 :imagesdir: ./doc/generated/contributors
-[.float-group]
+[]
 --
-image:seancorfield.png[seancorfield,role="left",width=310,link="https://github.com/seancorfield"]
-image:MIJOTHY.png[MIJOTHY,role="left",width=310,link="https://github.com/MIJOTHY"]
-image:borkdude.png[borkdude,role="left",width=310,link="https://github.com/borkdude"]
-image:holyjak.png[holyjak,role="left",width=310,link="https://github.com/holyjak"]
-image:PEZ.png[PEZ,role="left",width=310,link="https://github.com/PEZ"]
-image:SevereOverfl0w.png[SevereOverfl0w,role="left",width=310,link="https://github.com/SevereOverfl0w"]
-image:sogaiu.png[sogaiu,role="left",width=310,link="https://github.com/sogaiu"]
-image:uochan.png[uochan,role="left",width=310,link="https://github.com/uochan"]
+image:seancorfield.png[seancorfield,width=273,link="https://github.com/seancorfield"]
+image:MIJOTHY.png[MIJOTHY,width=273,link="https://github.com/MIJOTHY"]
+image:borkdude.png[borkdude,width=273,link="https://github.com/borkdude"]
+image:holyjak.png[holyjak,width=273,link="https://github.com/holyjak"]
+image:PEZ.png[PEZ,width=273,link="https://github.com/PEZ"]
+image:SevereOverfl0w.png[SevereOverfl0w,width=273,link="https://github.com/SevereOverfl0w"]
+image:sogaiu.png[sogaiu,width=273,link="https://github.com/sogaiu"]
+image:uochan.png[uochan,width=273,link="https://github.com/uochan"]
 --
 // AUTO-GENERATED:CONTRIBUTORS-END
 
@@ -79,9 +79,9 @@ image:uochan.png[uochan,role="left",width=310,link="https://github.com/uochan"]
 // Maintainers updated by script, do not edit
 // AUTO-GENERATED:MAINTAINERS-START
 :imagesdir: ./doc/generated/contributors
-[.float-group]
+[]
 --
-image:lread.png[lread,role="left",width=310,link="https://github.com/lread"]
+image:lread.png[lread,width=273,link="https://github.com/lread"]
 --
 // AUTO-GENERATED:MAINTAINERS-END
 
