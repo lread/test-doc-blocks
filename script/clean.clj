@@ -5,10 +5,14 @@
             [helper.main :as main]))
 
 (defn clean! []
-  (doseq [dir ["target" ".cpcache"]]
-    (println "Deleting" dir)
-    (when (fs/exists? dir)
-      (fs/delete-tree dir))))
+  (println "Deleting (d=deleted -=did not exist)")
+  (run! (fn [d]
+          (println (format "[%s] %s"
+                           (if (fs/exists? d) "d" "-")
+                           d))
+          (fs/delete-tree d))
+        ["target"
+         ".cpcache"]))
 
 (defn -main [& args]
   (when (main/doc-arg-opt args)

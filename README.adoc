@@ -27,7 +27,7 @@ toc::[]
 
 == Status
 
-Alpha - early adopters and feedback welcome!
+Folks have been using test-doc-blocks for years without issue.
 
 == Rationale
 I wanted to make sure the code examples I provided in rewrite-clj v1 documentation do not mislead and function as expected for those who dare to try them.
@@ -49,11 +49,11 @@ Have an update? Let us know!
 
 == Versioning
 
-Test-doc-block versioning scheme is: `major`.`minor`.`patch`-`test-qualifier`
+Test-doc-block versioning scheme is: `major`.`minor`.`release`-`test-qualifier`
 
 * `major` increments when the API has been broken - something, as a rule, we'd like to avoid.
 * `minor` increments to convey significant new features have been added.
-* `patch` indicates bug fixes - it is the number of commits in the repo.
+* `release` starting with v1.1, the test-doc-blocks release count over the life of test-doc-blocks.
 * `test-qualifier` is absent for stable releases. Can be `alpha`, `beta`, `rc1`, etc.
 
 == People

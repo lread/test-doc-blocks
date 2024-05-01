@@ -153,7 +153,7 @@ Before a release, it can be comforting to preview what docs will look like on ht
 Limitations
 
 * Considered this task experimental.
-I have only tested on macOS, but I am fairly confident it will work on Linux.
+I have tested on macOS and Linux.
 I'm not sure about Windows at this time.
 * You have to push your changes to GitHub to preview them.
 This allows for a full preview that includes any links (source, images, etc.) to GitHub.

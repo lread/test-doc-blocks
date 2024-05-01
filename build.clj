@@ -1,33 +1,25 @@
 (ns build
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
+  (:require [build-shared]
+            [clojure.edn :as edn]
             [clojure.tools.build.api :as b]))
 
-(def lib 'com.github.lread/test-doc-blocks)
-(def version (let [version-template (-> "version.edn" slurp edn/read-string)
-                   patch (b/git-count-revs nil)]
-               (str (:major version-template) "."
-                    (:minor version-template) "."
-                    patch
-                    (cond->> (:qualifier version-template)
-                      true (str "-")))))
+(def version (build-shared/lib-version))
+(def lib (build-shared/lib-artifact-name))
+
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
 (def jar-file (format "target/%s.jar" (name lib)))
-(def built-jar-version-file "target/built-jar-version.txt")
 
 (defn jar
   "Build library jar file.
-
-   Also writes built version to target/built-jar-version.txt for easy peasy pickup by any interested downstream operation.
-
-  We use the optional :version-suffix to distinguish local installs from production releases.
-  For example, when preview for cljdoc, we use the suffix: cjdoc-preview."
-  [{:keys [version-suffix]}]
+  Supports `:version-override` for local testing, otherwise official version is used.
+  For example, when testing 3rd party libs against rewrite-clj HEAD we use the suffix: canary."
+  [{:keys [version-override] :as opts}]
   (b/delete {:path class-dir})
   (b/delete {:path jar-file})
-  (let [version (if version-suffix (format "%s-%s" version version-suffix)
-                    version)]
+
+  (let [version (or version-override version)]
+    (println "jarring version" version)
     (b/write-pom {:class-dir class-dir
                   :lib lib
                   :version version
@@ -49,29 +41,17 @@
                  :target-dir class-dir})
     (b/jar {:class-dir class-dir
             :jar-file jar-file})
-    (spit built-jar-version-file version)))
-
-(defn- built-version* []
-  (when (not (.exists (io/file built-jar-version-file)))
-    (throw (ex-info (str "Built jar version file not found: " built-jar-version-file) {})))
-  (slurp built-jar-version-file))
-
-(defn built-version
-  ;; NOTE: Used by release script and github workflow
-  "Spit out version of jar built (with no trailing newline).
-  A separate task because I don't know what build.tools might spit to stdout."
-  [_]
-  (print (built-version*))
-  (flush))
+    (assoc opts :built-version version)))
 
 (defn install
-  "Install built jar to local maven repo"
-  [_]
-  (b/install {:class-dir class-dir
-              :lib lib
-              :version (built-version*)
-              :basis basis
-              :jar-file jar-file}))
+  [opts]
+  (let [{:keys [built-version]} (jar opts)]
+    (println "installing version" built-version)
+    (b/install {:class-dir class-dir
+                :lib lib
+                :version built-version
+                :basis basis
+                :jar-file jar-file})))
 
 (defn deploy
   "Deploy built jar to clojars"
@@ -80,11 +60,6 @@
     {:installer :remote
      :artifact jar-file
      :pom-file (b/pom-path {:lib lib :class-dir class-dir})}))
-
-(defn project-lib
-  "Returns project groupid/artifactid"
-  [_]
-  (println lib))
 
 (defn download-deps
   "Download all deps for all aliases"

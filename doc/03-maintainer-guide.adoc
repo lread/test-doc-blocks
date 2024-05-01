@@ -11,15 +11,17 @@ A release is triggered manually via a GitHub Action "Release" workflow.
 === Automated Workflow
 Our https://github.com/lread/test-doc-blocks/actions?query=workflow%3A%22Release%22[Release] GitHub Action handles the release workflow.
 
-Our GitHub Actions "Release" workflow:
+Our GitHub Actions "Release" workflow will:
 
 . Create a thin jar using our version scheme
-. Apply jar version to the following docs:
+. Apply jar version to the following files:
+.. `deps.edn` (we use babashka neil for version tracking/management)
 .. user guide docs `deps.edn` usage example
-.. change log "unreleased" and "unreleased breaking changes" headings
+.. change log "unreleased" heading
 . Deploy the jar to clojars
-. Commit and push updates made to `CHANGELOG.adoc` and `01-user-guide.adoc` back to the project
+. Commit and push updates made to `deps.edn`, `CHANGELOG.adoc` and `01-user-guide.adoc` back to the project
 . Create and push a release tag back to the project repo
+. Create a GitHub release
 . Inform cljdoc of the new release
 
 At this time, the release workflow does not run tests.
@@ -29,8 +31,9 @@ The release workflow will fail if the change log is not ready for release.
 
 === Updating the Version
 
-Edit `version.edn` in the project root.
-The release workflow consults this file when constructing the version.
+Edit `deps.edn`-> `:aliases` -> `:neil` -> `:version` in the project root.
+The release workflow automatically bumps the `:version` `patch` component by 1 before releasing.
+Update the `:version` `major` and `minor` components in `deps.edn` manually as needed.
 
 === Special Setup
 
@@ -50,7 +53,7 @@ If you so wish, you can also locally run all steps up to, but not including, dep
 ----
 bb ci-release prep
 ----
-Locally verify, but do NOT check in changes `prep` makes to `CHANGELOG.adoc`, `pom.xml` and `doc/01-user-guide.adoc`.
+Locally verify, but do NOT check in changes `prep` makes to `deps.edn`, `CHANGELOG.adoc`, and `doc/01-user-guide.adoc`.
 
 === Invoking a Release
 As a maintainer, you should have sufficient privileges to see a "Run Workflow" dropdown button on the https://github.com/lread/test-doc-blocks/actions/workflows/release.yml?query=workflow%3ARelease[Release] action page.
