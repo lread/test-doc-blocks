@@ -5,12 +5,16 @@
 ;;
 
 (ns ci-release
-  (:require [clean]
+  (:require [build-shared]
+            [clean]
             [clojure.java.io :as io]
             [clojure.string :as string]
             [helper.main :as main]
             [helper.shell :as shell]
             [lread.status-line :as status]))
+
+(def changelog-fname "CHANGELOG.adoc")
+(def user-guide-fname "doc/01-user-guide.adoc")
 
 (defn- last-release-tag []
   (->  (shell/command {:out :string}
@@ -18,90 +22,114 @@
        :out
        string/trim))
 
-(defn- update-file! [fname match-replacements]
+(defn- bump-version!
+  "bump version stored in deps.edn"
+  []
+  (shell/command "bb neil version patch --no-tag"))
+
+(defn- update-file! [fname desc match replacement]
   (let [old-content (slurp fname)
-        new-content (reduce (fn [in [desc match replacement]]
-                              (let [out (string/replace-first in match replacement)]
-                                (if (= in out)
-                                  (status/die 1 "Expected to %s in %s" desc fname)
-                                  out)))
-                            old-content
-                            match-replacements)]
-    (spit fname new-content)))
+        new-content (string/replace-first old-content match replacement)]
+    (if (= old-content new-content)
+      (status/die 1 "Expected to %s in %s" desc fname)
+      (spit fname new-content))))
 
 (defn- update-user-guide! [version]
-  (status/line :head "Updating library version in user guide to %s" version)
-  (update-file! "doc/01-user-guide.adoc"
-                [["update lib version"
-                  #"(?m)(^:lib-version: ).*$"
-                  (str "$1" version)]]))
+  (status/line :detail "Updating library version in user guide to %s" version)
+  (update-file! user-guide-fname
+                "update :lib-version: adoc attribute"
+                #"(?m)(^:lib-version: ).*$"
+                (str "$1" version)))
 
-(defn- adoc-section-search[content find-section]
-  (cond
-    (re-find (re-pattern  (str  "(?ims)^=+ " find-section " *$\\s+(^=|\\z)")) content)
-    :found-with-no-text
-
-    (re-find (re-pattern  (str  "(?ims)^=+ " find-section " *$")) content)
-    :found
-
-    :else
-    :not-found))
-
-(defn- validate-changelog
+(defn- analyze-changelog
   "Certainly not fool proof, but should help for common mistakes"
   []
-  (status/line :head "Validating change log")
-  (let [content (slurp "CHANGELOG.adoc")
-        unreleased-status (adoc-section-search content "Unreleased")
-        unreleased-breaking-status (adoc-section-search content "Unreleased Breaking Changes")]
-    (case unreleased-status
-      :found (status/line :detail "✅ Unreleased section found with descriptive text.")
-      :found-with-no-text (status/line :detail "❌ Unreleased section seems empty, please put some descriptive text in there to help our users understand what is in the release.")
-      :not-found (status/line :detail "❌ Unreleased section not found, please add one."))
-    (case unreleased-breaking-status
-      :found (status/line :detail "✅ Unreleased Breaking Changes section found with descriptive text")
-      :found-with-no-text (status/line :detail (str "❌ Unreleased breaking changes section found but seems empty.\n"
-                                                    "   Please put some descriptive text in there to help our users understand what is in the release\n"
-                                                    "   OR delete the section if there are no breaking changes for this release."))
-      :not-found (status/line :detail "✅ Unreleased Breaking Changes section not found, assuming no breaking changes for this release."))
+  (let [content (slurp changelog-fname)
+        valid-attrs ["[minor breaking]" "[breaking]"]
+        [_ attr content :as match] (re-find #"(?ims)^== Unreleased ?(.*?)$(.*?)(== v\d|\z)" content)]
+    (if (not match)
+      [{:error :section-missing}]
+      (cond-> []
+        (and attr
+             (not (string/blank? attr))
+             (not (contains? (set valid-attrs) attr)))
+        (conj {:error :suffix-invalid :valid-attrs valid-attrs :found attr})
 
-    (if (or (not (= :found unreleased-status))
-            (= :found-with-no-text unreleased-breaking-status))
-      (status/die 1 "Changelog needs some love")
-      (status/line :detail "Changelog looks good for update by release workflow."))
-    {:unreleased unreleased-status
-     :unreleased-breaking unreleased-breaking-status}))
+        ;; without any words of a reasonable min length, we consider section blank
+        (not (re-find #"(?m)[\p{L}]{3,}" content))
+        (conj {:error :content-missing})))))
 
-(defn- update-changelog! [version last-version {:keys [unreleased-breaking]}]
-  (status/line :head "Updating Change Log unreleased headers to release %s" version)
-  (update-file! "CHANGELOG.adoc"
-                [["update unreleased header"
-                  #"(?ims)^(=+) +unreleased *$(.*?)(^=+)"
-                  (str "$1 Unreleased\n\n$1 v" version "$2"
-                       (when last-version
-                         (str
-                          "https://github.com/lread/test-doc-blocks/compare/"
-                          last-version
-                          "\\\\...v"  ;; single backslash is escape for AsciiDoc
-                          version
-                          "[Gritty details of changes for this release]\n\n"))
-                       "$3")]])
-  (when (= :found unreleased-breaking)
-    (update-file! "CHANGELOG.adoc"
-                  [["update unreleased breaking changes header"
-                    #"(?ims)(=+) +unreleased breaking changes *$"
-                    (str "$1 v" version)]])))
+(defn- changelog-checks []
+  (let [changelog-findings (reduce (fn [acc n] (assoc acc (:error n) n))
+                                   {}
+                                   (analyze-changelog))]
+    [{:check "changelog has unreleased section"
+      :result (if (:section-missing changelog-findings) :fail :pass)}
+     {:check "changelog unreleased section attributes valid"
+      :result (cond
+                (:section-missing changelog-findings) :skip
+                (:suffix-invalid changelog-findings) :fail
+                :else :pass)
+      :msg (when-let [{:keys [valid-attrs found]} (:suffix-invalid changelog-findings)]
+             (format "expected attributes to absent or one of %s, but found: %s" (string/join ", " valid-attrs) found))}
+     {:check "changelog unreleased section has content"
+      :result (cond
+                (:section-missing changelog-findings) :skip
+                (:content-missing changelog-findings) :fail
+                :else :pass)}]))
+
+(defn- validate-changelog []
+  (status/line :head "Performing publish checks")
+  (let [check-results (changelog-checks)
+        passed? (every? #(= :pass (:result %)) check-results)]
+    (doseq [{:keys [check result msg]} check-results]
+      (status/line :detail "%s %s"
+                   (case result
+                     :pass "✓"
+                     :fail "x"
+                     :skip "~")
+                   check)
+      (when msg
+        (status/line :detail "  > %s" msg)))
+    (when (not passed?)
+      (status/die 1 "Changelog checks failed"))))
+
+(defn- yyyy-mm-dd-now-utc []
+  (-> (java.time.Instant/now) str (subs 0 10)))
+
+(defn- update-changelog! [version release-tag last-release-tag]
+  (status/line :detail "Applying version %s to changelog" version)
+  (update-file! changelog-fname
+                "update unreleased header"
+                #"(?ims)^== Unreleased(.*?)($.*?)(== v\d|\z)"
+                (str
+                 ;; add Unreleased section for next released
+                 "== Unreleased\n\n"
+                 ;; replace "Unreleased" with actual version
+                 "== v" version
+                 ;; followed by any attributes
+                 "$1"
+                 ;; followed by datestamp
+                 (str " - " (yyyy-mm-dd-now-utc))
+                 ;; followed by an AsciiDoc anchor for easy referencing
+                 (str " [[v" version  "]]")
+                 ;; followed by section content
+                 "$2"
+                 ;; followed by link to commit log
+                 (when last-release-tag
+                   (str
+                    "https://github.com/" (build-shared/lib-github-coords) "/compare/"
+                    last-release-tag
+                    "\\\\..."  ;; single backslash is escape for AsciiDoc
+                    release-tag
+                    "[commit log]\n\n"))
+                 ;; followed by next section indicator
+                 "$3")))
 
 (defn- create-jar! []
   (status/line :head "Creating jar for release")
   (shell/command "clojure -T:build jar")
   nil)
-
-(defn- built-version []
-  (-> (shell/command {:out :string}
-                     "clojure -T:build built-version")
-      :out
-      string/trim))
 
 (defn- assert-on-ci
   "Little blocker to save myself from myself when testing."
@@ -114,24 +142,23 @@
   []
   (status/line :head "Deploying jar to clojars")
   (assert-on-ci "deploy a jar")
-  (shell/command "clojure -T:build deploy")
+  (shell/command "clojure -T:build:deploy deploy")
   nil)
 
-(defn- commit-changes! [version]
-  (let [tag-version (str "v" version)]
-    (status/line :head "Committing and pushing changes made for %s" tag-version)
-    (assert-on-ci "commit changes")
-    (status/line :detail "Adding changes")
-    (shell/command "git add doc/01-user-guide.adoc CHANGELOG.adoc")
-    (status/line :detail "Committing")
-    (shell/command "git commit -m" (str  "Release job: updates for version " tag-version))
-    (status/line :detail "Version tagging")
-    (shell/command "git tag -a" tag-version "-m" (str  "Release " tag-version))
-    (status/line :detail "Pushing commit")
-    (shell/command "git push")
-    (status/line :detail "Pushing version tag")
-    (shell/command "git push origin" tag-version)
-    nil))
+(defn- commit-changes! [tag-version]
+  (status/line :head "Committing and pushing changes made for %s" tag-version)
+  (assert-on-ci "commit changes")
+  (status/line :detail "Adding changes")
+  (shell/command "git add deps.edn" user-guide-fname changelog-fname)
+  (status/line :detail "Committing")
+  (shell/command "git commit -m" (str  "Release job: updates for version " tag-version))
+  (status/line :detail "Version tagging")
+  (shell/command "git tag -a" tag-version "-m" (str  "Release " tag-version))
+  (status/line :detail "Pushing commit")
+  (shell/command "git push")
+  (status/line :detail "Pushing version tag")
+  (shell/command "git push origin" tag-version)
+  nil)
 
 (defn- inform-cljdoc! [version]
   (status/line :head "Informing cljdoc of new version %s" version)
@@ -145,16 +172,29 @@
     (when (not (zero? exit-code))
       (status/line :warn "Informing cljdoc did not seem to work, attempt exited with %d" exit-code))))
 
-(def args-usage "Valid args: (prep|deploy-remote|commit|validate|--help)
+(defn- create-github-release! [release-tag]
+  (status/line :head "Creating GitHub Release")
+  (assert-on-ci "create github release")
+  (let [changelog-url (format "https://github.com/%s/blob/main/%s"
+                              (build-shared/lib-github-coords)
+                              changelog-fname)]
+    (shell/command "gh release create"
+                   release-tag
+                   "--title" release-tag
+                   "--notes" (format "[Changelog](%s#%s)" changelog-url release-tag))))
+
+(def args-usage "Valid args: (prep|deploy-remote|commit|create-github-release|inform-cljdoc|validate|--help)
 
 Commands:
-  prep           Update user guide, changelog and create jar
-  deploy-remote  Deploy jar to clojars
-  commit         Commit changes made back to repo, inform cljdoc of release
+  prep                   Bump version, create jar and update user guide and changelog
+  deploy-remote          Deploy jar to clojars
+  commit                 Commit changes made back to repo
+  create-github-release  Create a GitHub release
+  inform-cljdoc          Trigger a doc build on cljdoc
 
 These commands are expected to be run in order from CI.
 Why the awkward separation?
-To restrict the exposure of our CLOJARS secrets during deploy workflow
+To restrict the exposure of our secrets during deploy workflow
 
 Additional commands:
   validate      Verify that change log is good for release
@@ -167,23 +207,31 @@ Options
     (cond
       (get opts "prep")
       (do (clean/clean!)
-          (let [changelog-status (validate-changelog)
-                last-version (last-release-tag)]
-            (status/line :detail "Last version released: %s" (or last-version "<none>"))
+          (validate-changelog)
+          (bump-version!)
+          (let [last-release-tag (last-release-tag)
+                version (build-shared/lib-version)
+                release-tag (build-shared/version->tag version)]
+            (status/line :detail "Release version: %s" version)
+            (status/line :detail "Release tag: %s" release-tag)
+            (status/line :detail "Last release tag: %s" last-release-tag)
             (io/make-parents "target")
             (create-jar!)
-            (let [version (built-version)]
-              (status/line :detail (str "Built version: " version))
-              (update-user-guide! version)
-              (update-changelog! version last-version changelog-status))))
+            (status/line :head "Updating docs")
+            (update-user-guide! version)
+            (update-changelog! version release-tag last-release-tag)))
 
       (get opts "deploy-remote")
       (deploy-jar!)
 
       (get opts "commit")
-      (let [version (built-version)]
-        (commit-changes! version)
-        (inform-cljdoc! version))
+      (commit-changes! (-> (build-shared/lib-version) build-shared/version->tag))
+
+      (get opts "inform-cljdoc")
+      (inform-cljdoc! (build-shared/lib-version))
+
+      (get opts "create-github-release")
+      (create-github-release! (-> (build-shared/lib-version) build-shared/version->tag))
 
       (get opts "validate")
       (do (validate-changelog)

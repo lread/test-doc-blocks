@@ -1,20 +1,27 @@
 // NOTE: release process automatically updates titles with "Unreleased" to title with actual release version
 = Change Log
 
-For a list of breaking changes see link:#breaking[breaking-changes]
+[.normal]
+A release with known breaking changes is marked with:
 
-// Release workflow will:
-// - Fail if there is no "== Unreleased" section header
-// - Helpfully fail when the section contains no descriptive text
-// - Replace the Unreleased section header with actual release version
-// - Prepend a new Unreleased section header
+* [breaking] you probably need to change your code
+* [minor breaking] you likely don't need to change your code
+
+// DO NOT EDIT: the "Unreleased" section header is automatically updated by the release workflow
+// which will fail on any of:
+// - unreleased section not found,
+// - unreleased section empty
+// - optional attribute is not [breaking] or [minor breaking]
+//   (adjust these in ci_relase.clj as you see fit)
 
 == Unreleased
 
+* Drop `alpha` status, we don't have many users, but folks have been using this lib for years
+* Reviewed and refreshed docs
 * Bumped library deps (these are used during test generation only)
-* No longer engaging clj-kondo's lint feature during code analysis.
+* No longer engaging clj-kondo's lint feature during code analysis
 
-== v1.0.166-alpha
+== v1.0.166-alpha - 2021-11-27 [[v1.0.166-alpha]]
 
 * While preserving our existing `-X` command line interface, add a more conventional main command line interface to support leiningen (and potentially Windows) users https://github.com/lread/test-doc-blocks/issues/8[#8]
 * Now failing when a requested file/glob does not exist https://github.com/lread/test-doc-blocks/issues/9[#9]
@@ -22,101 +29,90 @@ For a list of breaking changes see link:#breaking[breaking-changes]
 * Internal test-doc-blocks developer facing:
 ** Migrate from `depstar` to `tools.build`
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.146-alpha\...v1.0.166-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.146-alpha\...v1.0.166-alpha[commit log]
 
-== v1.0.146-alpha
+== v1.0.146-alpha - 2021-08-30 [[v1.0.146-alpha]]
 
 * Add support for `(refer-clojure ...)` in doc blocks https://github.com/lread/test-doc-blocks/issues/5[#5]
 * Bump rewrite-clj to v1.0.682-alpha
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.137-alpha\...v1.0.146-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.137-alpha\...v1.0.146-alpha[commit log]
 
-== v1.0.137-alpha
+== v1.0.137-alpha - 2021-08-23 [[v1.0.137-alpha]]
 
 * Freshen up docs, deps and internal scripts
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.129-alpha\...v1.0.137-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.129-alpha\...v1.0.137-alpha[commit log]
 
-== v1.0.129-alpha
+== v1.0.129-alpha - 2021-04-16 [[v1.0.129-alpha]]
 
 * Maintenance release - bump deps
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.124-alpha\...v1.0.129-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.124-alpha\...v1.0.129-alpha[commit log]
 
-== v1.0.124-alpha
+== v1.0.124-alpha - 2021-03-26 [[v1.0.124-alpha]]
 
 * Maintenance release - deps, docs and ops updates
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.116-alpha\...v1.0.124-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.116-alpha\...v1.0.124-alpha[commit log]
 
-== v1.0.116-alpha
+== v1.0.116-alpha - 2021-03-17 [[v1.0.116-alpha]]
 
 * Switch to `com.github.lread/test-doc-blocks` for deployment artifact name as per new security measures at clojars.
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.114-alpha\...v1.0.116-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.114-alpha\...v1.0.116-alpha[commit log]
 
-== v1.0.114-alpha
+== v1.0.114-alpha - 2021-03-14 [[v1.0.114-alpha]]
 
 * Ensure test-doc-blocks works on Windows
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.107-alpha\...v1.0.114-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.107-alpha\...v1.0.114-alpha[commit log]
 
-== v1.0.107-alpha
+== v1.0.107-alpha - 2021-03-13 [[v1.0.107-alpha]]
 
 * Support generating tests from CommonMark code blocks found in Clojure source docstrings
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.103-alpha\...v1.0.107-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.103-alpha\...v1.0.107-alpha[commit log]
 
-== v1.0.103-alpha
+== v1.0.103-alpha - 2021-03-12 [[v1.0.103-alpha]]
 
 * Correct sort order in new tree-like report of found blocks
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.101-alpha\...v1.0.103-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.101-alpha\...v1.0.103-alpha[commit log]
 
-== v1.0.101-alpha
+== v1.0.101-alpha - 2021-03-11 [[v1.0.101-alpha]]
 
 * Don't trim trailing newline for test body if last item is comment
 * Switch from (too) wide table to tree-like report of found blocks
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.92-alpha\...v1.0.101-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.92-alpha\...v1.0.101-alpha[commit log]
 
-== v1.0.92-alpha
+== v1.0.92-alpha - 2021-03-11 [[v1.0.92-alpha]]
 
 * Upgraded from rewrite-clj v0 to rewrite-clj v1
 * Release workflow now creates a GitHub release
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.85-alpha\...v1.0.92-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.85-alpha\...v1.0.92-alpha[commit log]
 
-== v1.0.85-alpha
+== v1.0.85-alpha - 2021-02-06 [[v1.0.85-alpha]]
 
 * Correct public API for cljdoc
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.82-alpha\...v1.0.85-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.82-alpha\...v1.0.85-alpha[commit log]
 
-== v1.0.82-alpha
+== v1.0.82-alpha - 2021-02-06 [[v1.0.82-alpha]]
 
 * Developer facing only: more updates to release workflow
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.80-alpha\...v1.0.82-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.80-alpha\...v1.0.82-alpha[commit log]
 
-== v1.0.80-alpha
+== v1.0.80-alpha - 2021-02-06 [[v1.0.80-alpha]]
 
 * Developer facing only: updates to release workflow
 
-https://github.com/lread/test-doc-blocks/compare/v1.0.76-alpha\...v1.0.80-alpha[Gritty details of changes for this release]
+https://github.com/lread/test-doc-blocks/compare/v1.0.76-alpha\...v1.0.80-alpha[commit log]
 
-== v1.0.76-alpha
+== v1.0.76-alpha - 2021-02-05 [[v1.0.72-alpha]]
 
 * First release
 
-[#breaking]
-== Breaking Changes
-
-// Release workflow will:
-// - If an "=== Unreleased Breaking Changes" section header exists here:
-//   - Helpfully fail the section contains no descriptive text
-//   - Replace the Unreleased section header with actual release version
-
-Still in alpha, nothing to track yet!
-
-// === Unreleased Breaking Changes

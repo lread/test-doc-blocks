@@ -8,7 +8,14 @@
         metosin/malli {:mvn/version "0.16.0"}
         rewrite-clj/rewrite-clj  {:mvn/version "1.1.47"}}
 
- :aliases {;;
+ :aliases {;; we use babashka/neil for project attributes
+           ;; publish workflow references these values (and automatically bumps patch component of version)
+           :neil {:project {:version "1.1.18" ;; describes last release and is template for next release
+                            :name com.github.lread/test-doc-blocks
+                            ;; not neilisms - could potentially conflict with new neilisms
+                            :github-coords lread/test-doc-blocks}}
+
+           ;;
            ;; Clojure versions we support
            ;; min for generation is v1.9
            ;; min for running generated v1.8
@@ -77,6 +84,7 @@
            ;; Deployment
            ;;
            :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.1"}}
+                   :extra-paths ["src" "build"]
                    :ns-default build}
 
            ;; keep deploy deps separate from build deps to avoid download-deps issues
