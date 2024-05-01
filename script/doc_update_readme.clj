@@ -5,38 +5,39 @@
   Run manually as needed."
   (:require [babashka.fs :as fs]
             [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [clojure.string :as string]
+            [etaoin.api :as etaoin]
             [helper.main :as main]
-            [helper.shell :as shell]
             [hiccup.util :as hu]
             [hiccup2.core :as h]
-            [lread.status-line :as status])
-  (:import (java.nio.file Files Paths CopyOption StandardCopyOption)
-           (java.nio.file.attribute FileAttribute)))
+            [lread.status-line :as status]
+            [taoensso.timbre :as timbre]))
+
+;; default log level for bb is debug, change it to info
+(alter-var-root #'timbre/*config* #(assoc % :min-level :info))
 
 (def contributions-lookup
-  {:feedback             "💬 feedback"
-   :code                 "💻 code"
-   :docs                 "📝 docs"
-   :inspiration          "💡 inspiration"
-   :testing              "🧪 testing"})
+  {:feedback             ["💬" "feedback"]
+   :code                 ["💻" "code"]
+   :docs                 ["📝" "doc"]
+   :inspiration          ["💡" "inspire"]
+   :testing              ["🧪" "test"]})
 
 (defn- generate-asciidoc [contributors {:keys [images-dir image-width]}]
   (str ":imagesdir: " images-dir "\n"
-       "[.float-group]\n"
+       "[]\n"
        "--\n"
        (apply str (for [{:keys [github-id]} contributors]
-                    (str "image:" github-id ".png[" github-id ",role=\"left\",width=" image-width ",link=\"https://github.com/" github-id "\"]\n")))
+                    (str "image:" github-id ".png[" github-id ",width=" image-width ",link=\"https://github.com/" github-id "\"]\n")))
        "--\n"))
 
 (defn- update-readme-text [old-text marker-id new-content]
-  (let [marker (str "// AUTO-GENERATED:" marker-id )
+  (let [marker (str "// AUTO-GENERATED:" marker-id)
         marker-start (str marker "-START")
         marker-end (str marker "-END")]
-    (string/replace old-text
-                    (re-pattern (str "(?s)" marker-start ".*" marker-end))
-                    (str marker-start "\n" (string/trim new-content) "\n" marker-end))))
+    (string/replace-first old-text
+                          (re-pattern (str "(?s)" marker-start ".*" marker-end))
+                          (str marker-start "\n" (string/trim new-content) "\n" marker-end))))
 
 (defn update-readme-file! [contributors readme-filename image-info]
   (status/line :head (str "updating " readme-filename))
@@ -50,123 +51,105 @@
         (status/line :detail (str  readme-filename " text updated")))
       (status/line :detail (str  readme-filename " text unchanged")))))
 
-(defn include-css
-  ;; not in babashka, adpapted from hiccup.page
-  "Include a list of external stylesheet files."
-  [& styles]
-  (for [style styles]
-    [:link {:type "text/css", :href style, :rel "stylesheet"}]))
+(defn generate-contributor-html
+  "Some shenanigins herein.
+  Needed (?) to calc wrapper div so that when grabbing div would also grab shadowbox."
+  [github-id contributions {:keys [image-width]}]
+  (let [card-margin-right 5
+        card-padding 7
+        card-shadow-h-offset 4
+        card-border 1
+        card-width (- image-width (+ card-margin-right card-padding (* 2 card-shadow-h-offset) card-border))
+        avatar-size 110
+        contrib-font-size (if (< (count contributions) 5) "1.2em" "0.77em")]
+    (str
+     (h/html
+      [:head
+       [:link {:href "https://fonts.googleapis.com", :rel "preconnect"}]
+       [:link {:href "https://fonts.gstatic.com", :rel "preconnect" :crossorigin "crossorigin"}]
+       [:link {:type "text/css", :href "https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" :rel "stylesheet"}]
+       [:style
+        (hu/raw-string
+         (str
+          "* {-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}\n"
+          "body {font-family: 'Fira Code', monospace; margin: 0;}\n"
+          (format ".wrapper {overflow:hidden; min-width: %dpx; max-width: %dpx;}" image-width image-width) "\n"
+          (format ".card {float: left; border-radius: 5px;
+                          border: %dpx solid #ccc;
+                          padding: %dpx;
+                          margin: 0 5px %dpx 0;
+                          box-shadow: %dpx 4px 3px grey;
+                          background-color: #f4f4f4;
+                          width: %dpx;}"
+                  card-border card-padding card-margin-right card-shadow-h-offset card-width) "\n"
+          (format ".avatar {float: left; height: %dpx; border-radius: 5px; padding: 0; margin-right: 10px;}"
+                  avatar-size) "\n"
+          ".image {margin: 2px;}\n"
+          (format ".contribs {padding-top: 3px; margin-left: 5px; line-height: 1.4; max-height: %dpx; overflow: hidden;}"
+                  avatar-size) "\n"
+          (format ".contrib {display:inline-block;font-size: %s;white-space: nowrap;margin: 0;margin-right: 0.8em;}\n"
+                  contrib-font-size)
+          ".symbol {margin-right: 0.3em;}\n"
+          ".text {}\n"
+          ".name {font-size: 1.3em; margin: 0; clear:both;}\n"))]]
+      [:div.wrapper
+       [:div.card
+        [:div
+         [:img.avatar {:src (str "https://github.com/" github-id ".png")}]
+         [:div.contribs
+          (doall
+           (for [c (sort contributions)]
+             (let [[c-sym c-text] (c contributions-lookup)]
+               [:span.contrib
+                [:span.symbol c-sym]
+                [:span.text c-text]])))]
+         [:p.name (str "@" github-id)]]]]))))
 
-(defn generate-contributor-html [github-id contributions]
-  (str
-   (h/html
-    [:head
-     (include-css "https://fonts.googleapis.com/css?family=Fira+Code&display=swap")
-     [:style
-      (hu/raw-string
-       "* {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;}
-        body {
-          font-family: 'Fira Code', monospace;
-          margin: 0;}
-        .card {
-          min-width: 295px;
-          float: left;
-          border-radius: 5px;
-          border: 1px solid #CCCCCC;
-          padding: 4px;
-          margin: 0 5px 5px 0;
-          box-shadow: 4px 4px 3px grey;
-          background-color: #F4F4F4;}
-        .avatar {
-          float: left;
-          height: 110px;
-          border-radius: 4px;
-          padding: 0;
-          margin-right: 6px; }
-        .image { margin: 2px;}
-        .text {
-          margin-left: 2px;
-          padding: 0}
-        .contrib { margin: 0; }
-        .name {
-          font-size: 1.20em;
-          margin: 0 3px 5px 0;}")]]
-    [:div.card
-     [:img.avatar {:src (str "https://github.com/" github-id ".png?size=110")}]
-     [:div.text
-      [:p.name (str "@" github-id)]
-      [:div.contribs
-       (doall
-        (for [c contributions]
-          (when-let [c-text (c contributions-lookup)]
-            [:p.contrib c-text])))]]])))
-
-(defn- str->Path [spath]
-  (Paths/get spath (into-array String [])))
-
-  (defn- temp-Path [prefix]
-  (Files/createTempDirectory prefix (into-array FileAttribute [])))
-
-(defn- move-Path [source target]
+(defn- move-path [source target]
   (when (fs/exists? target)
     (fs/delete-tree target))
-  (.mkdirs (.toFile target))
-  (Files/move source target (into-array CopyOption
-                                        [(StandardCopyOption/ATOMIC_MOVE)
-                                         (StandardCopyOption/REPLACE_EXISTING)])))
+  (fs/create-dirs (fs/parent target))
+  (fs/move source target {:replace-existing true :atomic-move true}))
 
-(defn- find-chrome []
-  (let [mac-chrome "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-        linux-chrome "chrome"]
-    (cond
-      (.canExecute (io/file mac-chrome)) mac-chrome
-      :else linux-chrome)))
-
-(defn- chrome-info []
-  (try
-    (let [chrome (find-chrome)]
-      {:exe chrome
-       :version (-> (shell/command {:out :string} chrome "--version")
-                    :out
-                    string/trim)})
-    (catch Exception _e)))
-
-(defn- generate-image! [target-dir github-id contributions image-opts]
-  (let [html-file (str target-dir "/temp.html")]
+(defn- generate-image! [driver target-dir github-id contributions opts]
+  (let [html-file (fs/file target-dir (str github-id ".html"))]
     (try
-      (spit html-file (generate-contributor-html github-id contributions))
-      (shell/command {:out :string :err :string}
-                     (find-chrome)
-                     "--headless"
-                     (str "--screenshot=" target-dir "/" github-id ".png")
-                     (str "--window-size=" (:image-width image-opts) ",125")
-                     "--default-background-color=0"
-                     "--hide-scrollbars"
-                     html-file)
+      (spit html-file (generate-contributor-html github-id contributions opts))
+      (etaoin/go driver (str "file://" html-file))
+      ;; send the Chrome-specific request for a transparent background
+      (etaoin/execute {:driver driver
+                       :method :post
+                       :path [:session (:session driver) "chromium" "send_command_and_get_result"]
+                       :data {:cmd "Emulation.setDefaultBackgroundColorOverride"
+                              :params {:color {:r 0 :g 0 :b 0 :a 0}}}})
+      (etaoin/screenshot-element driver
+                                 {:tag :div :class :wrapper}
+                                 (str target-dir "/" github-id ".png"))
       (finally
-        (fs/delete-if-exists html-file)))))
+        ;; comment this out to leave generated .html around for tweaking/debugging
+        (when (fs/exists? html-file)
+          (fs/delete html-file))))))
 
 (defn- generate-contributor-images! [contributors image-opts]
   (status/line :head "generating contributor images")
-  (let [work-dir (temp-Path "rewrite-clj-update-readme")]
+  (let [driver (etaoin/chrome {:headless true})
+        work-dir (fs/create-temp-dir {:prefix "cljdoc-update-readme"})]
     (try
       (doall
        (for [contributor-type (keys contributors)]
          (do
            (status/line :detail (str contributor-type))
-           (doall
-            (for [{:keys [github-id contributions]} (contributor-type contributors)]
-              (do
-                (status/line :detail (str "  " github-id " " contributions))
-                (generate-image! (str work-dir) github-id contributions image-opts)))))))
-      (let [target-path (str->Path (:images-dir image-opts))]
-        (move-Path work-dir target-path))
+           (doseq [{:keys [github-id contributions]} (contributor-type contributors)]
+             (status/line :detail (str "  " github-id " " contributions))
+             (generate-image! driver (str work-dir) github-id contributions image-opts)))))
+      (let [target-path (:images-dir image-opts)]
+        (move-path work-dir target-path))
       (catch java.lang.Exception e
         (when (fs/exists? work-dir)
           (fs/delete-tree work-dir))
-        (throw e)))))
+        (throw e))
+      (finally
+        (etaoin/quit driver)))))
 
 (defn- sort-contributors
   "Maybe not perfect but the aim for now is to sort by number of contributions then github id.
@@ -179,27 +162,27 @@
              {}
              contributors))
 
-(defn- check-prerequesites []
-  (status/line :head  "checking prerequesites")
-  (let [info (chrome-info)]
-    (if info
-      (status/line :detail (str "found chrome:" (:exe info) "\n"
-                                "version:" (:version info)))
-      (status/line :detail "* error: did not find google chrome - need it to generate images."))
-    chrome-info))
+(defn- missing-prerequesites []
+  (let [need "chromedriver"
+        found (fs/which need)]
+    (if found
+      (do
+        (status/line :detail "found: %s" found)
+        nil)
+      (format "not found: %s" need))))
 
 (defn -main [& args]
   (when (main/doc-arg-opt args)
     (let [readme-filename "README.adoc"
           contributors-source "doc/contributors.edn"
-          image-opts {:image-width 310
+          image-opts {:image-width 273
                       :images-dir "./doc/generated/contributors"}
           contributors (->> (slurp contributors-source)
                             edn/read-string
                             sort-contributors)]
       (status/line :head "updating docs to honor those who contributed")
-      (when (not (check-prerequesites))
-        (status/die 1 "pre-requisites not met"))
+      (when-let [missing (missing-prerequesites)]
+        (status/die 1 "Pre-requisites not met\n%s" missing))
       (status/line :detail (str  "contributors source: " contributors-source))
       (generate-contributor-images! contributors image-opts)
       (update-readme-file! contributors readme-filename image-opts)
