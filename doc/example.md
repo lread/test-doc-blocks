@@ -91,38 +91,40 @@ It is sometimes just nice to know that your code snippet will run without except
 ## Inline Options
 You can, to some limited extent, communicate your intent to test-doc-blocks.
 
-Test-doc-blocks will look for CommonMark comments that begin with `:test-doc-blocks`.
+Test-doc-blocks will look for CommonMark `:test-doc-blocks` comment lines.
 
 It currently understands the following options:
 
-- `:test-doc-blocks/apply` - controls to what code blocks options are applied
 - `:test-doc-blocks/skip` - skips the next code block
 - `:test-doc-blocks/reader-cond` - wraps your code block in a reader conditional
 - `:test-doc-blocks/test-ns` - specifies the output test namespace
 - `:test-doc-blocks/platform` - specifies Clojure file type to generate for test ns
 - `:test-doc-blocks/meta` - attach metadata to generated tests
-
-### Applying Options - :apply
-
-By default, new options are applied to the next Clojure code block only.
-
-You can change this by including the `:test-doc-blocks/apply` option:
-
-- `:next` - default - applies new options to next Clojure code block only
-- `:all-next` - applies new options to all subsequent code blocks in the document until specifically overridden with new opts
+- `:test-doc-blocks/apply` - controls to what code blocks options are applied
 
 ### Skipping Code Blocks - :skip
 
 By default, test-doc-blocks will create tests for all Clojure code blocks it finds in the files you specified.
 
-Tell test-doc-blocks to skip the next Clojure code block via the following CommonMark comment:
+Tell test-doc-blocks to skip the next Clojure code block via `<!-- #:test-doc-blocks {:skip true} -->`:
+
+~~~markdown
+<!-- #:test-doc-blocks {:skip true} -->
+```Clojure
+;; no tests will be generated for this Clojure code block
+
+(something we don't want to test ...
+```
+~~~
+
+Because `:skip` is a boolean, you can use the shorter `<!-- :test-doc-blocks/skip -->`:
 
 ~~~markdown
 <!-- :test-doc-blocks/skip -->
 ```Clojure
 ;; no tests will be generated for this Clojure code block
 
-(something we don't want to test)
+(something we don't want to test ...
 ```
 ~~~
 
@@ -169,7 +171,7 @@ Test-doc-blocks does no special checking, but `:reader-cond` only makes sense fo
 ### Specifying Test Namespace - :test-ns
 
 By default, test-doc-blocks will generate tests to namespaces based on document filenames.
-This file is named `example.md`. Test-doc-blocks, up to this point has been generating tests to the `example-md-test` namespace.
+This file your are reading now is named `example.md`. Test-doc-blocks, up to this point has been generating tests to the `example-md-test` namespace.
 
 If this does not work for you, you can override this default via a CommonMark comment:
 
@@ -217,7 +219,7 @@ When specifying the platform, remember that:
 - For Clojure `my-ns-file.clj` will be picked over `my-ns-file.cljc`
 - For ClojureScript `my-ns-file.cljs` will be picked over `my-ns-file.cljc`
 
-So if you are generating mixed platforms, you might want to specify the test-ns as well.
+So if you are generating mixed platforms, you might want to specify the test-ns as well:
 
 ~~~markdown
 <!-- #:test-doc-blocks{:platform :cljs :test-ns example-md-cljs-test} -->
@@ -274,11 +276,60 @@ user=> (into [] {:a 1})
 ```
 ~~~
 
+### Applying Options - :apply
+
+Use the `:test-doc-blocks/apply` option to control which code blocks your specified option(s) apply to:
+
+- `:next` - default - applies new options to next Clojure code block only
+- `:all-next` - applies new options to all subsequent code blocks in the document until specifically overridden with new opts
+
+For example, maybe you want test-doc-blocks to skip code blocks by default:
+
+~~~markdown
+<!-- #:test-doc-blocks{:skip true :apply :all-next} -->
+~~~
+
+All subsequent code blocks would be skipped.
+
+~~~markdown
+```clojure
+;; I am a code block that is skipped by test-doc-blocks
+(maybe some code that won't compile ...
+```
+~~~
+
+Then you could choose to not skip a code block like so:
+
+~~~markdown
+<!-- #:test-doc-blocks{:skip false} -->
+```clojure
+;; A test will be generated for this code block
+(apply str (interpose " " ["don't" "skip" "me!"]))
+;; =>  "don't skip me!"
+```
+~~~
+
+To have test-doc-blocks stop skipping code blocks by default:
+
+~~~markdown
+<!-- #:test-doc-blocks{:skip false :apply :all-next} -->
+~~~
+
+And now test-doc-blocks will generate tests for subsequent code blocks.
+
+~~~markdown
+```clojure
+;; A test will be generated for this code block
+(apply str (interpose " " ["test" "me" "by" "default"]))
+;; =>  "test me by default"
+```
+~~~
+
 # Section Titles
 
 Test-doc-blocks will try to give each test block some context by including its filename, section title and starting line number.
 
-This code block should include "Section Titles" as part of the context for its generated test.
+This code block should include "Section Titles" (the actual title of this section) as part of the context for its generated test.
 
 ~~~markdown
 ```Clojure
