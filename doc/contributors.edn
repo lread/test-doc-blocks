@@ -7,7 +7,8 @@
   {:github-id "seancorfield" :contributions [:inspiration :feedback :testing]}
   {:github-id "uochan" :contributions [:feedback]}
   {:github-id "holyjak" :contributions [:docs]}
-  {:github-id "MIJOTHY" :contributions [:feedback :docs]}]
+  {:github-id "MIJOTHY" :contributions [:feedback :docs]}
+  {:github-id "genmeblog" :contributions [:feedback]}]
  :maintainers
  [{:github-id "lread"
    :contributions [:code]}]}
