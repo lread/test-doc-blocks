@@ -32,7 +32,8 @@
            ;; but on Windows it can be very time consuming to learn how to escape them
            ;; sooo... I'm putting :docs here
            :test-opts {:exec-args {:docs ["doc/01-user-guide.adoc"
-                                          "doc/example.{adoc,md,cljc}"]}}
+                                          "doc/example.{adoc,md,cljc}"
+                                          "test-resources/doc/*.{adoc,md}"]}}
 
            ;; and :target, even passing a "\"string\"" is hard on windows
            :regen-opts {:exec-args {:target-root "test-resources/expected"}}

@@ -33,7 +33,8 @@
     (doseq [[fname headers] fnames]
       (println (indent fname indent-cnt))
       (doseq [[header lines] (->> headers (group-by :header) (into []) (sort-by #(-> % second first :line-no)))]
-        (println (indent header (+ 2 indent-cnt)))
+        (when header
+          (println (indent header (+ 2 indent-cnt))))
         (doseq [line lines]
           (println (-> (format "%03d: %s" (:line-no line) (:test-doc-blocks/test-ns line))
                        (indent (+ 4 indent-cnt)))))))))
