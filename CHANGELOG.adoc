@@ -16,10 +16,14 @@ A release with known breaking changes is marked with:
 
 == Unreleased
 
+== v1.1.20 - 2024-05-06 [[v1.1.20]]
+
 * Tests can now be generated from a header-less doc
 https://github.com/lread/test-doc-blocks/issues/25[#25]
 (thanks for the feedback https://github.com/genmeblog[@genmeblog]!)
 * Bumped malli (used during test generation only)
+
+https://github.com/lread/test-doc-blocks/compare/v1.1.19\...v1.1.20[commit log]
 
 == v1.1.19 - 2024-05-02 [[v1.1.19]]
 

@@ -10,7 +10,7 @@
 
  :aliases {;; we use babashka/neil for project attributes
            ;; publish workflow references these values (and automatically bumps patch component of version)
-           :neil {:project {:version "1.1.19" ;; describes last release and is template for next release
+           :neil {:project {:version "1.1.20" ;; describes last release and is template for next release
                             :name com.github.lread/test-doc-blocks
                             ;; not neilisms - could potentially conflict with new neilisms
                             :github-coords lread/test-doc-blocks}}
