@@ -16,6 +16,8 @@ A release with known breaking changes is marked with:
 
 == Unreleased
 
+* Bumped deps (used during test generation only)
+
 == v1.1.20 - 2024-05-06 [[v1.1.20]]
 
 * Tests can now be generated from a header-less doc
