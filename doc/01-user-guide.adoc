@@ -1,7 +1,7 @@
 = User Guide
 :toclevels: 5
 :toc:
-:clojure-version: 1.10.3
+:clojure-version: 1.12.0
 // NOTE: lib-version is automatically updated by release workflow
 :lib-version: 1.1.20
 
@@ -12,7 +12,7 @@
 You want to verify that the Clojure/ClojureScript code examples in your docs work as expected.
 
 == Prerequisites
-You can generate tests with Clojure v1.9 or above.
+You can generate tests with Clojure v1.11 or above.
 
 You can run generated tests with Clojure v1.8 and above (if supported by your test runner).
 

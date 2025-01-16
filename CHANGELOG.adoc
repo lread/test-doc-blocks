@@ -17,6 +17,7 @@ A release with known breaking changes is marked with:
 == Unreleased
 
 * Bumped deps (used during test generation only)
+** Note that you'll need to bump to at least clojure 1.11 when generating tests
 
 == v1.1.20 - 2024-05-06 [[v1.1.20]]
 

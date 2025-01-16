@@ -45,7 +45,7 @@
                                   (re-matches re-editor-style-expected line)))
               (recur (-> acc
                          (update :body str (str (:out-token acc) " "
-                                                (str (conj (:out acc)) "\n")))
+                                                (conj (:out acc)) "\n"))
                          (dissoc :out :out-token))
                      lines)
 
