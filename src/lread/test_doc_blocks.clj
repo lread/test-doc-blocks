@@ -54,7 +54,7 @@
         (print-found! blocks 3))
       (println)))
   (when (some :test-doc-blocks/skip parsed)
-    (println (str "As requested, skipping:\n"))
+    (println "As requested, skipping:\n")
     (print-found! (filter :test-doc-blocks/skip parsed) 1)
     (println)))
 

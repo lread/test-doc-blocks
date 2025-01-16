@@ -3,9 +3,9 @@
  :deps {lread/status-line {:git/url "https://github.com/lread/status-line.git"
                            :sha "cf44c15f30ea3867227fa61ceb823e5e942c707f"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
-        version-clj/version-clj {:mvn/version "2.0.2"}
-        etaoin/etaoin {:mvn/version "1.0.40"}
-        io.github.babashka/neil {:git/tag "v0.3.67" :git/sha "054ca51"}}
+        version-clj/version-clj {:mvn/version "2.0.3"}
+        etaoin/etaoin {:mvn/version "1.1.42"}
+        io.github.babashka/neil {:git/tag "v0.3.68" :git/sha "78ffab1"}}
  :tasks {;; setup
          :requires ([babashka.fs :as fs]
                     [clojure.string :as string]
@@ -21,7 +21,7 @@
                                                   ["Valid args: [options]"
                                                    ""
                                                    "Options:"
-                                                   (format "  -v, --clojure-version VERSION  Test with Clojure %s [default: 1.10]"
+                                                   (format "  -v, --clojure-version VERSION  Test with Clojure %s [default: 1.11]"
                                                            (-> allowed-versions vec pr-str (string/replace "\"" "")))
                                                    "  --help                         Show this help"])]
                       (when-let [opts (main/doc-arg-opt args-usage *command-line-args*)]
@@ -76,26 +76,26 @@
                             (spit success-marker "SUCCESS"))
                           (status/line :detail "Tests already successfully generated - run a \"bb clean\" to force regen"))))}
 
-         -gen-1.10 (run-under ["1.10"] 'gen)
+         -gen-1.11 (run-under ["1.11"] 'gen)
 
          gen-to-expected {:doc "generate tests from sample docs to the expected result"
                           :task (clojure "-X:test-doc-blocks:test-opts:regen-opts gen-tests")}
 
          test-gen-kaocha {:doc "use kaocha to run generated tests"
                           :task (when-let [clojure-version (requested-clojure-version)]
-                                  (run '-gen-1.10)
+                                  (run '-gen-1.11)
                                   (status/line :detail "Testing with clojure v%s" clojure-version)
                                   (clojure (format "-M:isolated/kaocha:%s generated" clojure-version)))}
 
          test-gen-clj {:doc "use Clojure test-runner to run generated tests"
                        :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10" "1.11" "1.12"])]
-                               (run '-gen-1.10)
+                               (run '-gen-1.11)
                                (status/line :detail "Testing with clojure v%s" clojure-version)
                                (clojure (format "-M:isolated/clj-test-runner:%s" clojure-version)))}
 
          test-gen-cljs {:doc "use cljs-test-runner to run generated tests"
                         :task (do
-                                (run '-gen-1.10)
+                                (run '-gen-1.11)
                                 (clojure "-M:isolated/cljs-test-runner"))}
 
          test-gen-all {:doc "run generated tests under all platforms"
@@ -122,10 +122,10 @@
                   :task (when (no-args-check)
                           (run 'clean)
                           (run 'lint)
-                          (run-under ["1.9" "1.10" "1.11" "1.12"] 'test-unit)
-                          (run-under ["1.9" "1.10" "1.11" "1.12"] 'test-integration)
+                          (run-under ["1.11" "1.12"] 'test-unit)
+                          (run-under ["1.11" "1.12"] 'test-integration)
                           (run 'gen)
-                          (run-under ["1.9" "1.10" "1.11" "1.12"] 'test-gen-kaocha) ;; kaocha min versio is 1.9
+                          (run-under ["1.9" "1.10" "1.11" "1.12"] 'test-gen-kaocha) ;; kaocha min version is 1.9
                           (run-under ["1.8" "1.9" "1.10" "1.11" "1.12"] 'test-gen-clj) ;; also include 1.8
                           (run 'test-gen-cljs))}
 

@@ -32,7 +32,7 @@
 (defn- read-ns-ref [ns-ref feature]
   (rest (reader/read-string
          {:read-cond :allow :features #{ feature }}
-         (str (format "(do %s)" ns-ref)))))
+         (format "(do %s)" ns-ref))))
 
 (defn- parse-requires [requires feature]
   ;; will not normalize clj shorthand at this time
