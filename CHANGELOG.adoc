@@ -14,10 +14,13 @@ A release with known breaking changes is marked with:
 // - optional attribute is not [breaking] or [minor breaking]
 //   (adjust these in ci_relase.clj as you see fit)
 
-== Unreleased
+== [minor breaking] Unreleased
 
-* Bumped deps (used during test generation only)
-** Note that you'll need to bump to at least clojure 1.11 when generating tests
+* Minor breaking
+** You'll need to use at least clojure v1.11 when generating tests
+
+* Other changes
+** Bumped deps (used during test generation only)
 
 == v1.1.20 - 2024-05-06 [[v1.1.20]]
 
