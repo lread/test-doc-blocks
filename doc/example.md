@@ -37,6 +37,16 @@ Within your Clojure code blocks, test-doc-blocks automatically generates asserti
    (+ 1 2 3 4)
    ;; => 10
 
+   ;; Expected output can span multiple lines
+   (assoc {} :foo :bar :quu :baz)
+   ;; => {:foo :bar
+   ;      :quu :baz}
+
+   ;; Of if you prefer, without the leading comment character
+   (assoc {} :foo :bar :quu :baz)
+   ;; => {:foo :bar
+          :quu :baz}
+
    ;; it understands that Clojure and ClojureScript can evaluate differently
    \C
    ;; =clj=> \C

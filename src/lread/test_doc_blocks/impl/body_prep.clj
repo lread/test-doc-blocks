@@ -38,22 +38,28 @@
                                            (or (re-matches re-editor-style-expected line)
                                                (re-matches re-editor-style-out-expected line)))]
             (cond
-              ;; out expectation ends
+              ;; expectation ends
               (and (:out acc) (or (not line)
                                   assert-token
                                   (not (re-matches re-out-continue line))
                                   (re-matches re-editor-style-expected line)))
-              (recur (-> acc
-                         (update :body str (str (:out-token acc) " "
-                                                (conj (:out acc)) "\n"))
-                         (dissoc :out :out-token))
+              (recur (as-> acc acc
+                       (case (:style acc)
+                         :out
+                         (update acc :body str (str (:out-token acc) " "
+                                                    (conj (:out acc)) "\n"))
+                         :editor
+                         (update acc :body str (str (:assert-token acc) " "
+                                                    (string/join "\n" (:out acc))
+                                                    "\n")))
+                       (dissoc acc :out :out-token :assert-token :style))
                      lines)
 
               ;; all done?
               (not line)
               acc
 
-              ;; collecting stdout/stderr expectation
+              ;; collecting expectation
               (and (:out acc)
                    (not assert-token)
                    (re-matches re-out-continue line))
@@ -65,6 +71,7 @@
               (or (= "=stdout=>" assert-token)
                   (= "=stderr=>" assert-token))
               (recur (assoc acc
+                            :style :out
                             :out (if payload [payload] [])
                             :out-token assert-token)
                      (rest lines))
@@ -73,7 +80,10 @@
               ;; actual
               ;; ;;=> expected
               assert-token
-              (recur (update acc :body str (str assert-token " " payload "\n"))
+              (recur (assoc acc
+                            :out (if payload [payload] [])
+                            :style :editor
+                            :assert-token assert-token)
                      (rest lines))
 
               ;; other lines
@@ -84,7 +94,12 @@
 
 
 (comment
-  (prep-block-for-conversion-to-test ";; =stdout=> line1")
+  (prep-block-for-conversion-to-test ";; =stdout=> line1
+; line2")
 
-
+  (prep-block-for-conversion-to-test
+   "(assoc {} :foo :bar :baz :kikka)
+;; => {:foo :bar
+;  :baz :kikka}"
+   )
   )
