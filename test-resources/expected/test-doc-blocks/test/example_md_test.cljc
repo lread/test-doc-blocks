@@ -25,6 +25,12 @@
 ;; test-doc-blocks will generate an assertion to verify (+ 1 2 3 4) evaluates
 ;; to the expected 10
 (clojure.test/is (= '10 (+ 1 2 3 4)))
+;; Expected output can span multiple lines
+(clojure.test/is (= '{:foo :bar
+     :quu :baz} (assoc {} :foo :bar :quu :baz)))
+;; Of if you prefer, without the leading comment character
+(clojure.test/is (= '{:foo :bar
+       :quu :baz} (assoc {} :foo :bar :quu :baz)))
 ;; it understands that Clojure and ClojureScript can evaluate differently
 #?(:clj (clojure.test/is (= '\C \C)))
 #?(:cljs (clojure.test/is (= '"C" \C)))
@@ -37,7 +43,7 @@
   (clojure.test/is (= ["is this right?" "or not?"] (clojure.string/split-lines actual-out))))))
 
 (clojure.test/deftest block-0004
-  (clojure.test/testing  "doc/example.md - line 84 - The Basics"
+  (clojure.test/testing  "doc/example.md - line 94 - The Basics"
 (->> "here we are only checking that our code will run"
      reverse
      reverse
@@ -47,7 +53,7 @@
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-0005
-  (clojure.test/testing  "doc/example.md - line 143 - Wrap Test in a Reader Conditional - :reader-cond"
+  (clojure.test/testing  "doc/example.md - line 153 - Wrap Test in a Reader Conditional - :reader-cond"
 #?(:clj
 (do
 ;; This code block will be wrapped in a #?(:clj (do ...))
@@ -60,7 +66,7 @@ nil
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-0006
-  (clojure.test/testing  "doc/example.md - line 153 - Wrap Test in a Reader Conditional - :reader-cond"
+  (clojure.test/testing  "doc/example.md - line 163 - Wrap Test in a Reader Conditional - :reader-cond"
 #?(:cljs
 (do
 ;; This code block will be wrapped in a #?(:cljs (do ...))
@@ -72,18 +78,18 @@ nil
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-0007
-  (clojure.test/testing  "doc/example.md - line 161 - Wrap Test in a Reader Conditional - :reader-cond"
+  (clojure.test/testing  "doc/example.md - line 171 - Wrap Test in a Reader Conditional - :reader-cond"
 ;; And our generic cljc code:
 (clojure.test/is (= '[1 2 3] (read-string "[1 2 3]")))))
 
 (clojure.test/deftest ^:testing-meta123 block-0008
-  (clojure.test/testing  "doc/example.md - line 255 - Specifying Metadata - :meta"
+  (clojure.test/testing  "doc/example.md - line 265 - Specifying Metadata - :meta"
 ;; this code block will generate a test with metadata {:testing-meta123 true}
 
 (clojure.test/is (= '[[:a 1]] (into [] {:a 1})))))
 
 (clojure.test/deftest ^{:testing-meta123 "a-specific-value", :testing-meta789 :yip} block-0009
-  (clojure.test/testing  "doc/example.md - line 266 - Specifying Metadata - :meta"
+  (clojure.test/testing  "doc/example.md - line 276 - Specifying Metadata - :meta"
 ;; this code block will generate a test with metadata:
 ;;  {:testing-meta123 "a-specific-value" :testing-meta789 :yip}
 
@@ -94,28 +100,28 @@ nil
    ["oh" "my" "goodness"])))))
 
 (clojure.test/deftest block-0010
-  (clojure.test/testing  "doc/example.md - line 305 - Applying Options - :apply"
+  (clojure.test/testing  "doc/example.md - line 315 - Applying Options - :apply"
 ;; A test will be generated for this code block
 (clojure.test/is (= '"don't skip me!" (apply str (interpose " " ["don't" "skip" "me!"]))))))
 
 (clojure.test/deftest block-0011
-  (clojure.test/testing  "doc/example.md - line 321 - Applying Options - :apply"
+  (clojure.test/testing  "doc/example.md - line 331 - Applying Options - :apply"
 ;; A test will be generated for this code block
 (clojure.test/is (= '"test me by default" (apply str (interpose " " ["test" "me" "by" "default"]))))))
 
 (clojure.test/deftest block-0012
-  (clojure.test/testing  "doc/example.md - line 335 - Section Titles"
+  (clojure.test/testing  "doc/example.md - line 345 - Section Titles"
 nil
 
 (clojure.test/is (= '"well!how!about!that" (string/join "!" ["well" "how" "about" "that"])))))
 
 (clojure.test/deftest block-0013
-  (clojure.test/testing  "doc/example.md - line 349 - Indented Blocks"
+  (clojure.test/testing  "doc/example.md - line 359 - Indented Blocks"
 ;; we handle simple cases a-OK.
 (clojure.test/is (= '6 (+ 1 2 3)))))
 
 (clojure.test/deftest block-0014
-  (clojure.test/testing  "doc/example.md - line 357 - Indented Blocks"
+  (clojure.test/testing  "doc/example.md - line 367 - Indented Blocks"
 ;; we handle indented wrapped strings just fine
 (def s "my
 goodness
@@ -125,14 +131,14 @@ gracious")
   (clojure.test/is (= ["my" "goodness" "gracious"] (clojure.string/split-lines actual-out))))))
 
 (clojure.test/deftest block-0015
-  (clojure.test/testing  "doc/example.md - line 448 - Test Run Order"
+  (clojure.test/testing  "doc/example.md - line 458 - Test Run Order"
 (defn fn-block1 [] (+ 1 2 3))
 
 ; test-doc-blocks dummy assertion to appease tools that fail on no assertions
 (clojure.test/is (= '"dummy" "dummy"))))
 
 (clojure.test/deftest block-0016
-  (clojure.test/testing  "doc/example.md - line 453 - Test Run Order"
+  (clojure.test/testing  "doc/example.md - line 463 - Test Run Order"
 ;; and we continue in this block
 
 (def var-block2 (+ 4 5 6))
@@ -140,7 +146,7 @@ gracious")
 (clojure.test/is (= '21 (+ (fn-block1) var-block2)))))
 
 (clojure.test/deftest block-0017
-  (clojure.test/testing  "doc/example.md - line 463 - Test Run Order"
+  (clojure.test/testing  "doc/example.md - line 473 - Test Run Order"
 (clojure.test/is (= '100 (+ (fn-block1) var-block2 79)))))
 
 (defn test-ns-hook [] (block-0001) (block-0002) (block-0003) (block-0004) (block-0005) (block-0006) (block-0007) (block-0008) (block-0009) (block-0010) (block-0011) (block-0012) (block-0013) (block-0014) (block-0015) (block-0016) (block-0017))
