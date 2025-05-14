@@ -42,7 +42,7 @@ Within your Clojure code blocks, test-doc-blocks automatically generates asserti
    ;; => {:foo :bar
    ;      :quu :baz}
 
-   ;; Of if you prefer, without the leading comment character
+   ;; Or if you prefer, without the leading comment character
    (assoc {} :foo :bar :quu :baz)
    ;; => {:foo :bar
           :quu :baz}
