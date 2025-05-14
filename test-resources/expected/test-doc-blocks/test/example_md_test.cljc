@@ -28,7 +28,7 @@
 ;; Expected output can span multiple lines
 (clojure.test/is (= '{:foo :bar
      :quu :baz} (assoc {} :foo :bar :quu :baz)))
-;; Of if you prefer, without the leading comment character
+;; Or if you prefer, without the leading comment character
 (clojure.test/is (= '{:foo :bar
        :quu :baz} (assoc {} :foo :bar :quu :baz)))
 ;; it understands that Clojure and ClojureScript can evaluate differently
