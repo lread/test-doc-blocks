@@ -86,6 +86,9 @@
     ;; comment characters
     (is (= "=> {:foo :bar\n:baz :quu}\n"
            (sut/prep-block-for-conversion-to-test ";; => {:foo :bar\n;:baz :quu}\n"))))
+  (testing "Editor style multiline blocks can use more than one leading comment characted"
+    (is (= "=> {:foo :bar\n:baz :quu}\n"
+           (sut/prep-block-for-conversion-to-test ";; => {:foo :bar\n;;:baz :quu}\n"))))
   (testing "Editor style multiline blocks without leading comments"
     (is (= "=> {:foo :bar\n:baz :quu}\n"
            (sut/prep-block-for-conversion-to-test ";; => {:foo :bar\n:baz :quu}\n"))))

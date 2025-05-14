@@ -29,7 +29,7 @@
   "
   [block-text]
   (let [re-editor-style-out-expected #"^\s*(?:;;\s*){0,1}(=stdout=>|=stderr=>)(?:\s*$| {0,1}(.*))"
-        re-out-continue #"^\s*;(?:\s*$| {0,1}(.*))"
+        re-out-continue #"^\s*;+(?:\s*$| {0,1}(.*))"
         re-editor-style-expected #"^\s*(?:;;\s*){0,1}(=clj=>|=cljs=>|=>)\s*(.*$)"]
     (-> (loop [acc {:body ""}
                [line :as lines] (string/split-lines block-text)]
