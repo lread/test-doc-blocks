@@ -80,6 +80,15 @@
                                                                        ";      line2    "]))))    )) )
 
 (deftest comment-handling
+  (testing "Editor style multiline blocks removes leading comments"
+    ;; The part of code that is rewriting these blocks as test cases expects the assertion symbol
+    ;; `=>` to be on its own line and the following expectation on a separate line without leading
+    ;; comment characters
+    (is (= "=> {:foo :bar\n:baz :quu}\n"
+           (sut/prep-block-for-conversion-to-test ";; => {:foo :bar\n;:baz :quu}\n"))))
+  (testing "Editor style multiline blocks without leading comments"
+    (is (= "=> {:foo :bar\n:baz :quu}\n"
+           (sut/prep-block-for-conversion-to-test ";; => {:foo :bar\n:baz :quu}\n"))))
   (testing "missing ;; is ok for assertion"
     (is (= "=stdout=> [\"hello there\"]\n"
            (sut/prep-block-for-conversion-to-test "=stdout=> hello there"))))
