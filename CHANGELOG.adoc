@@ -20,6 +20,8 @@ A release with known breaking changes is marked with:
 ** You'll need to use at least clojure v1.11 when generating tests
 
 * Other changes
+** Test-doc-blocks now correctly specifies `true` for ClojureScript `include-macros`
+(thanks for raising https://github.com/NoahTheDuke[@NoahTheDuke]! thanks for fixing https://github.com/mattiuusitalo[@mattiuusitalo]!)
 ** Bumped deps (used during test generation only)
 
 == v1.1.20 - 2024-05-06 [[v1.1.20]]
