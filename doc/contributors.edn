@@ -8,7 +8,9 @@
   {:github-id "uochan" :contributions [:feedback]}
   {:github-id "holyjak" :contributions [:docs]}
   {:github-id "MIJOTHY" :contributions [:feedback :docs]}
-  {:github-id "genmeblog" :contributions [:feedback]}]
+  {:github-id "genmeblog" :contributions [:feedback]}
+  {:github-id "NoahTheDuke" :contributions [:feedback]}
+  {:github-id "mattiuusitalo" :contributions [:feedback :code]}]
  :maintainers
  [{:github-id "lread"
    :contributions [:code]}]}
