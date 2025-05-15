@@ -89,7 +89,7 @@ image:lread.png[lread,width=273,link="https://github.com/lread"]
 // AUTO-GENERATED:MAINTAINERS-END
 
 == License
-Copyright © 2024 Lee Read, all rights reserved.
+Copyright © 2025 Lee Read, all rights reserved.
 
 Distributed under the EPL License, same as Clojure.
 See LICENSE.
