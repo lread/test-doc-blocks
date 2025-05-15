@@ -1,7 +1,7 @@
 (ns example-md-out-test
   (:require clojure.test
             clojure.string
-            [lread.test-doc-blocks.runtime :include-macros]))
+            [lread.test-doc-blocks.runtime :include-macros true]))
 
 (clojure.test/deftest block-0001
   (clojure.test/testing  "doc/example.md - line 70 - The Basics"
