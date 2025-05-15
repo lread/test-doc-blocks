@@ -2,7 +2,7 @@
   #?(:clj (:refer-clojure :exclude [read-string]))
   (:require clojure.test
             clojure.string
-            #?(:cljs [lread.test-doc-blocks.runtime :include-macros])
+            #?(:cljs [lread.test-doc-blocks.runtime :include-macros true])
             #?(:clj lread.test-doc-blocks.runtime)
             #?@(:clj [[clojure.edn :refer [read-string]]] :cljs [[cljs.reader :refer [read-string]]])
             [clojure.set :as set]

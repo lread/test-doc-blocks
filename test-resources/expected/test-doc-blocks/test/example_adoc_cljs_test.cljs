@@ -1,7 +1,7 @@
 (ns example-adoc-cljs-test
   (:require clojure.test
             clojure.string
-            [lread.test-doc-blocks.runtime :include-macros]
+            [lread.test-doc-blocks.runtime :include-macros true]
             [goog.math :as math])
   (:import goog.events.EventType))
 

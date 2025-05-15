@@ -24,7 +24,7 @@
 
 (defn- base-requires [platform]
   (let [base ['clojure.test 'clojure.string]
-        runtime-cljs "[lread.test-doc-blocks.runtime :include-macros]"
+        runtime-cljs "[lread.test-doc-blocks.runtime :include-macros true]"
         runtime-clj "lread.test-doc-blocks.runtime"]
     (case platform
       :clj (conj base runtime-clj)

@@ -1,7 +1,7 @@
 (ns minimal-adoc-test
   (:require clojure.test
             clojure.string
-            #?(:cljs [lread.test-doc-blocks.runtime :include-macros])
+            #?(:cljs [lread.test-doc-blocks.runtime :include-macros true])
             #?(:clj lread.test-doc-blocks.runtime)))
 
 (clojure.test/deftest block-0001
