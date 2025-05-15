@@ -13,7 +13,15 @@
             (string/join "\n"
                          [";; =stdout=> line1"
                           "; line2"
-                          "; line3"])))))
+                          "; line3"]))))
+
+    ;; Should not matter how many leading comments are used
+    (is (= "=stdout=> [\"line1\" \"line2\" \"line3\"]\n"
+           (sut/prep-block-for-conversion-to-test
+            (string/join "\n"
+                         [";; =stdout=> line1"
+                          ";; line2"
+                          ";; line3"])))))
   (testing "multiple lines, first line in block"
     (is (= "=stdout=> [\"line1\" \"line2\" \"line3\"]\n"
            (sut/prep-block-for-conversion-to-test
@@ -118,6 +126,10 @@
           "=> 42"
           "=stdout=> [\"some stdout\" \"continue stdout\"]"
           "=stderr=> [\"some stderr goes\" \"here and\" \"here\"]"
+          ""
+          "(assoc {} :foo :bar :baz :quu)"
+          "=> {:foo :bar"
+          "    :baz :quu}"
           "That is all"]
          (string/split-lines
           (sut/prep-block-for-conversion-to-test
@@ -141,4 +153,8 @@
                               "; some stderr goes"
                               "; here and"
                               "; here"
+                              ""
+                              "(assoc {} :foo :bar :baz :quu)"
+                              ";; => {:foo :bar"
+                              ";;     :baz :quu}"
                               "That is all"]))))))
