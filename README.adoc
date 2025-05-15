@@ -65,10 +65,12 @@ Test-doc-block versioning scheme is: `major`.`minor`.`release`-`test-qualifier`
 []
 --
 image:seancorfield.png[seancorfield,width=273,link="https://github.com/seancorfield"]
+image:mattiuusitalo.png[mattiuusitalo,width=273,link="https://github.com/mattiuusitalo"]
 image:MIJOTHY.png[MIJOTHY,width=273,link="https://github.com/MIJOTHY"]
 image:borkdude.png[borkdude,width=273,link="https://github.com/borkdude"]
 image:genmeblog.png[genmeblog,width=273,link="https://github.com/genmeblog"]
 image:holyjak.png[holyjak,width=273,link="https://github.com/holyjak"]
+image:NoahTheDuke.png[NoahTheDuke,width=273,link="https://github.com/NoahTheDuke"]
 image:PEZ.png[PEZ,width=273,link="https://github.com/PEZ"]
 image:SevereOverfl0w.png[SevereOverfl0w,width=273,link="https://github.com/SevereOverfl0w"]
 image:sogaiu.png[sogaiu,width=273,link="https://github.com/sogaiu"]
