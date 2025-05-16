@@ -13,7 +13,15 @@
             (string/join "\n"
                          [";; =stdout=> line1"
                           "; line2"
-                          "; line3"])))))
+                          "; line3"]))))
+
+    ;; Should not matter how many leading comments are used
+    (is (= "=stdout=> [\"line1\" \"line2\" \"line3\"]\n"
+           (sut/prep-block-for-conversion-to-test
+            (string/join "\n"
+                         [";; =stdout=> line1"
+                          ";; line2"
+                          ";; line3"])))))
   (testing "multiple lines, first line in block"
     (is (= "=stdout=> [\"line1\" \"line2\" \"line3\"]\n"
            (sut/prep-block-for-conversion-to-test
@@ -80,6 +88,18 @@
                                                                        ";      line2    "]))))    )) )
 
 (deftest comment-handling
+  (testing "Editor style multiline blocks removes leading comments"
+    ;; The part of code that is rewriting these blocks as test cases expects the assertion symbol
+    ;; `=>` to be on its own line and the following expectation on a separate line without leading
+    ;; comment characters
+    (is (= "=> {:foo :bar\n:baz :quu}\n"
+           (sut/prep-block-for-conversion-to-test ";; => {:foo :bar\n;:baz :quu}\n"))))
+  (testing "Editor style multiline blocks can use more than one leading comment characted"
+    (is (= "=> {:foo :bar\n:baz :quu}\n"
+           (sut/prep-block-for-conversion-to-test ";; => {:foo :bar\n;;:baz :quu}\n"))))
+  (testing "Editor style multiline blocks without leading comments"
+    (is (= "=> {:foo :bar\n:baz :quu}\n"
+           (sut/prep-block-for-conversion-to-test ";; => {:foo :bar\n:baz :quu}\n"))))
   (testing "missing ;; is ok for assertion"
     (is (= "=stdout=> [\"hello there\"]\n"
            (sut/prep-block-for-conversion-to-test "=stdout=> hello there"))))
@@ -87,7 +107,36 @@
     (is (= ";=stdout=> hello there\n"
            (sut/prep-block-for-conversion-to-test ";=stdout=> hello there")))
     (is (= ";;;=stdout=> hello there\n"
-           (sut/prep-block-for-conversion-to-test ";;;=stdout=> hello there"))) ))
+           (sut/prep-block-for-conversion-to-test ";;;=stdout=> hello there"))))
+  (testing "Mixing stdout and editor style assertions"
+    (is (= "(do (println \"When do I end?
+=> 77\")
+    42)
+=stdout=> [\"When do I end?\" \"=> 77\"]
+=> 42
+"
+           (sut/prep-block-for-conversion-to-test "(do (println \"When do I end?\n=> 77\")
+    42)
+;; =stdout=> When do I end?
+; => 77
+;; => 42
+")))
+
+    (is (= "[:when :do :i '=stdout=> (inc 41) :end?]
+=> [:when
+:do
+:i
+=stdout=> 42
+:end?]
+
+"
+           (sut/prep-block-for-conversion-to-test "[:when :do :i '=stdout=> (inc 41) :end?]
+   ;; => [:when
+   ; :do
+   ; :i
+   ; =stdout=> 42
+   ; :end?]
+  ")))))
 
 (deftest larger-test
   (is (= ["Testing 123"
@@ -106,6 +155,10 @@
           "=> 42"
           "=stdout=> [\"some stdout\" \"continue stdout\"]"
           "=stderr=> [\"some stderr goes\" \"here and\" \"here\"]"
+          ""
+          "(assoc {} :foo :bar :baz :quu)"
+          "=> {:foo :bar"
+          "    :baz :quu}"
           "That is all"]
          (string/split-lines
           (sut/prep-block-for-conversion-to-test
@@ -129,4 +182,8 @@
                               "; some stderr goes"
                               "; here and"
                               "; here"
+                              ""
+                              "(assoc {} :foo :bar :baz :quu)"
+                              ";; => {:foo :bar"
+                              ";;     :baz :quu}"
                               "That is all"]))))))
