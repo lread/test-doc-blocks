@@ -107,7 +107,36 @@
     (is (= ";=stdout=> hello there\n"
            (sut/prep-block-for-conversion-to-test ";=stdout=> hello there")))
     (is (= ";;;=stdout=> hello there\n"
-           (sut/prep-block-for-conversion-to-test ";;;=stdout=> hello there"))) ))
+           (sut/prep-block-for-conversion-to-test ";;;=stdout=> hello there"))))
+  (testing "Mixing stdout and editor style assertions"
+    (is (= "(do (println \"When do I end?
+=> 77\")
+    42)
+=stdout=> [\"When do I end?\" \"=> 77\"]
+=> 42
+"
+           (sut/prep-block-for-conversion-to-test "(do (println \"When do I end?\n=> 77\")
+    42)
+;; =stdout=> When do I end?
+; => 77
+;; => 42
+")))
+
+    (is (= "[:when :do :i '=stdout=> (inc 41) :end?]
+=> [:when
+:do
+:i
+=stdout=> 42
+:end?]
+
+"
+           (sut/prep-block-for-conversion-to-test "[:when :do :i '=stdout=> (inc 41) :end?]
+   ;; => [:when
+   ; :do
+   ; :i
+   ; =stdout=> 42
+   ; :end?]
+  ")))))
 
 (deftest larger-test
   (is (= ["Testing 123"
