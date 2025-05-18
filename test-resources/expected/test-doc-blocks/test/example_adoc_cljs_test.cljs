@@ -6,7 +6,7 @@
   (:import goog.events.EventType))
 
 (clojure.test/deftest block-0001
-  (clojure.test/testing  "doc/example.adoc - line 271 - Specifying The Platform - :platform"
+  (clojure.test/testing  "doc/example.adoc - line 305 - Specifying The Platform - :platform"
 ;; this code block will generate a test under example-adoc-cljs-test ns to a .cljs file
 
 nil

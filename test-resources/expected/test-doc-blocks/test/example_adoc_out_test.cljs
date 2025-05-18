@@ -4,7 +4,7 @@
             [lread.test-doc-blocks.runtime :include-macros true]))
 
 (clojure.test/deftest block-0001
-  (clojure.test/testing  "doc/example.adoc - line 98 - The Basics"
+  (clojure.test/testing  "doc/example.adoc - line 84 - The Basics"
 ;; And the same idea for ClojureScript
 (let [[actual actual-out actual-err] (lread.test-doc-blocks.runtime/eval-capture (do
   (println "To out I go")
