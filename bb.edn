@@ -44,6 +44,9 @@
          download-deps {:doc "bring down Clojure deps"
                         :task (clojure "-T:build download-deps")}
 
+         dev {:doc "Launch nREPL for development, --help for usage"
+              :task dev-repl/-main}
+
          lint {:doc "[--rebuild] lint source code with clj-kondo"
                :task lint/-main}
 
