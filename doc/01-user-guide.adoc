@@ -370,6 +370,7 @@ Other options and related projects that I am currently aware of (in alphabetical
 It uses this support in tests for some of its documentation.
 A `.feature` document describes the feature and includes given, when, then scenarios that are both run and shown in the documentation.
 You can use step definitions to hide any gritty details.
+* https://github.com/noahtheduke/lazytest[lazytest] - Supports running tests in markdown `.md` file code blocks
 * https://github.com/pink-gorilla/notebook[notebook] - Someday notebook-type tools might serve both as tests and docs.
 Until that golden day, test-doc-blocks and similar tools are worthy of consideration.
 * https://github.com/hyperfiddle/rcf[RCF] - Turns your Rich Comment Forms into tests
