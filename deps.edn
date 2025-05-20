@@ -62,7 +62,8 @@
            ;;
 
            ;; for kaocha see also tests.edn
-           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}
+           :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}
+                                 nubank/matcher-combinators {:mvn/version "3.9.1"}}
                     :extra-paths ["test"]
                     :main-opts ["-m" "kaocha.runner"]}
 

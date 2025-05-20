@@ -37,6 +37,11 @@ Within your Clojure code blocks, test-doc-blocks automatically generates asserti
    (+ 1 2 3 4)
    ;; => 10
 
+   ;; the expected value can span multiple lines
+   (assoc {} :foo :bar :quu :baz)
+   ;; => {:foo :bar
+   ;;     :quu :baz}
+
    ;; it understands that Clojure and ClojureScript can evaluate differently
    \C
    ;; =clj=> \C
@@ -52,7 +57,6 @@ Within your Clojure code blocks, test-doc-blocks automatically generates asserti
    ; is this right?
    ; or not?
    ```
-
    Sometimes we might care about evaluated result, stderr and stdout.
    <!-- #:test-doc-blocks {:platform :clj :test-ns example-md-out-test} -->
    ```clj
@@ -65,7 +69,6 @@ Within your Clojure code blocks, test-doc-blocks automatically generates asserti
    ;; =stderr=> To err is human
    ;; =stdout=> To out I go
    ```
-
    <!-- #:test-doc-blocks {:platform :cljs :test-ns example-md-out-test} -->
    ```cljs
    ;; And the same idea for ClojureScript
@@ -86,6 +89,51 @@ It is sometimes just nice to know that your code snippet will run without except
      reverse
      reverse
      (apply str))
+```
+## Multiline Expectations
+
+It is normal for `=stdout=>` and `=stderr=>` output to span multiple lines.
+You can span other expected output over multiple lines for readability.
+
+<!-- #:test-doc-blocks {:platform :clj :test-ns example-md-out-test} -->
+```clj
+;; A snippit of Clojure where we check result, stderr and stdout
+(do
+  (println "Hi ho\nHi ho\nTo out I will go")
+  (binding [*out* *err*] (println "To err is human\nTo forgive\nIs devine"))
+  (range 1 16))
+;; => ( 1  2  3  4  5
+;;      6  7  8  9 10
+;;     11 12 13 14 15) 
+;; =stdout=> Hi ho
+;; Hi ho
+;; To out I will go
+;; =stderr=> 
+;; To err is human
+;; To forgive
+;; Is devine
+```
+If your expected stdout or stderr contains subsequent lines starting with test-doc-block `+=*>+` markers, you can distinguish by using a single semicolon prefix for subsequent lines:
+
+<!-- #:test-doc-blocks {:platform :clj :test-ns example-md-out-test} -->
+```clj
+;; A snippit of Clojure where we check result, stderr and stdout
+(do
+  (println "Hi ho\nHi ho\nTo out I will go\n=stderr=> still part of stdout")
+  (binding [*out* *err*] (println "To err is human\nTo forgive\nIs devine\n=> part of stderr"))
+  [:bip :bop '=stdout> :bap :borp])
+;; => [:bip :bop
+;;     =stdout> :bap
+;;     :borp]
+;; =stdout=> Hi ho
+; Hi ho
+; To out I will go
+; =stderr=> still part of stdout
+;; =stderr=> 
+; To err is human
+; To forgive
+; Is devine
+; => part of stderr
 ```
 
 ## Inline Options

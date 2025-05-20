@@ -6,7 +6,7 @@
             [clojure.string :as string]))
 
 (clojure.test/deftest block-0001
-  (clojure.test/testing  "doc/example.md - line 196 - Specifying Test Namespace - :test-ns"
+  (clojure.test/testing  "doc/example.md - line 244 - Specifying Test Namespace - :test-ns"
 ;; this code block will generate tests under example-md-new-ns.ns1-test
 
 nil

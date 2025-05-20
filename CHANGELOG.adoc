@@ -21,7 +21,11 @@ A release with known breaking changes is marked with:
 
 * Other changes
 ** Test-doc-blocks now correctly specifies `true` for ClojureScript `include-macros`
+https://github.com/lread/test-doc-blocks/issues/29[#29]
 (thanks for raising https://github.com/NoahTheDuke[@NoahTheDuke]! thanks for fixing https://github.com/mattiuusitalo[@mattiuusitalo]!)
+** Editor-style multiline expectations can be fully commented
+https://github.com/lread/test-doc-blocks/issues/33[#33]
+(thanks https://github.com/mattiuusitalo[@mattiuusitalo]!)
 ** Bumped deps (used during test generation only)
 
 == v1.1.20 - 2024-05-06 [[v1.1.20]]

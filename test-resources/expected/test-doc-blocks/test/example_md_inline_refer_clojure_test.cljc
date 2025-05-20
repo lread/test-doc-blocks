@@ -7,7 +7,7 @@
             [clojure.edn :refer [read-string]]))
 
 (clojure.test/deftest block-0001
-  (clojure.test/testing  "doc/example.md - line 413 - Inline refer-clojure"
+  (clojure.test/testing  "doc/example.md - line 461 - Inline refer-clojure"
 ;; a contrived example that uses uses clojure.edn/read-string in place
 ;; of clojure.core/read-string and excludes clojure.core/for
 nil
