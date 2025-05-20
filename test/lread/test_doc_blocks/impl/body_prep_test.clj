@@ -1,9 +1,10 @@
 (ns lread.test-doc-blocks.impl.body-prep-test
   (:require [clojure.string :as string]
             [clojure.test :refer [deftest testing is]]
-            [lread.test-doc-blocks.impl.body-prep :as sut]))
+            [lread.test-doc-blocks.impl.body-prep :as sut]
+            [matcher-combinators.test]))
 
-(deftest converts-stdout-assertions
+(deftest converts-stdout-assertions-test
   (testing "single line"
     (is (= "=stdout=> [\"line1\"]\n"
            (sut/prep-block-for-conversion-to-test ";;=stdout=> line1"))))
@@ -42,7 +43,7 @@
                                "; ; hello"
                                "; ; there"]))))) )
 
-(deftest converts-stderr-assertions
+(deftest converts-stderr-assertions-test
   (testing "sanity test - multiple lines"
     (is (= "=stderr=> [\"line1\" \"line2\" \"line3\"]\n"
            (sut/prep-block-for-conversion-to-test
@@ -51,7 +52,7 @@
                           "; line2"
                           "; line3"]))))))
 
-(deftest converts-simple-editor-style-assertions
+(deftest converts-simple-editor-style-assertions-test
   (is (= "=> (+ 1 2 3)\n"
          (sut/prep-block-for-conversion-to-test ";; => (+ 1 2 3)")))
   (is (= "=clj=> (+ 4 5 6)\n"
@@ -60,14 +61,14 @@
          (sut/prep-block-for-conversion-to-test ";; =cljs=> (+ 7 8 9)"))))
 
 
-(deftest ignores-repl-style-assertions
+(deftest ignores-repl-style-assertions-test
   (is (= "user=> (* 6 7)\n42\n"
          (sut/prep-block-for-conversion-to-test
           (string/join "\n"
                        ["user=> (* 6 7)"
                         "42"])))))
 
-(deftest whitespace-handling
+(deftest whitespace-handling-test
   (testing "editor style"
     (is (= "=> {:a 1 :b 2}\n"
            (sut/prep-block-for-conversion-to-test ";;=>{:a 1 :b 2}")
@@ -87,7 +88,7 @@
                                                                        ";     line1     "
                                                                        ";      line2    "]))))    )) )
 
-(deftest comment-handling
+(deftest comment-handling-test
   (testing "Editor style multiline blocks removes leading comments"
     ;; The part of code that is rewriting these blocks as test cases expects the assertion symbol
     ;; `=>` to be on its own line and the following expectation on a separate line without leading
@@ -103,87 +104,169 @@
   (testing "missing ;; is ok for assertion"
     (is (= "=stdout=> [\"hello there\"]\n"
            (sut/prep-block-for-conversion-to-test "=stdout=> hello there"))))
-  (testing "no conversion when not ;;"
+  (testing "no conversion when assertion token line does not startw with ;;"
     (is (= ";=stdout=> hello there\n"
            (sut/prep-block-for-conversion-to-test ";=stdout=> hello there")))
     (is (= ";;;=stdout=> hello there\n"
            (sut/prep-block-for-conversion-to-test ";;;=stdout=> hello there"))))
-  (testing "Mixing stdout and editor style assertions"
-    (is (= "(do (println \"When do I end?
-=> 77\")
-    42)
-=stdout=> [\"When do I end?\" \"=> 77\"]
-=> 42
-"
-           (sut/prep-block-for-conversion-to-test "(do (println \"When do I end?\n=> 77\")
-    42)
-;; =stdout=> When do I end?
-; => 77
-;; => 42
-")))
+  )
 
-    (is (= "[:when :do :i '=stdout=> (inc 41) :end?]
-=> [:when
-:do
-:i
-=stdout=> 42
-:end?]
-
-"
-           (sut/prep-block-for-conversion-to-test "[:when :do :i '=stdout=> (inc 41) :end?]
-   ;; => [:when
-   ; :do
-   ; :i
-   ; =stdout=> 42
-   ; :end?]
-  ")))))
+(deftest multiline-expectations-test
+  (testing "pass-thru editor-style"
+    (is (match? ["[:i :can :be"
+                 " :on :multiple"
+                 " :lines]"
+                 "=> [:i :can :be"
+                 "    :on :multiple"
+                 "    :lines]"]
+                (string/split-lines
+                 (sut/prep-block-for-conversion-to-test
+                  (string/join "\n" ["[:i :can :be"
+                                     " :on :multiple"
+                                     " :lines]"
+                                     "=> [:i :can :be"
+                                     "    :on :multiple"
+                                     "    :lines]"]))))))
+  (testing "comment editor-style"
+    (is (match? ["[:i :can :be"
+                 " :on :multiple"
+                 " :lines]"
+                 "=> [:i :can :be"
+                 #" * :on :multiple$"
+                 #" * :lines]$"]
+                (string/split-lines
+                 (sut/prep-block-for-conversion-to-test
+                  (string/join "\n" ["[:i :can :be"
+                                     " :on :multiple"
+                                     " :lines]"
+                                     ";;=> [:i :can :be"
+                                     ";;    :on :multiple"
+                                     ";;    :lines]"]))))))
+  (testing "comment editor-style different leading commas on continuation lines"
+    (is (match? ["[:i :can :be"
+                 " :on :multiple"
+                 " :lines]"
+                 "=> [:i :can :be"
+                 #" * :on :multiple$"
+                 #" * :lines]$"]
+                (string/split-lines
+                 (sut/prep-block-for-conversion-to-test
+                  (string/join "\n" ["[:i :can :be"
+                                     " :on :multiple"
+                                     " :lines]"
+                                     ";; => [:i :can :be"
+                                     ";      :on :multiple"
+                                     ";;;;   :lines]"]))))))
+  (testing "comment editor-style no leading commas on continuation lines"
+    (is (match? ["[:i :can :be"
+                 " :on :multiple"
+                 " :lines]"
+                 "=> [:i :can :be"
+                 #" * :on :multiple$"
+                 #" * :lines]$"]
+                (string/split-lines
+                 (sut/prep-block-for-conversion-to-test
+                  (string/join "\n" ["[:i :can :be"
+                                     " :on :multiple"
+                                     " :lines]"
+                                     ";; => [:i :can :be"
+                                     "       :on :multiple"
+                                     "       :lines]"])))))
+    (testing "can handle embedded => assertion token in =stdout=> expectation"
+      (is (match? ["(do (println \"When do I end?\\n=> 77\")"
+                   "    42)"
+                   "=stdout=> [\"When do I end?\" \"=> 77\"]"
+                   "=> 42"
+                   "]"]
+                  (string/split-lines
+                   (sut/prep-block-for-conversion-to-test
+                    (string/join "\n" ["(do (println \"When do I end?\\n=> 77\")"
+                                       "    42)"
+                                       ";; =stdout=> When do I end?"
+                                       "; => 77"
+                                       ";; => 42"
+                                       "]"]))))))
+    (testing "can handle embedded =stdout=> token in => expectation"
+      (is (match? ["[:when :do :i '=stdout=> (inc 41) :end?]"
+                   "=> [:when"
+                   ":do"
+                   ":i"
+                   "=stdout=> 42"
+                   ":end?]"]
+                  (string/split-lines
+                   (sut/prep-block-for-conversion-to-test
+                    (string/join "\n" ["[:when :do :i '=stdout=> (inc 41) :end?]"
+                                       ";; => [:when"
+                                       ";; :do"
+                                       ";; :i"
+                                       ";; =stdout=> 42"
+                                       ";; :end?]"]))))))
+    (testing "can handle embedded =stdout=> token in => expectation"
+      (is (match? ["[:when :do :i '=stdout=> (inc 41) :end?]"
+                   "=> [:when"
+                   ":do"
+                   ":i"
+                   "=stdout=> 42"
+                   ":end?]"]
+                  (string/split-lines
+                   (sut/prep-block-for-conversion-to-test
+                    (string/join "\n" ["[:when :do :i '=stdout=> (inc 41) :end?]"
+                                       "=> [:when"
+                                       ":do"
+                                       ":i"
+                                       "=stdout=> 42"
+                                       ":end?]"]))))))))
 
 (deftest larger-test
-  (is (= ["Testing 123"
-          ""
-          "REPL style asserts"
-          ""
-          "user=> (+ 1 2 3)"
-          "6"
-          ""
-          "Editor style asserts"
-          ""
-          "(* 8 8)"
-          "=> 64"
-          ""
-          "(do-something)"
-          "=> 42"
-          "=stdout=> [\"some stdout\" \"continue stdout\"]"
-          "=stderr=> [\"some stderr goes\" \"here and\" \"here\"]"
-          ""
-          "(assoc {} :foo :bar :baz :quu)"
-          "=> {:foo :bar"
-          "    :baz :quu}"
-          "That is all"]
-         (string/split-lines
-          (sut/prep-block-for-conversion-to-test
-           (string/join "\n" ["Testing 123"
-                              ""
-                              "REPL style asserts "
-                              ""
-                              "user=> (+ 1 2 3)"
-                              "6"
-                              ""
-                              "Editor style asserts"
-                              ""
-                              "(* 8 8)"
-                              ";; => 64"
-                              ""
-                              "(do-something)"
-                              ";; => 42"
-                              ";; =stdout=> some stdout"
-                              "; continue stdout"
-                              ";; =stderr=>"
-                              "; some stderr goes"
-                              "; here and"
-                              "; here"
-                              ""
-                              "(assoc {} :foo :bar :baz :quu)"
-                              ";; => {:foo :bar"
-                              ";;     :baz :quu}"
-                              "That is all"]))))))
+  (is (match? ["Testing 123"
+               ""
+               "REPL style asserts"
+               ""
+               "user=> (+ 1 2 3)"
+               "6"
+               ""
+               "Editor style asserts"
+               ""
+               "(* 8 8)"
+               "=> 64"
+               ""
+               "(do-something)"
+               "=> 42"
+               ";; some comment"
+               "=stdout=> [\"some stdout\" \"continue stdout\"]"
+               "=stderr=> [\"some stderr goes\" \"here and\" \"here\"]"
+               ""
+               "(assoc {} :foo :bar :baz :quu)"
+               "=> {:foo :bar"
+               "    :baz :quu}"
+               ";; some other comment"
+               "That is all"]
+              (string/split-lines
+               (sut/prep-block-for-conversion-to-test
+                (string/join "\n" ["Testing 123"
+                                   ""
+                                   "REPL style asserts "
+                                   ""
+                                   "user=> (+ 1 2 3)"
+                                   "6"
+                                   ""
+                                   "Editor style asserts"
+                                   ""
+                                   "(* 8 8)"
+                                   ";; => 64"
+                                   ""
+                                   "(do-something)"
+                                   ";; => 42"
+                                   ";; some comment"
+                                   ";; =stdout=> some stdout"
+                                   "; continue stdout"
+                                   ";; =stderr=>"
+                                   "; some stderr goes"
+                                   "; here and"
+                                   "; here"
+                                   ""
+                                   "(assoc {} :foo :bar :baz :quu)"
+                                   ";; => {:foo :bar"
+                                   ";;     :baz :quu}"
+                                   ";; some other comment"
+                                   "That is all"]))))))
