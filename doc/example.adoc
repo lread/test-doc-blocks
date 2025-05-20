@@ -128,7 +128,7 @@ You can span other expected output over multiple lines for readability.
 ;; Is devine
 ----
 
-If your expected output contains subsequent lines starting with test-doc-block `+=*>+` markers, you can distinguish by using a single semicolon prefix for subsequent lines:
+If your expected stdout or stderr contains subsequent lines starting with test-doc-block `+=*>+` markers, you can distinguish by using a single semicolon prefix for subsequent lines:
 
 //#:test-doc-blocks {:platform :clj :test-ns example-adoc-out-test}
 [source,clj]
@@ -139,8 +139,8 @@ If your expected output contains subsequent lines starting with test-doc-block `
   (binding [*out* *err*] (println "To err is human\nTo forgive\nIs devine\n=> part of stderr"))
   [:bip :bop '=stdout> :bap :borp])
 ;; => [:bip :bop
-;      =stdout> :bap
-;      :borp]
+;;     =stdout> :bap
+;;     :borp]
 ;; =stdout=> Hi ho
 ; Hi ho
 ; To out I will go

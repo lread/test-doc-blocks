@@ -35,8 +35,8 @@
   (binding [*out* *err*] (println "To err is human\nTo forgive\nIs devine\n=> part of stderr"))
   [:bip :bop '=stdout> :bap :borp]))]
   (clojure.test/is (= '[:bip :bop
-     =stdout> :bap
-     :borp] actual))
+    =stdout> :bap
+    :borp] actual))
   (clojure.test/is (= ["To err is human" "To forgive" "Is devine" "=> part of stderr"] (clojure.string/split-lines actual-err)))
   (clojure.test/is (= ["Hi ho" "Hi ho" "To out I will go" "=stderr=> still part of stdout"] (clojure.string/split-lines actual-out))))))
 
