@@ -104,12 +104,11 @@
   (testing "missing ;; is ok for assertion"
     (is (= "=stdout=> [\"hello there\"]\n"
            (sut/prep-block-for-conversion-to-test "=stdout=> hello there"))))
-  (testing "no conversion when assertion token line does not startw with ;;"
+  (testing "no conversion when assertion token line does not start with ;;"
     (is (= ";=stdout=> hello there\n"
            (sut/prep-block-for-conversion-to-test ";=stdout=> hello there")))
     (is (= ";;;=stdout=> hello there\n"
-           (sut/prep-block-for-conversion-to-test ";;;=stdout=> hello there"))))
-  )
+           (sut/prep-block-for-conversion-to-test ";;;=stdout=> hello there")))))
 
 (deftest multiline-expectations-test
   (testing "pass-thru editor-style"
