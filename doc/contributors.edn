@@ -10,7 +10,7 @@
   {:github-id "MIJOTHY" :contributions [:feedback :docs]}
   {:github-id "genmeblog" :contributions [:feedback]}
   {:github-id "NoahTheDuke" :contributions [:feedback]}
-  {:github-id "mattiuusitalo" :contributions [:feedback :code]}]
+  {:github-id "mattiuusitalo" :contributions [:feedback :code :docs]}]
  :maintainers
  [{:github-id "lread"
-   :contributions [:code]}]}
+   :contributions [:code :docs :testing]}]}
