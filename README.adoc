@@ -42,6 +42,7 @@ You might want the same for your library.
 
 * https://github.com/clj-commons/etaoin[etaoin] - Pure Clojure Webdriver protocol implementation 
 * https://github.com/seancorfield/honeysql[honeysql] - Turn Clojure data structures into SQL
+* https://github.com/metosin/malli[malli] - High-performance data-driven data specification library for Clojure/Script
 * https://github.com/metosin/oksa[oksa] - Generate GraphQL queries using Clojure data structures
 * https://github.com/clj-commons/rewrite-clj[rewrite-clj] - Rewrite Clojure Code and EDN!
 * test-doc-blocks - Test AsciiDoc and CommonMark code blocks found in articles and docstrings _(meta, right?)_
