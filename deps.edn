@@ -23,14 +23,14 @@
            :1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
            :1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
            :1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.4"}}}
-           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.0"}}}
+           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.1"}}}
 
            ;;
            ;; REPL to support bb dev-jvm & dev-cljs tasks, see script/dev_repl.clj
            ;;
            :nrepl
            {:extra-deps {nrepl/nrepl {:mvn/version "1.3.1"}
-                         cider/cider-nrepl {:mvn/version "0.55.7"}
+                         cider/cider-nrepl {:mvn/version "0.56.0"}
                          refactor-nrepl/refactor-nrepl {:mvn/version "3.11.0"}}
             :jvm-opts ["-XX:-OmitStackTraceInFastThrow" "-Djdk.attach.allowAttachSelf"]
             :main-opts  ["-m" "nrepl.cmdline"
@@ -40,8 +40,8 @@
            :flowstorm
            {;; for disabling the official compiler
             :classpath-overrides {org.clojure/clojure nil}
-            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.0-9"}
-                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.4.2"}}
+            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.0-10"}
+                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.4.4"}}
             :jvm-opts ["-Dclojure.storm.instrumentEnable=true"]}
 
            ;; clojure -X support for local examples
@@ -113,7 +113,7 @@
            :deploy {:extra-deps {slipset/deps-deploy {:mvn/version "0.2.2"}}}
 
            ;; Maintenance
-           :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.0"}
+           :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.1"}
                                    com.github.liquidz/antq {:mvn/version "2.11.1276"}
                                    org.slf4j/slf4j-simple {:mvn/version "2.0.17"} ;; to rid ourselves of logger warnings
                                    }
