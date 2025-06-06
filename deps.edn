@@ -3,7 +3,7 @@
  :deps {org.clojure/clojure {:mvn/version "1.11.4"}
         org.clojure/tools.reader {:mvn/version "1.5.2"}
         babashka/fs {:mvn/version "0.5.25"}
-        clj-kondo/clj-kondo {:mvn/version "2025.04.07"}
+        clj-kondo/clj-kondo {:mvn/version "2025.06.05"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
         metosin/malli {:mvn/version "0.18.0"}
         rewrite-clj/rewrite-clj  {:mvn/version "1.2.50"}}
@@ -40,7 +40,7 @@
            :flowstorm
            {;; for disabling the official compiler
             :classpath-overrides {org.clojure/clojure nil}
-            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.0-10"}
+            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.1"}
                          com.github.flow-storm/flow-storm-dbg {:mvn/version "4.4.4"}}
             :jvm-opts ["-Dclojure.storm.instrumentEnable=true"]}
 

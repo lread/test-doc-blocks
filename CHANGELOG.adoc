@@ -16,6 +16,8 @@ A release with known breaking changes is marked with:
 
 == Unreleased
 
+* Bumped deps (used during test generation only)
+
 == v1.2.21 [minor breaking] - 2025-05-20 [[v1.2.21]]
 
 * Minor breaking
