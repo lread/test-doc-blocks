@@ -5,7 +5,7 @@
         babashka/fs {:mvn/version "0.5.27"}
         clj-kondo/clj-kondo {:mvn/version "2025.09.22"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
-        metosin/malli {:mvn/version "0.19.1"}
+        metosin/malli {:mvn/version "0.19.2"}
         rewrite-clj/rewrite-clj  {:mvn/version "1.2.50"}}
 
  :aliases {;; we use babashka/neil for project attributes
