@@ -23,7 +23,7 @@
            :1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
            :1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
            :1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.4"}}}
-           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.2"}}}
+           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.3"}}}
 
            ;;
            ;; REPL to support bb dev-jvm & dev-cljs tasks, see script/dev_repl.clj
@@ -113,7 +113,7 @@
            :deploy {:extra-deps {slipset/deps-deploy {:mvn/version "0.2.2"}}}
 
            ;; Maintenance
-           :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.2"}
+           :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.3"}
                                    com.github.liquidz/antq {:mvn/version "2.11.1276"}
                                    org.slf4j/slf4j-simple {:mvn/version "2.0.17"} ;; to rid ourselves of logger warnings
                                    }
