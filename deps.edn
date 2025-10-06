@@ -2,10 +2,10 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.11.4"}
         org.clojure/tools.reader {:mvn/version "1.5.2"}
-        babashka/fs {:mvn/version "0.5.26"}
-        clj-kondo/clj-kondo {:mvn/version "2025.07.28"}
+        babashka/fs {:mvn/version "0.5.27"}
+        clj-kondo/clj-kondo {:mvn/version "2025.09.22"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
-        metosin/malli {:mvn/version "0.19.1"}
+        metosin/malli {:mvn/version "0.19.2"}
         rewrite-clj/rewrite-clj  {:mvn/version "1.2.50"}}
 
  :aliases {;; we use babashka/neil for project attributes
@@ -23,13 +23,13 @@
            :1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
            :1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
            :1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.4"}}}
-           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.2"}}}
+           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.3"}}}
 
            ;;
            ;; REPL to support bb dev-jvm & dev-cljs tasks, see script/dev_repl.clj
            ;;
            :nrepl
-           {:extra-deps {nrepl/nrepl {:mvn/version "1.3.1"}
+           {:extra-deps {nrepl/nrepl {:mvn/version "1.4.0"}
                          cider/cider-nrepl {:mvn/version "0.57.0"}
                          refactor-nrepl/refactor-nrepl {:mvn/version "3.11.0"}}
             :jvm-opts ["-XX:-OmitStackTraceInFastThrow" "-Djdk.attach.allowAttachSelf"]
@@ -40,8 +40,8 @@
            :flowstorm
            {;; for disabling the official compiler
             :classpath-overrides {org.clojure/clojure nil}
-            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.2"}
-                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.5.1"}}
+            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.3-1"}
+                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.5.7"}}
             :jvm-opts ["-Dclojure.storm.instrumentEnable=true"]}
 
            ;; clojure -X support for local examples
@@ -113,7 +113,7 @@
            :deploy {:extra-deps {slipset/deps-deploy {:mvn/version "0.2.2"}}}
 
            ;; Maintenance
-           :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.2"}
+           :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.3"}
                                    com.github.liquidz/antq {:mvn/version "2.11.1276"}
                                    org.slf4j/slf4j-simple {:mvn/version "2.0.17"} ;; to rid ourselves of logger warnings
                                    }
