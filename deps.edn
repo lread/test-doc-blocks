@@ -2,10 +2,10 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.11.4"}
         org.clojure/tools.reader {:mvn/version "1.5.2"}
-        babashka/fs {:mvn/version "0.5.27"}
-        clj-kondo/clj-kondo {:mvn/version "2025.09.22"}
+        babashka/fs {:mvn/version "0.5.30"}
+        clj-kondo/clj-kondo {:mvn/version "2025.10.23"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
-        metosin/malli {:mvn/version "0.19.2"}
+        metosin/malli {:mvn/version "0.20.0"}
         rewrite-clj/rewrite-clj  {:mvn/version "1.2.50"}}
 
  :aliases {;; we use babashka/neil for project attributes
@@ -23,14 +23,14 @@
            :1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
            :1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
            :1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.4"}}}
-           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.3"}}}
+           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.4"}}}
 
            ;;
            ;; REPL to support bb dev-jvm & dev-cljs tasks, see script/dev_repl.clj
            ;;
            :nrepl
-           {:extra-deps {nrepl/nrepl {:mvn/version "1.4.0"}
-                         cider/cider-nrepl {:mvn/version "0.57.0"}
+           {:extra-deps {nrepl/nrepl {:mvn/version "1.5.1"}
+                         cider/cider-nrepl {:mvn/version "0.58.0"}
                          refactor-nrepl/refactor-nrepl {:mvn/version "3.11.0"}}
             :jvm-opts ["-XX:-OmitStackTraceInFastThrow" "-Djdk.attach.allowAttachSelf"]
             :main-opts  ["-m" "nrepl.cmdline"
@@ -40,8 +40,8 @@
            :flowstorm
            {;; for disabling the official compiler
             :classpath-overrides {org.clojure/clojure nil}
-            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.3-1"}
-                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.5.7"}}
+            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.4"}
+                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.5.9"}}
             :jvm-opts ["-Dclojure.storm.instrumentEnable=true"]}
 
            ;; clojure -X support for local examples
@@ -104,7 +104,7 @@
            ;;
            ;; Deployment
            ;;
-           :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.10"}}
+           :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.11"}}
                    :extra-paths ["src" "build"]
                    :ns-default build}
 
