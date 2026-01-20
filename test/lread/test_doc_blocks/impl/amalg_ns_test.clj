@@ -1,6 +1,4 @@
 (ns lread.test-doc-blocks.impl.amalg-ns-test
-  (:refer-clojure :exclude [for filter])
-  (:refer-clojure :exclude [doseq remove])
   (:require [clojure.test :refer [deftest testing is]]
             [lread.test-doc-blocks.impl.amalg-ns :as sut]))
 
