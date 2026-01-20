@@ -1,7 +1,7 @@
 {:paths ["src"]
 
  :deps {org.clojure/clojure {:mvn/version "1.11.4"}
-        org.clojure/tools.reader {:mvn/version "1.5.2"}
+        org.clojure/tools.reader {:mvn/version "1.6.0"}
         babashka/fs {:mvn/version "0.5.30"}
         clj-kondo/clj-kondo {:mvn/version  "2026.01.19"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
