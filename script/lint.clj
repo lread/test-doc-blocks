@@ -1,8 +1,7 @@
 #!/usr/bin/env bb
 
 (ns lint
-  (:require [babashka.classpath :as bbcp]
-            [babashka.fs :as fs]
+  (:require [babashka.fs :as fs]
             [clojure.string :as string]
             [helper.main :as main]
             [helper.shell :as shell]
@@ -21,11 +20,13 @@
   (when (cache-exists?)
     (delete-cache))
   (let [clj-cp (-> (shell/clojure {:out :string}
-                                  "-Spath -M:kaocha" )
+                                  "-Spath -M:kaocha")
                    with-out-str
                    string/trim)
-        bb-cp (bbcp/get-classpath)]
-
+        bb-cp (-> (shell/command {:out :string}
+                                 "bb print-deps --format classpath")
+                  :out
+                  string/trim)]
     (status/line :detail "- copying configs and creating cache")
     (shell/clojure "-M:clj-kondo --skip-lint --copy-configs --dependencies --lint" clj-cp bb-cp)))
 
