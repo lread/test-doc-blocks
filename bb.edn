@@ -9,6 +9,7 @@
  :tasks {;; setup
          :requires ([babashka.fs :as fs]
                     [clojure.string :as string]
+                    [helper.jdk :as jdk]
                     [helper.main :as main]
                     [lread.status-line :as status])
          :init (do
@@ -97,9 +98,13 @@
                                (clojure (format "-M:isolated/clj-test-runner:%s" clojure-version)))}
 
          test-gen-cljs {:doc "use cljs-test-runner to run generated tests"
-                        :task (do
-                                (run '-gen-1.11)
-                                (clojure "-M:isolated/cljs-test-runner"))}
+                        :task (let [jdk-version (jdk/version)]
+                               (if (< (:major jdk-version) 21)
+                                (status/die 1 "ClojureScript requires JDK 21 or later (found JDK %s)"
+                                 (:version jdk-version))
+                                (do
+                                 (run '-gen-1.11)
+                                 (clojure "-M:isolated/cljs-test-runner"))))}
 
          test-gen-all {:doc "run generated tests under all platforms"
                        :depends [test-gen-kaocha test-gen-clj test-gen-cljs]}
@@ -123,6 +128,7 @@
 
          ci-test {:doc "run continuous integration service tests"
                   :task (when (no-args-check)
+                         (let [jdk-version (jdk/version)]
                           (run 'clean)
                           (run 'lint)
                           (run-under ["1.11" "1.12"] 'test-unit)
@@ -130,7 +136,10 @@
                           (run 'gen)
                           (run-under ["1.9" "1.10" "1.11" "1.12"] 'test-gen-kaocha) ;; kaocha min version is 1.9
                           (run-under ["1.8" "1.9" "1.10" "1.11" "1.12"] 'test-gen-clj) ;; also include 1.8
-                          (run 'test-gen-cljs))}
+                          (if (< (:major jdk-version) 21)
+                           (status/line :warn "ClojureScript requires JDK 21 or later (found JDK %s), skipping: test-gen-cljs"
+                            (:version jdk-version))
+                           (run 'test-gen-cljs))))}
 
          ci-release {:doc "release task, use --help for args"
                      :requires [ci-release]

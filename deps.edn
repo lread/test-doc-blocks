@@ -78,7 +78,8 @@
                              :replace-paths ["test"] ;; include test to bring in kaocha hook
                              :main-opts ["-m" "kaocha.runner"]}
 
-           :isolated/cljs-test-runner {:replace-deps {org.clojure/clojure {:mvn/version "1.8.0"}
+           :isolated/cljs-test-runner {:replace-deps {org.clojure/clojure {:mvn/version "1.9.0"}
+                                                      org.clojure/clojurescript {:mvn/version "1.12.145"}
                                                       olical/cljs-test-runner {:mvn/version "3.8.1"}}
                                        :replace-paths ["target/test-doc-blocks/test"]
                                        :main-opts ["-m" "cljs-test-runner.main"
