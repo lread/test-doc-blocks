@@ -6,7 +6,7 @@
         clj-kondo/clj-kondo {:mvn/version  "2026.05.25"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
         metosin/malli {:mvn/version "0.20.1"}
-        rewrite-clj/rewrite-clj  {:mvn/version "1.2.54"}}
+        rewrite-clj/rewrite-clj  {:mvn/version "1.2.55"}}
 
  :aliases {;; we use babashka/neil for project attributes
            ;; publish workflow references these values (and automatically bumps patch component of version)
