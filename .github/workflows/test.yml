@@ -26,10 +26,10 @@ jobs:
       if: matrix.os == 'windows'
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Clojure deps cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           ~/.m2/repository
@@ -45,7 +45,7 @@ jobs:
         java-version: ${{ matrix.java-version }}
 
     - name: Install Clojure Tools
-      uses: DeLaGuardo/setup-clojure@13.6.0
+      uses: DeLaGuardo/setup-clojure@13.6.1
       with:
         bb: 'latest'
         cli: 'latest'

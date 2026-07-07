@@ -2,11 +2,11 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.11.4"}
         org.clojure/tools.reader {:mvn/version "1.6.0"}
-        babashka/fs {:mvn/version "0.5.33"}
-        clj-kondo/clj-kondo {:mvn/version  "2026.04.15"}
+        babashka/fs {:mvn/version "0.5.34"}
+        clj-kondo/clj-kondo {:mvn/version  "2026.05.25"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
         metosin/malli {:mvn/version "0.20.1"}
-        rewrite-clj/rewrite-clj  {:mvn/version "1.2.54"}}
+        rewrite-clj/rewrite-clj  {:mvn/version "1.2.55"}}
 
  :aliases {;; we use babashka/neil for project attributes
            ;; publish workflow references these values (and automatically bumps patch component of version)
@@ -24,14 +24,15 @@
            :1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
            :1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.4"}}}
            :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.5"}}}
+           :1.13 {:override-deps {org.clojure/clojure {:mvn/version "1.13.0-alpha3"}}}
 
            ;;
            ;; REPL to support bb dev-jvm & dev-cljs tasks, see script/dev_repl.clj
            ;;
            :nrepl
            {:extra-deps {nrepl/nrepl {:mvn/version "1.7.0"}
-                         cider/cider-nrepl {:mvn/version "0.59.0"}
-                         refactor-nrepl/refactor-nrepl {:mvn/version "3.12.0"}}
+                         cider/cider-nrepl {:mvn/version "0.61.0"}
+                         refactor-nrepl/refactor-nrepl {:mvn/version "3.14.0"}}
             :jvm-opts ["-XX:-OmitStackTraceInFastThrow" "-Djdk.attach.allowAttachSelf"]
             :main-opts  ["-m" "nrepl.cmdline"
                          "--middleware" "[refactor-nrepl.middleware/wrap-refactor cider.nrepl/cider-middleware]"
@@ -40,8 +41,8 @@
            :flowstorm
            {;; for disabling the official compiler
             :classpath-overrides {org.clojure/clojure nil}
-            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.5"}
-                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.5.9"}}
+            :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.5-1"}
+                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.6.0"}}
             :jvm-opts ["-Dclojure.storm.instrumentEnable=true"]}
 
            ;; clojure -X support for local examples
@@ -63,7 +64,7 @@
 
            ;; for kaocha see also tests.edn
            :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}
-                                 nubank/matcher-combinators {:mvn/version "3.10.0"}}
+                                 nubank/matcher-combinators {:mvn/version "3.10.1"}}
                     :extra-paths ["test"]
                     :main-opts ["-m" "kaocha.runner"]}
 
@@ -105,16 +106,16 @@
            ;;
            ;; Deployment
            ;;
-           :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.13"}}
+           :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.14"}}
                    :extra-paths ["src" "build"]
                    :ns-default build}
 
            ;; keep deploy deps separate from build deps to avoid download-deps issues
            ;; caused by, I think, conflicting maven deps
-           :deploy {:extra-deps {slipset/deps-deploy {:mvn/version "0.2.3"}}}
+           :deploy {:extra-deps {slipset/deps-deploy {:mvn/version "0.2.5"}}}
 
            ;; Maintenance
-           :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.3"}
+           :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.5"}
                                    com.github.liquidz/antq {:mvn/version "2.11.1276"}
                                    org.slf4j/slf4j-simple {:mvn/version "2.0.18"} ;; to rid ourselves of logger warnings
                                    }
