@@ -16,7 +16,7 @@
                  (defn no-args-check []
                    (main/doc-arg-opt *command-line-args*))
                  (defn requested-clojure-version
-                   ([] (requested-clojure-version ["1.9" "1.10" "1.11" "1.12"]))
+                   ([] (requested-clojure-version ["1.9" "1.10" "1.11" "1.12" "1.13"]))
                    ([allowed-versions]
                     (let [args-usage (string/join "\n"
                                                   ["Valid args: [options]"
@@ -31,7 +31,7 @@
                             (status/die 1 args-usage)
                             clojure-version))))))
                  (defn run-under [clojure-versions task-sym]
-                   (doseq [clojure-version clojure-versions] ;; kaocha min versio is 1.9
+                   (doseq [clojure-version clojure-versions] ;; kaocha min version is 1.9
                      (binding [*command-line-args* ["--clojure-version" clojure-version]]
                        (run task-sym)))))
          :enter (let [{:keys [name accepts-args?]} (current-task)]
@@ -92,7 +92,7 @@
                                   (clojure (format "-M:isolated/kaocha:%s generated" clojure-version)))}
 
          test-gen-clj {:doc "use Clojure test-runner to run generated tests"
-                       :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10" "1.11" "1.12"])]
+                       :task (when-let [clojure-version (requested-clojure-version ["1.8" "1.9" "1.10" "1.11" "1.12" "1.13"])]
                                (run '-gen-1.11)
                                (status/line :detail "Testing with clojure v%s" clojure-version)
                                (clojure (format "-M:isolated/clj-test-runner:%s" clojure-version)))}
@@ -131,11 +131,11 @@
                          (let [jdk-version (jdk/version)]
                           (run 'clean)
                           (run 'lint)
-                          (run-under ["1.11" "1.12"] 'test-unit)
-                          (run-under ["1.11" "1.12"] 'test-integration)
+                          (run-under ["1.11" "1.12" "1.13"] 'test-unit)
+                          (run-under ["1.11" "1.12" "1.13"] 'test-integration)
                           (run 'gen)
-                          (run-under ["1.9" "1.10" "1.11" "1.12"] 'test-gen-kaocha) ;; kaocha min version is 1.9
-                          (run-under ["1.8" "1.9" "1.10" "1.11" "1.12"] 'test-gen-clj) ;; also include 1.8
+                          (run-under ["1.9" "1.10" "1.11" "1.12" "1.13"] 'test-gen-kaocha) ;; kaocha min version is 1.9
+                          (run-under ["1.8" "1.9" "1.10" "1.11" "1.12" "1.13"] 'test-gen-clj) ;; also include 1.8
                           (if (< (:major jdk-version) 21)
                            (status/line :warn "ClojureScript requires JDK 21 or later (found JDK %s), skipping: test-gen-cljs"
                             (:version jdk-version))
