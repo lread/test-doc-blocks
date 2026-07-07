@@ -111,7 +111,7 @@
 
            ;; keep deploy deps separate from build deps to avoid download-deps issues
            ;; caused by, I think, conflicting maven deps
-           :deploy {:extra-deps {slipset/deps-deploy {:mvn/version "0.2.3"}}}
+           :deploy {:extra-deps {slipset/deps-deploy {:mvn/version "0.2.5"}}}
 
            ;; Maintenance
            :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.3"}
