@@ -2,7 +2,7 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.11.4"}
         org.clojure/tools.reader {:mvn/version "1.6.0"}
-        babashka/fs {:mvn/version "0.5.33"}
+        babashka/fs {:mvn/version "0.5.34"}
         clj-kondo/clj-kondo {:mvn/version  "2026.04.15"}
         dev.nubank/docopt {:mvn/version "0.6.1-fix7"}
         metosin/malli {:mvn/version "0.20.1"}
