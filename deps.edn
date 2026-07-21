@@ -24,14 +24,14 @@
            :1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
            :1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.4"}}}
            :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.5"}}}
-           :1.13 {:override-deps {org.clojure/clojure {:mvn/version "1.13.0-alpha3"}}}
+           :1.13 {:override-deps {org.clojure/clojure {:mvn/version "1.13.0-alpha4"}}}
 
            ;;
            ;; REPL to support bb dev-jvm & dev-cljs tasks, see script/dev_repl.clj
            ;;
            :nrepl
            {:extra-deps {nrepl/nrepl {:mvn/version "1.7.0"}
-                         cider/cider-nrepl {:mvn/version "0.61.0"}
+                         cider/cider-nrepl {:mvn/version "0.62.2"}
                          refactor-nrepl/refactor-nrepl {:mvn/version "3.14.0"}}
             :jvm-opts ["-XX:-OmitStackTraceInFastThrow" "-Djdk.attach.allowAttachSelf"]
             :main-opts  ["-m" "nrepl.cmdline"
@@ -42,7 +42,7 @@
            {;; for disabling the official compiler
             :classpath-overrides {org.clojure/clojure nil}
             :extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.5-1"}
-                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.6.0"}}
+                         com.github.flow-storm/flow-storm-dbg {:mvn/version "4.7.0"}}
             :jvm-opts ["-Dclojure.storm.instrumentEnable=true"]}
 
            ;; clojure -X support for local examples
