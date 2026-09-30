@@ -117,7 +117,7 @@
            ;; Maintenance
            :outdated {:extra-deps {org.clojure/clojure {:mvn/version "1.12.5"}
                                    com.github.liquidz/antq {:mvn/version "2.11.1276"}
-                                   org.slf4j/slf4j-simple {:mvn/version "2.0.18"} ;; to rid ourselves of logger warnings
+                                   org.slf4j/slf4j-simple {:mvn/version "2.0.20"} ;; to rid ourselves of logger warnings
                                    }
                       :main-opts ["-m" "antq.core" "--ignore-locals"
                                   "--exclude=lambdaisland/kaocha@1.88.1376" ;; breaks clojure 1.9 compat: https://github.com/lambdaisland/kaocha/issues/433
