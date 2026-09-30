@@ -1,23 +1,18 @@
-#!/usr/bin/env bb
-
 (ns clean
-  (:require [babashka.fs :as fs]
-            [helper.main :as main]))
+  (:require
+   [babashka.fs :as fs]
+   [lread.status-line :as status]))
 
-(defn clean! []
+(defn task
+  [_opts]
+  (status/line :head "Deleting build work")
   (println "Deleting (d=deleted -=did not exist)")
   (run! (fn [d]
           (println (format "[%s] %s"
                            (if (fs/exists? d) "d" "-")
                            d))
-          (fs/delete-tree d))
+          (fs/delete-tree d {:force true}))
         ["target"
-         ".cpcache"]))
-
-(defn -main [& args]
-  (when (main/doc-arg-opt args)
-    (clean!))
-  nil)
-
-(main/when-invoked-as-script
- (apply -main *command-line-args*))
+         ".cpcache"
+         ".clj-kondo/.cache"
+         ".lsp/.cache"]))

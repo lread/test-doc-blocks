@@ -19,12 +19,13 @@
            ;; Clojure versions we support
            ;; min for generation is v1.11.4
            ;; min for running generated v1.8
-           :1.8 {:override-deps {org.clojure/clojure {:mvn/version "1.8.0"}}}
-           :1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
-           :1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
-           :1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.4"}}}
-           :1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.5"}}}
-           :1.13 {:override-deps {org.clojure/clojure {:mvn/version "1.13.0-alpha8"}}}
+           :clojure-1.8 {:override-deps {org.clojure/clojure {:mvn/version "1.8.0"}}}
+           :clojure-1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
+           :clojure-1.10 {:override-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
+           :clojure-1.11 {:override-deps {org.clojure/clojure {:mvn/version "1.11.4"}}}
+           :clojure-1.12 {:override-deps {org.clojure/clojure {:mvn/version "1.12.5"}}}
+           ;; Candidate release is :clojure-pre-* (ex. clojure-pre-1.13.0) (if any)
+           :clojure-pre-1.13 {:override-deps {org.clojure/clojure {:mvn/version "1.13.0-alpha8"}}}
 
            ;;
            ;; REPL to support bb dev-jvm & dev-cljs tasks, see script/dev_repl.clj
