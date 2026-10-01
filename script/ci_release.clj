@@ -1,5 +1,3 @@
-#!/usr/bin/env bb
-
 ;;
 ;; This script is ultimately run from GitHub Actions
 ;;
@@ -9,7 +7,6 @@
             [clean]
             [clojure.java.io :as io]
             [clojure.string :as string]
-            [helper.main :as main]
             [helper.shell :as shell]
             [lread.status-line :as status]))
 
@@ -183,59 +180,46 @@
                    "--title" release-tag
                    "--notes" (format "[Changelog](%s#%s)" changelog-url release-tag))))
 
-(def args-usage "Valid args: (prep|deploy-remote|commit|create-github-release|inform-cljdoc|validate|--help)
+;; task entrypoints
+(defn prep
+  {:org.babashka/cli {:doc "Bump version, create jar and update user guide and changelog"}}
+  [_opts]
+  (clean/task {})
+  (validate-changelog)
+  (bump-version!)
+  (let [last-release-tag (last-release-tag)
+        version (build-shared/lib-version)
+        release-tag (build-shared/version->tag version)]
+    (status/line :detail "Release version: %s" version)
+    (status/line :detail "Release tag: %s" release-tag)
+    (status/line :detail "Last release tag: %s" last-release-tag)
+    (io/make-parents "target")
+    (create-jar!)
+    (status/line :head "Updating docs")
+    (update-user-guide! version)
+    (update-changelog! version release-tag last-release-tag)))
 
-Commands:
-  prep                   Bump version, create jar and update user guide and changelog
-  deploy-remote          Deploy jar to clojars
-  commit                 Commit changes made back to repo
-  create-github-release  Create a GitHub release
-  inform-cljdoc          Trigger a doc build on cljdoc
+(defn deploy-remote
+  {:org.babashka/cli {:doc "Deploy jar to clojars"}}
+  [_opts]
+  (deploy-jar!))
 
-These commands are expected to be run in order from CI.
-Why the awkward separation?
-To restrict the exposure of our secrets during deploy workflow
+(defn commit
+  {:org.babashka/cli {:doc "Commit changes made back to repo"}}
+  [_opts]
+  (commit-changes! (-> (build-shared/lib-version) build-shared/version->tag)))
 
-Additional commands:
-  validate      Verify that change log is good for release
+(defn create-github-release
+  {:org.babashka/cli {:doc "Create a GitHub release"}}
+  [_opts]
+  (create-github-release! (-> (build-shared/lib-version) build-shared/version->tag)))
 
-Options
-  --help        Show this help")
+(defn inform-cljdoc 
+  {:org.babashka/cli {:doc "Trigger a doc build on cljdoc"}}
+  [_opts]
+  (inform-cljdoc! (build-shared/lib-version)))
 
-(defn -main [& args]
-  (when-let [opts (main/doc-arg-opt args-usage args)]
-    (cond
-      (get opts "prep")
-      (do (clean/clean!)
-          (validate-changelog)
-          (bump-version!)
-          (let [last-release-tag (last-release-tag)
-                version (build-shared/lib-version)
-                release-tag (build-shared/version->tag version)]
-            (status/line :detail "Release version: %s" version)
-            (status/line :detail "Release tag: %s" release-tag)
-            (status/line :detail "Last release tag: %s" last-release-tag)
-            (io/make-parents "target")
-            (create-jar!)
-            (status/line :head "Updating docs")
-            (update-user-guide! version)
-            (update-changelog! version release-tag last-release-tag)))
-
-      (get opts "deploy-remote")
-      (deploy-jar!)
-
-      (get opts "commit")
-      (commit-changes! (-> (build-shared/lib-version) build-shared/version->tag))
-
-      (get opts "inform-cljdoc")
-      (inform-cljdoc! (build-shared/lib-version))
-
-      (get opts "create-github-release")
-      (create-github-release! (-> (build-shared/lib-version) build-shared/version->tag))
-
-      (get opts "validate")
-      (do (validate-changelog)
-          nil))))
-
-(main/when-invoked-as-script
- (apply -main *command-line-args*))
+(defn validate 
+  {:org.babashka/cli {:doc "Run locally to valid we are good for release"}}
+  [_opts]
+  (validate-changelog))

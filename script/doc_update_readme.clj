@@ -1,5 +1,3 @@
-#!/usr/bin/env bb
-
 (ns doc-update-readme
   "Script to update README.adoc to credit contributors
   Run manually as needed."
@@ -7,7 +5,6 @@
             [clojure.edn :as edn]
             [clojure.string :as string]
             [etaoin.api :as etaoin]
-            [helper.main :as main]
             [hiccup.util :as hu]
             [hiccup2.core :as h]
             [lread.status-line :as status]
@@ -67,12 +64,12 @@
       [:head
        [:link {:href "https://fonts.googleapis.com", :rel "preconnect"}]
        [:link {:href "https://fonts.gstatic.com", :rel "preconnect" :crossorigin "crossorigin"}]
-       [:link {:type "text/css", :href "https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" :rel "stylesheet"}]
+       [:link {:href "https://fonts.googleapis.com/css2?family=Fira+Code&family=Noto+Color+Emoji&display=swap" :rel "stylesheet"}]
        [:style
         (hu/raw-string
          (str
           "* {-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}\n"
-          "body {font-family: 'Fira Code', monospace; margin: 0;}\n"
+          "body {font-family: 'Fira Code'; margin: 0;}\n"
           (format ".wrapper {overflow:hidden; min-width: %dpx; max-width: %dpx;}" image-width image-width) "\n"
           (format ".card {float: left; border-radius: 5px;
                           border: %dpx solid #ccc;
@@ -109,7 +106,8 @@
   (when (fs/exists? target)
     (fs/delete-tree target))
   (fs/create-dirs (fs/parent target))
-  (fs/move source target {:replace-existing true :atomic-move true}))
+  (fs/copy-tree source target)
+  (fs/delete-tree source))
 
 (defn- generate-image! [driver target-dir github-id contributions opts]
   (let [html-file (fs/file target-dir (str github-id ".html"))]
@@ -171,23 +169,19 @@
         nil)
       (format "not found: %s" need))))
 
-(defn -main [& args]
-  (when (main/doc-arg-opt args)
-    (let [readme-filename "README.adoc"
-          contributors-source "doc/contributors.edn"
-          image-opts {:image-width 273
-                      :images-dir "./doc/generated/contributors"}
-          contributors (->> (slurp contributors-source)
-                            edn/read-string
-                            sort-contributors)]
-      (status/line :head "updating docs to honor those who contributed")
-      (when-let [missing (missing-prerequesites)]
-        (status/die 1 "Pre-requisites not met\n%s" missing))
-      (status/line :detail (str  "contributors source: " contributors-source))
-      (generate-contributor-images! contributors image-opts)
-      (update-readme-file! contributors readme-filename image-opts)
-      (status/line :detail "SUCCESS")))
+(defn task [_opts]
+  (let [readme-filename "README.adoc"
+        contributors-source "doc/contributors.edn"
+        image-opts {:image-width 273
+                    :images-dir "./doc/generated/contributors"}
+        contributors (->> (slurp contributors-source)
+                          edn/read-string
+                          sort-contributors)]
+    (status/line :head "updating docs to honor those who contributed")
+    (when-let [missing (missing-prerequesites)]
+      (status/die 1 "Pre-requisites not met\n%s" missing))
+    (status/line :detail (str  "contributors source: " contributors-source))
+    (generate-contributor-images! contributors image-opts)
+    (update-readme-file! contributors readme-filename image-opts)
+    (status/line :detail "SUCCESS"))
   (shutdown-agents))
-
-(main/when-invoked-as-script
- (apply -main *command-line-args*))
